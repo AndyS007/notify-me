@@ -38,11 +38,21 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "886e9ced-2880-4d61-9778-a9a23cb96b2a"
+      }
+    },
+    "owner": "andys007"
   }
 }
