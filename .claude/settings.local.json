@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn install:*)",
+      "Bash(wait)",
+      "Bash(while pgrep:*)",
+      "Bash(do sleep:*)",
+      "Bash(done)",
+      "Bash(yarn android:*)"
+    ]
+  }
+}
