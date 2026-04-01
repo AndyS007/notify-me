@@ -1,6 +1,6 @@
 {
   "name": "notify-me",
-  "main": "expo-router/entry",
+  "main": "./index.js",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -16,6 +16,7 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "drizzle-orm": "^0.45.2",
     "expo": "^55.0.0",
     "expo-build-properties": "~55.0.10",
     "expo-constants": "~55.0.9",
@@ -25,6 +26,7 @@
     "expo-linking": "~55.0.8",
     "expo-router": "~55.0.7",
     "expo-splash-screen": "~55.0.12",
+    "expo-sqlite": "^55.0.11",
     "expo-status-bar": "~55.0.4",
     "expo-symbols": "~55.0.5",
     "expo-system-ui": "~55.0.10",
@@ -34,6 +36,7 @@
     "react-native": "0.83.2",
     "react-native-android-notification-listener": "^5.0.1",
     "react-native-gesture-handler": "~2.30.0",
+    "react-native-get-app-list": "^0.2.0",
     "react-native-mmkv": "^4.3.0",
     "react-native-nitro-modules": "^0.35.2",
     "react-native-reanimated": "4.2.1",

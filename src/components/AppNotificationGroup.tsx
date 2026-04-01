@@ -1,0 +1,143 @@
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, {
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+} from 'react-native-reanimated';
+import { AppIcon } from './AppIcon';
+import { NotificationItem } from './NotificationItem';
+import { NotificationGroup } from '../hooks/use-notifications';
+import { AppInfo } from '../services/app-list-service';
+import { formatRelativeTime } from '../utils/format-time';
+
+type Props = {
+  group: NotificationGroup;
+  appInfo: AppInfo | undefined;
+};
+
+export function AppNotificationGroup({ group, appInfo }: Props) {
+  const [expanded, setExpanded] = useState(false);
+
+  const displayName = appInfo?.appName || group.appName || group.packageName;
+  const icon = appInfo?.icon || group.icon;
+  const latest = group.items[0];
+
+  return (
+    <Animated.View layout={LinearTransition} style={styles.card}>
+      <TouchableOpacity
+        style={styles.header}
+        onPress={() => setExpanded((v) => !v)}
+        activeOpacity={0.75}
+      >
+        <AppIcon iconBase64={icon} appName={displayName} size={44} />
+
+        <View style={styles.headerInfo}>
+          <View style={styles.nameRow}>
+            <Text style={styles.appName} numberOfLines={1}>
+              {displayName}
+            </Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{group.items.length}</Text>
+            </View>
+          </View>
+
+          {!expanded && (
+            <Text style={styles.preview} numberOfLines={1}>
+              {latest.title ? `${latest.title}: ` : ''}
+              {latest.text}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.headerMeta}>
+          <Text style={styles.time}>
+            {formatRelativeTime(group.latestTimestamp)}
+          </Text>
+          <Text style={styles.chevron}>{expanded ? '▲' : '▼'}</Text>
+        </View>
+      </TouchableOpacity>
+
+      {expanded && (
+        <Animated.View
+          entering={FadeInDown.duration(200)}
+          exiting={FadeOut.duration(150)}
+          style={styles.itemList}
+        >
+          {group.items.map((item, index) => (
+            <NotificationItem
+              key={item.id}
+              item={item}
+              isLast={index === group.items.length - 1}
+            />
+          ))}
+        </Animated.View>
+      )}
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#1c1c1e',
+    marginHorizontal: 16,
+    marginVertical: 5,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    gap: 12,
+  },
+  headerInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  appName: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    flex: 1,
+  },
+  badge: {
+    backgroundColor: '#ff3b30',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  preview: {
+    color: '#888',
+    fontSize: 13,
+  },
+  headerMeta: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  time: {
+    color: '#555',
+    fontSize: 11,
+  },
+  chevron: {
+    color: '#555',
+    fontSize: 9,
+  },
+  itemList: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#2c2c2c',
+  },
+});

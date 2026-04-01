@@ -6,7 +6,16 @@
       "Bash(while pgrep:*)",
       "Bash(do sleep:*)",
       "Bash(done)",
-      "Bash(yarn android:*)"
+      "Bash(yarn android:*)",
+      "Bash(find /Users/andy/Code/side-projects/notify-me -not -path */node_modules/* -not -path */.git/* -not -path */android/build/* -not -path */ios/Pods/* -not -path */.expo/* -type f)",
+      "Bash(ls -d /Users/andy/Code/side-projects/notify-me/.*)",
+      "Bash(find /Users/andy/Code/side-projects/notify-me -maxdepth 2 -type f \\\\\\(-name *.db -o -name *.sqlite -o -name *.json -o -name *.env* \\\\\\))",
+      "Bash(git:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn cache:*)",
+      "Bash(adb devices:*)",
+      "Bash(adb:*)",
+      "Bash(curl -sL https://raw.githubusercontent.com/leandrosimoes/react-native-android-notification-listener/master/README.md)"
     ]
   }
 }
