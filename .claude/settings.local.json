@@ -15,7 +15,13 @@
       "Bash(yarn cache:*)",
       "Bash(adb devices:*)",
       "Bash(adb:*)",
-      "Bash(curl -sL https://raw.githubusercontent.com/leandrosimoes/react-native-android-notification-listener/master/README.md)"
+      "Bash(curl -sL https://raw.githubusercontent.com/leandrosimoes/react-native-android-notification-listener/master/README.md)",
+      "Bash(npm install:*)",
+      "Bash(npm --version)",
+      "Bash(yarn global:*)",
+      "Bash(read /private/tmp/claude-501/-Users-andy-Code-side-projects-notify-me/c8b1aba7-33fd-4ed1-9988-b691af05fffc/tasks/by3t14368.output)",
+      "Bash(eas build:*)",
+      "Bash(curl:*)"
     ]
   }
 }
