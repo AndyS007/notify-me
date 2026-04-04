@@ -1,4 +1,4 @@
-CREATE TABLE `notifications` (
+CREATE TABLE IF NOT EXISTS `notifications` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`package_name` text NOT NULL,
 	`app_name` text DEFAULT '' NOT NULL,
@@ -8,5 +8,5 @@ CREATE TABLE `notifications` (
 	`icon` text
 );
 --> statement-breakpoint
-CREATE INDEX `idx_pkg` ON `notifications` (`package_name`);--> statement-breakpoint
-CREATE INDEX `idx_ts` ON `notifications` (`timestamp`);
+CREATE INDEX IF NOT EXISTS `idx_pkg` ON `notifications` (`package_name`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `idx_ts` ON `notifications` (`timestamp`);
