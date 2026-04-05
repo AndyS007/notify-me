@@ -14,7 +14,7 @@ import { useSignInWithApple } from '@clerk/expo/apple';
 import { useSignInWithGoogle } from '@clerk/expo/google';
 
 export default function SignUpScreen() {
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { signUp } = useSignUp();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
   const router = useRouter();
@@ -26,30 +26,45 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
 
   const onSignUpPress = async () => {
-    if (!isLoaded) return;
     setLoading(true);
     try {
-      await signUp.create({ emailAddress: email, password });
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      setPendingVerification(true);
+      const { error } = await signUp.password({ emailAddress: email, password });
+      if (error) {
+        Alert.alert('Sign up failed', error.message);
+        return;
+      }
+      if (signUp.status === 'missing_requirements') {
+        const { error: sendError } = await signUp.verifications.sendEmailCode();
+        if (sendError) {
+          Alert.alert('Failed to send verification code', sendError.message);
+          return;
+        }
+        setPendingVerification(true);
+      } else if (signUp.status === 'complete') {
+        await signUp.finalize();
+        router.replace('/(home)');
+      }
     } catch (err: any) {
-      Alert.alert('Sign up failed', err.errors?.[0]?.message ?? err.message);
+      Alert.alert('Sign up failed', err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const onVerifyPress = async () => {
-    if (!isLoaded) return;
     setLoading(true);
     try {
-      const result = await signUp.attemptEmailAddressVerification({ code });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
+      const { error } = await signUp.verifications.verifyEmailCode({ code });
+      if (error) {
+        Alert.alert('Verification failed', error.message);
+        return;
+      }
+      if (signUp.status === 'complete') {
+        await signUp.finalize();
         router.replace('/(home)');
       }
     } catch (err: any) {
-      Alert.alert('Verification failed', err.errors?.[0]?.message ?? err.message);
+      Alert.alert('Verification failed', err.message);
     } finally {
       setLoading(false);
     }

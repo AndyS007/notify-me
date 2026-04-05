@@ -21,7 +21,9 @@
       "Bash(yarn global:*)",
       "Bash(read /private/tmp/claude-501/-Users-andy-Code-side-projects-notify-me/c8b1aba7-33fd-4ed1-9988-b691af05fffc/tasks/by3t14368.output)",
       "Bash(eas build:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(claude mcp:*)"
     ]
   }
 }

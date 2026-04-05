@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import { useSignIn } from "@clerk/expo";
+import { useSignInWithApple } from "@clerk/expo/apple";
+import { useSignInWithGoogle } from "@clerk/expo/google";
+import { Link, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   Alert,
   Platform,
@@ -7,36 +11,32 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import { useSignIn } from '@clerk/expo';
-import { useSignInWithApple } from '@clerk/expo/apple';
-import { useSignInWithGoogle } from '@clerk/expo/google';
+} from "react-native";
 
 export default function SignInScreen() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn } = useSignIn();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
   const router = useRouter();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const onSignInPress = async () => {
-    if (!isLoaded) return;
     setLoading(true);
     try {
-      const result = await signIn.create({
-        identifier: email,
-        password,
-      });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.replace('/(home)');
+      const { error } = await signIn.password({ identifier: email, password });
+      if (error) {
+        Alert.alert("Sign in failed", error.message);
+        return;
+      }
+      if (signIn.status === "complete") {
+        await signIn.finalize();
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      Alert.alert('Sign in failed', err.errors?.[0]?.message ?? err.message);
+      Alert.alert("Sign in failed", err.message);
     } finally {
       setLoading(false);
     }
@@ -48,11 +48,11 @@ export default function SignInScreen() {
         await startAppleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace('/(home)');
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      if (err.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Apple sign-in failed', err.message);
+      if (err.code === "ERR_REQUEST_CANCELED") return;
+      Alert.alert("Apple sign-in failed", err.message);
     }
   };
 
@@ -62,11 +62,11 @@ export default function SignInScreen() {
         await startGoogleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace('/(home)');
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      if (err.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Google sign-in failed', err.message);
+      if (err.code === "ERR_REQUEST_CANCELED") return;
+      Alert.alert("Google sign-in failed", err.message);
     }
   };
 
@@ -77,17 +77,17 @@ export default function SignInScreen() {
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#555"
-          autoCapitalize="none"
-          keyboardType="email-address"
+          placeholder='Email'
+          placeholderTextColor='#555'
+          autoCapitalize='none'
+          keyboardType='email-address'
           value={email}
           onChangeText={setEmail}
         />
         <TextInput
           style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#555"
+          placeholder='Password'
+          placeholderTextColor='#555'
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -98,7 +98,7 @@ export default function SignInScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? "Signing in…" : "Sign in"}
           </Text>
         </Pressable>
       </View>
@@ -115,7 +115,7 @@ export default function SignInScreen() {
         </Text>
       </Pressable>
 
-      {Platform.OS === 'ios' && (
+      {Platform.OS === "ios" && (
         <Pressable style={[styles.btn, styles.appleBtn]} onPress={onApplePress}>
           <Text style={styles.btnText}> Continue with Apple</Text>
         </Pressable>
@@ -123,7 +123,7 @@ export default function SignInScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don't have an account? </Text>
-        <Link href="/(auth)/sign-up" asChild>
+        <Link href='/(auth)/sign-up' asChild>
           <Pressable>
             <Text style={styles.link}>Sign up</Text>
           </Pressable>
@@ -136,83 +136,83 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#111',
-    justifyContent: 'center',
+    backgroundColor: "#111",
+    justifyContent: "center",
     paddingHorizontal: 24,
     gap: 16,
   },
   title: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 8,
   },
   form: {
     gap: 12,
   },
   input: {
-    backgroundColor: '#1c1c1c',
-    color: '#fff',
+    backgroundColor: "#1c1c1c",
+    color: "#fff",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: "#2a2a2a",
   },
   btn: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
   btnDisabled: {
     opacity: 0.5,
   },
   btnText: {
-    color: '#111',
-    fontWeight: '600',
+    color: "#111",
+    fontWeight: "600",
     fontSize: 15,
   },
   googleBtn: {
-    backgroundColor: '#1c1c1c',
+    backgroundColor: "#1c1c1c",
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: "#2a2a2a",
   },
   googleBtnText: {
-    color: '#fff',
+    color: "#fff",
   },
   appleBtn: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: "#2a2a2a",
   },
   dividerLabel: {
-    color: '#555',
+    color: "#555",
     fontSize: 13,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 8,
   },
   footerText: {
-    color: '#555',
+    color: "#555",
     fontSize: 14,
   },
   link: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
