@@ -1,14 +1,15 @@
 services:
   - type: web
     name: notify-me-backend
-    runtime: java
+    runtime: docker
     region: singapore
     rootDir: backend
-    buildCommand: ./gradlew build -x test
-    startCommand: java -jar build/libs/*.jar
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
     envVars:
-      - key: DATABASE_URL
+      - key: DB_URL
         sync: false
-      - key: JAVA_VERSION
-        value: "17"
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
