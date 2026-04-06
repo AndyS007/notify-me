@@ -5,6 +5,7 @@ services:
     region: singapore
     rootDir: backend
     dockerfilePath: ./Dockerfile
+    plan: free
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
