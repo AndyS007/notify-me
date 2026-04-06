@@ -23,7 +23,9 @@
       "Bash(eas build:*)",
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "mcp__render__list_services",
+      "mcp__render__list_workspaces"
     ]
   }
 }
