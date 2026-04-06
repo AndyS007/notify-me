@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: notify-me-backend
+    runtime: java
+    region: singapore
+    rootDir: backend
+    buildCommand: ./gradlew build -x test
+    startCommand: java -jar build/libs/*.jar
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JAVA_VERSION
+        value: "17"
