@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
@@ -24,8 +24,7 @@ class SecurityConfig(
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()
             }
-            .oauth2ResourceServer { it.jwt {} }
-            .addFilterAfter(clerkAuthFilter, BearerTokenAuthenticationFilter::class.java)
+            .addFilterBefore(clerkAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }
