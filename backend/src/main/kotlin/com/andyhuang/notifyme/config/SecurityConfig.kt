@@ -22,6 +22,7 @@ class SecurityConfig(
             .authorizeHttpRequests {
                 it.requestMatchers("/actuator/**").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/hello").permitAll()
                     .anyRequest().authenticated()
             }
             .addFilterBefore(clerkAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
