@@ -36,5 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### Local config (contains credentials) ###
+src/main/resources/application-local.properties
+
 ### Kotlin ###
 .kotlin
