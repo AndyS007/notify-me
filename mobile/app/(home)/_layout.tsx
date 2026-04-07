@@ -1,24 +1,20 @@
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '@clerk/expo';
 import { useEffect, useRef } from 'react';
-import { registerDevice } from '../../src/services/device-registration-service';
+import { useRegisterDevice } from '../../src/api/devices';
 
 export default function HomeLayout() {
-  const { isSignedIn, isLoaded, getToken } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
+  const { mutate: registerDevice } = useRegisterDevice();
   const registered = useRef(false);
 
   useEffect(() => {
     if (!isSignedIn || registered.current) return;
     registered.current = true;
-
-    getToken().then((token) => {
-      if (token) {
-        registerDevice(token).catch((err) =>
-          console.warn('Device registration failed:', err)
-        );
-      }
+    registerDevice(undefined, {
+      onError: (err) => console.warn('Device registration failed:', err),
     });
-  }, [isSignedIn, getToken]);
+  }, [isSignedIn, registerDevice]);
 
   if (!isLoaded) return null;
 
