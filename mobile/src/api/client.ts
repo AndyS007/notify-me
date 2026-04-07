@@ -1,14 +1,19 @@
-import { useAuth } from '@clerk/expo';
-import { useCallback, useMemo } from 'react';
-import createClient, { type Client } from 'openapi-fetch';
-import type { paths } from './schema';
+import { useAuth } from "@clerk/expo";
+import createClient, { type Client } from "openapi-fetch";
+import { useCallback, useMemo } from "react";
+import type { paths } from "./schema";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://10.0.2.2:8080';
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_BASE_URL ??
+  "https://notify-me-backend-p7ft.onrender.com";
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -20,7 +25,7 @@ function createApiClient(getToken: () => Promise<string | null>): ApiClient {
   client.use({
     async onRequest({ request }) {
       const token = await getToken();
-      if (token) request.headers.set('Authorization', `Bearer ${token}`);
+      if (token) request.headers.set("Authorization", `Bearer ${token}`);
       return request;
     },
     async onResponse({ response }) {
