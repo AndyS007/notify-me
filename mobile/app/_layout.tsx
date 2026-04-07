@@ -7,11 +7,17 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { db } from '../src/db';
 import migrations from '../drizzle/migrations';
 import { queryClient } from '../src/api/query-client';
+import { useAppUpdate } from '../src/hooks/use-app-update';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 if (!publishableKey) {
   throw new Error('Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in .env');
+}
+
+function AppContent() {
+  useAppUpdate();
+  return <Slot />;
 }
 
 export default function RootLayout() {
@@ -28,7 +34,7 @@ export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <QueryClientProvider client={queryClient}>
-        <Slot />
+        <AppContent />
       </QueryClientProvider>
     </ClerkProvider>
   );
