@@ -1,0 +1,174 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+  workflow_dispatch:
+
+jobs:
+  # ── 1. Compute fingerprint and decide: build or update ──────────────────────
+  fingerprint:
+    name: Check fingerprint
+    runs-on: ubuntu-latest
+    outputs:
+      android_changed: ${{ steps.compare.outputs.android_changed }}
+      ios_changed: ${{ steps.compare.outputs.ios_changed }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: mobile/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: mobile
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Compute fingerprints
+        id: compute
+        working-directory: mobile
+        run: |
+          ANDROID=$(npx @expo/fingerprint . --platform android | jq -r '.hash')
+          IOS=$(npx @expo/fingerprint . --platform ios | jq -r '.hash')
+          echo "android=$ANDROID" >> $GITHUB_OUTPUT
+          echo "ios=$IOS" >> $GITHUB_OUTPUT
+          echo "Android fingerprint: $ANDROID"
+          echo "iOS fingerprint:     $IOS"
+
+      - name: Compare with latest builds
+        id: compare
+        working-directory: mobile
+        run: |
+          ANDROID_CURRENT="${{ steps.compute.outputs.android }}"
+          IOS_CURRENT="${{ steps.compute.outputs.ios }}"
+
+          ANDROID_LAST=$(eas build:list \
+            --platform android --status finished --limit 1 \
+            --json --non-interactive 2>/dev/null \
+            | jq -r '.[0].fingerprintHash // ""')
+
+          IOS_LAST=$(eas build:list \
+            --platform ios --status finished --limit 1 \
+            --json --non-interactive 2>/dev/null \
+            | jq -r '.[0].fingerprintHash // ""')
+
+          echo "Android — current: $ANDROID_CURRENT, last build: $ANDROID_LAST"
+          echo "iOS     — current: $IOS_CURRENT,     last build: $IOS_LAST"
+
+          if [ "$ANDROID_CURRENT" != "$ANDROID_LAST" ]; then
+            echo "android_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "android_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$IOS_CURRENT" != "$IOS_LAST" ]; then
+            echo "ios_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "ios_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ── 2a. New native build (fingerprint changed) ──────────────────────────────
+  build_android:
+    name: Build Android
+    needs: fingerprint
+    if: needs.fingerprint.outputs.android_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: mobile/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: mobile
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android
+        run: eas build --platform android --profile production --non-interactive
+        working-directory: mobile
+
+  build_ios:
+    name: Build iOS
+    needs: fingerprint
+    if: needs.fingerprint.outputs.ios_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: mobile/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: mobile
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build iOS
+        run: eas build --platform ios --profile production --non-interactive
+        working-directory: mobile
+
+  # ── 2b. OTA update (JS-only change, fingerprint unchanged) ──────────────────
+  update:
+    name: Publish OTA update
+    needs: fingerprint
+    if: >
+      needs.fingerprint.outputs.android_changed == 'false' &&
+      needs.fingerprint.outputs.ios_changed == 'false'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: mobile/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: mobile
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish EAS Update
+        run: |
+          eas update \
+            --channel production \
+            --message "${{ github.event.head_commit.message }}" \
+            --non-interactive
+        working-directory: mobile

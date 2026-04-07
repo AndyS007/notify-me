@@ -8,6 +8,12 @@
     "scheme": "notifyme",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "url": "https://u.expo.dev/886e9ced-2880-4d61-9778-a9a23cb96b2a"
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.andys007.notifyme"
