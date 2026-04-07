@@ -1,29 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import DeviceInfo from 'react-native-device-info';
 import { ApiClient, useApiClient } from './client';
+import type { components } from './schema';
 
-// ---- Types ----
+// ---- Types (generated from backend OpenAPI) ----
 
-export type RegisterDeviceRequest = {
-  deviceId: string;
-  deviceName: string | null;
-  brand: string;
-  model: string;
-  osName: string;
-  osVersion: string;
-  appVersion: string;
-};
-
-export type RegisterDeviceResponse = {
-  id: string;
-  deviceId: string;
-  deviceName: string | null;
-  brand: string | null;
-  model: string | null;
-  osName: string | null;
-  osVersion: string | null;
-  appVersion: string | null;
-};
+export type RegisterDeviceRequest = components['schemas']['RegisterDeviceRequest'];
+export type RegisterDeviceResponse = components['schemas']['RegisterDeviceResponse'];
 
 // ---- API functions ----
 
