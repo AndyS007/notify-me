@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import DeviceInfo from 'react-native-device-info';
-import { ApiClient, useApiClient } from './client';
+import { useApiClient, type ApiClient } from './client';
 import type { components } from './schema';
 
 // ---- Types (generated from backend OpenAPI) ----
@@ -27,8 +27,9 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
 }
 
 export async function registerDeviceApi(client: ApiClient): Promise<RegisterDeviceResponse> {
-  const info = await collectDeviceInfo();
-  return client.post<RegisterDeviceResponse>('/devices/register', info);
+  const body = await collectDeviceInfo();
+  const { data } = await client.POST('/devices/register', { body });
+  return data!;
 }
 
 // ---- Hooks ----
