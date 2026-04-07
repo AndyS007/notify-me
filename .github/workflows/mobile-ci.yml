@@ -35,23 +35,19 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Compute fingerprints
+      - name: Compute fingerprint
         id: compute
         working-directory: mobile
         run: |
-          ANDROID=$(npx @expo/fingerprint . --platform android | jq -r '.hash')
-          IOS=$(npx @expo/fingerprint . --platform ios | jq -r '.hash')
-          echo "android=$ANDROID" >> $GITHUB_OUTPUT
-          echo "ios=$IOS" >> $GITHUB_OUTPUT
-          echo "Android fingerprint: $ANDROID"
-          echo "iOS fingerprint:     $IOS"
+          HASH=$(npx @expo/fingerprint . | jq -r '.hash')
+          echo "hash=$HASH" >> $GITHUB_OUTPUT
+          echo "Fingerprint: $HASH"
 
       - name: Compare with latest builds
         id: compare
         working-directory: mobile
         run: |
-          ANDROID_CURRENT="${{ steps.compute.outputs.android }}"
-          IOS_CURRENT="${{ steps.compute.outputs.ios }}"
+          CURRENT="${{ steps.compute.outputs.hash }}"
 
           ANDROID_LAST=$(eas build:list \
             --platform android --status finished --limit 1 \
@@ -63,16 +59,17 @@ jobs:
             --json --non-interactive 2>/dev/null \
             | jq -r '.[0].fingerprintHash // ""')
 
-          echo "Android — current: $ANDROID_CURRENT, last build: $ANDROID_LAST"
-          echo "iOS     — current: $IOS_CURRENT,     last build: $IOS_LAST"
+          echo "Current:          $CURRENT"
+          echo "Android last:     $ANDROID_LAST"
+          echo "iOS last:         $IOS_LAST"
 
-          if [ "$ANDROID_CURRENT" != "$ANDROID_LAST" ]; then
+          if [ "$CURRENT" != "$ANDROID_LAST" ]; then
             echo "android_changed=true" >> $GITHUB_OUTPUT
           else
             echo "android_changed=false" >> $GITHUB_OUTPUT
           fi
 
-          if [ "$IOS_CURRENT" != "$IOS_LAST" ]; then
+          if [ "$CURRENT" != "$IOS_LAST" ]; then
             echo "ios_changed=true" >> $GITHUB_OUTPUT
           else
             echo "ios_changed=false" >> $GITHUB_OUTPUT
