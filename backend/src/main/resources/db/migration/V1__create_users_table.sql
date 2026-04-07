@@ -1,0 +1,6 @@
+CREATE TABLE users (
+    id            UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    clerk_user_id VARCHAR(255) NOT NULL UNIQUE,
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);

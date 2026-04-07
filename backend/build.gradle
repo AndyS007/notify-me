@@ -24,6 +24,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
 	implementation 'com.clerk:backend-api:4.1.4'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
