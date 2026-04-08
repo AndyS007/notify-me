@@ -1,10 +1,12 @@
 import { Alert } from 'react-native';
 import * as Updates from 'expo-updates';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../i18n';
 
 export function useAppUpdate() {
   const { isUpdateAvailable, isUpdatePending, isDownloading } = Updates.useUpdates();
   const alertShown = useRef(false);
+  const t = useTranslation();
 
   // Check for updates on mount (only in non-dev builds where updates are enabled)
   useEffect(() => {
@@ -27,28 +29,28 @@ export function useAppUpdate() {
     alertShown.current = true;
 
     Alert.alert(
-      'Update Available',
-      'A new version is ready. Install now for the latest improvements.',
+      t.update.title,
+      t.update.message,
       [
         {
-          text: 'Later',
+          text: t.update.later,
           style: 'cancel',
           onPress: () => {
             alertShown.current = false;
           },
         },
         {
-          text: 'Install Now',
+          text: t.update.installNow,
           onPress: () => {
             Updates.fetchUpdateAsync().catch(() => {
-              Alert.alert('Update Failed', 'Could not download the update. Please try again later.');
+              Alert.alert(t.update.errorTitle, t.update.errorMessage);
               alertShown.current = false;
             });
           },
         },
       ],
     );
-  }, [isUpdateAvailable]);
+  }, [isUpdateAvailable, t]);
 
   return { isDownloading };
 }

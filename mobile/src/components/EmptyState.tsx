@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from '../i18n';
 
 export function EmptyState() {
+  const t = useTranslation();
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>🔔</Text>
-      <Text style={styles.title}>No notifications yet</Text>
-      <Text style={styles.subtitle}>
-        Notifications will appear here once your device receives them.
-      </Text>
+      <Text style={styles.icon}>{t.notifications.empty.icon}</Text>
+      <Text style={styles.title}>{t.notifications.empty.title}</Text>
+      <Text style={styles.subtitle}>{t.notifications.empty.subtitle}</Text>
     </View>
   );
 }

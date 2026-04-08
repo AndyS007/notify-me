@@ -12,12 +12,14 @@ import { Link, useRouter } from 'expo-router';
 import { useSignUp } from '@clerk/expo';
 import { useSignInWithApple } from '@clerk/expo/apple';
 import { useSignInWithGoogle } from '@clerk/expo/google';
+import { useTranslation } from '../../src/i18n';
 
 export default function SignUpScreen() {
   const { signUp } = useSignUp();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
   const router = useRouter();
+  const t = useTranslation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,13 +32,13 @@ export default function SignUpScreen() {
     try {
       const { error } = await signUp.password({ emailAddress: email, password });
       if (error) {
-        Alert.alert('Sign up failed', error.message);
+        Alert.alert(t.auth.signUp.errorTitle, error.message);
         return;
       }
       if (signUp.status === 'missing_requirements') {
         const { error: sendError } = await signUp.verifications.sendEmailCode();
         if (sendError) {
-          Alert.alert('Failed to send verification code', sendError.message);
+          Alert.alert(t.auth.signUp.sendCodeErrorTitle, sendError.message);
           return;
         }
         setPendingVerification(true);
@@ -45,7 +47,7 @@ export default function SignUpScreen() {
         router.replace('/(home)');
       }
     } catch (err: any) {
-      Alert.alert('Sign up failed', err.message);
+      Alert.alert(t.auth.signUp.errorTitle, err.message);
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ export default function SignUpScreen() {
     try {
       const { error } = await signUp.verifications.verifyEmailCode({ code });
       if (error) {
-        Alert.alert('Verification failed', error.message);
+        Alert.alert(t.auth.verifyEmail.errorTitle, error.message);
         return;
       }
       if (signUp.status === 'complete') {
@@ -64,7 +66,7 @@ export default function SignUpScreen() {
         router.replace('/(home)');
       }
     } catch (err: any) {
-      Alert.alert('Verification failed', err.message);
+      Alert.alert(t.auth.verifyEmail.errorTitle, err.message);
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ export default function SignUpScreen() {
       }
     } catch (err: any) {
       if (err.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Apple sign-in failed', err.message);
+      Alert.alert(t.auth.signUp.appleErrorTitle, err.message);
     }
   };
 
@@ -94,18 +96,18 @@ export default function SignUpScreen() {
       }
     } catch (err: any) {
       if (err.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Google sign-in failed', err.message);
+      Alert.alert(t.auth.signUp.googleErrorTitle, err.message);
     }
   };
 
   if (pendingVerification) {
     return (
       <View style={styles.root}>
-        <Text style={styles.title}>Verify email</Text>
-        <Text style={styles.subtitle}>Enter the code sent to {email}</Text>
+        <Text style={styles.title}>{t.auth.verifyEmail.title}</Text>
+        <Text style={styles.subtitle}>{t.auth.verifyEmail.instruction(email)}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Verification code"
+          placeholder={t.auth.verifyEmail.codePlaceholder}
           placeholderTextColor="#555"
           keyboardType="number-pad"
           value={code}
@@ -117,7 +119,7 @@ export default function SignUpScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? 'Verifying…' : 'Verify'}
+            {loading ? t.auth.verifyEmail.verifying : t.auth.verifyEmail.verify}
           </Text>
         </Pressable>
       </View>
@@ -126,12 +128,12 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>Create account</Text>
+      <Text style={styles.title}>{t.auth.signUp.title}</Text>
 
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder={t.auth.signUp.emailPlaceholder}
           placeholderTextColor="#555"
           autoCapitalize="none"
           keyboardType="email-address"
@@ -140,7 +142,7 @@ export default function SignUpScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder={t.auth.signUp.passwordPlaceholder}
           placeholderTextColor="#555"
           secureTextEntry
           value={password}
@@ -152,34 +154,34 @@ export default function SignUpScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? 'Creating account…' : 'Sign up'}
+            {loading ? t.auth.signUp.creatingAccount : t.auth.signUp.signUp}
           </Text>
         </Pressable>
       </View>
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerLabel}>or</Text>
+        <Text style={styles.dividerLabel}>{t.auth.signUp.or}</Text>
         <View style={styles.dividerLine} />
       </View>
 
       <Pressable style={[styles.btn, styles.googleBtn]} onPress={onGooglePress}>
         <Text style={[styles.btnText, styles.googleBtnText]}>
-          Continue with Google
+          {t.auth.signUp.continueWithGoogle}
         </Text>
       </Pressable>
 
       {Platform.OS === 'ios' && (
         <Pressable style={[styles.btn, styles.appleBtn]} onPress={onApplePress}>
-          <Text style={styles.btnText}> Continue with Apple</Text>
+          <Text style={styles.btnText}>{t.auth.signUp.continueWithApple}</Text>
         </Pressable>
       )}
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Already have an account? </Text>
+        <Text style={styles.footerText}>{t.auth.signUp.alreadyHaveAccount}</Text>
         <Link href="/(auth)/sign-in" asChild>
           <Pressable>
-            <Text style={styles.link}>Sign in</Text>
+            <Text style={styles.link}>{t.auth.signUp.signInLink}</Text>
           </Pressable>
         </Link>
       </View>
