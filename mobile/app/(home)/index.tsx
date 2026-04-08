@@ -10,6 +10,7 @@ import { usePermission } from '../../src/hooks/use-permission';
 import { AppNotificationGroup } from '../../src/components/AppNotificationGroup';
 import { EmptyState } from '../../src/components/EmptyState';
 import { PermissionBanner } from '../../src/components/PermissionBanner';
+import { useTranslation } from '../../src/i18n';
 
 export default function ActivityScreen() {
   const { groups, loading, refresh } = useNotifications();
@@ -17,6 +18,7 @@ export default function ActivityScreen() {
   const { hasPermission, request, recheck } = usePermission();
   const { signOut } = useAuth();
   const router = useRouter();
+  const t = useTranslation();
 
   // Refresh list whenever the headless task writes a new notification to the DB
   useEffect(() => {
@@ -41,13 +43,13 @@ export default function ActivityScreen() {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Notifications</Text>
+        <Text style={styles.title}>{t.home.title}</Text>
         <View style={styles.headerRight}>
           {groups.length > 0 && (
-            <Text style={styles.subtitle}>{groups.length} apps</Text>
+            <Text style={styles.subtitle}>{t.home.appCount(groups.length)}</Text>
           )}
           <Pressable onPress={onSignOut}>
-            <Text style={styles.signOut}>Sign out</Text>
+            <Text style={styles.signOut}>{t.home.signOut}</Text>
           </Pressable>
         </View>
       </View>

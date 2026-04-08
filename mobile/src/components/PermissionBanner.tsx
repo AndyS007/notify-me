@@ -1,20 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from '../i18n';
 
 type Props = {
   onPress: () => void;
 };
 
 export function PermissionBanner({ onPress }: Props) {
+  const t = useTranslation();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notification access required</Text>
-      <Text style={styles.subtitle}>
-        Grant notification listener access so this app can track incoming
-        notifications.
-      </Text>
+      <Text style={styles.title}>{t.permission.title}</Text>
+      <Text style={styles.subtitle}>{t.permission.description}</Text>
       <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.8}>
-        <Text style={styles.buttonText}>Grant Access</Text>
+        <Text style={styles.buttonText}>{t.permission.grantAccess}</Text>
       </TouchableOpacity>
     </View>
   );

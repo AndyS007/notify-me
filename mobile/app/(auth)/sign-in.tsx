@@ -12,12 +12,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useTranslation } from "../../src/i18n";
 
 export default function SignInScreen() {
   const { signIn } = useSignIn();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
   const router = useRouter();
+  const t = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,7 @@ export default function SignInScreen() {
     try {
       const { error } = await signIn.password({ identifier: email, password });
       if (error) {
-        Alert.alert("Sign in failed", error.message);
+        Alert.alert(t.auth.signIn.errorTitle, error.message);
         return;
       }
       if (signIn.status === "complete") {
@@ -36,7 +38,7 @@ export default function SignInScreen() {
         router.replace("/(home)");
       }
     } catch (err: any) {
-      Alert.alert("Sign in failed", err.message);
+      Alert.alert(t.auth.signIn.errorTitle, err.message);
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
-      Alert.alert("Apple sign-in failed", err.message);
+      Alert.alert(t.auth.signIn.appleErrorTitle, err.message);
     }
   };
 
@@ -66,18 +68,18 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
-      Alert.alert("Google sign-in failed", err.message);
+      Alert.alert(t.auth.signIn.googleErrorTitle, err.message);
     }
   };
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>Welcome back</Text>
+      <Text style={styles.title}>{t.auth.signIn.title}</Text>
 
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          placeholder='Email'
+          placeholder={t.auth.signIn.emailPlaceholder}
           placeholderTextColor='#555'
           autoCapitalize='none'
           keyboardType='email-address'
@@ -86,7 +88,7 @@ export default function SignInScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder='Password'
+          placeholder={t.auth.signIn.passwordPlaceholder}
           placeholderTextColor='#555'
           secureTextEntry
           value={password}
@@ -98,34 +100,34 @@ export default function SignInScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? t.auth.signIn.signingIn : t.auth.signIn.signIn}
           </Text>
         </Pressable>
       </View>
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerLabel}>or</Text>
+        <Text style={styles.dividerLabel}>{t.auth.signIn.or}</Text>
         <View style={styles.dividerLine} />
       </View>
 
       <Pressable style={[styles.btn, styles.googleBtn]} onPress={onGooglePress}>
         <Text style={[styles.btnText, styles.googleBtnText]}>
-          Continue with Google
+          {t.auth.signIn.continueWithGoogle}
         </Text>
       </Pressable>
 
       {Platform.OS === "ios" && (
         <Pressable style={[styles.btn, styles.appleBtn]} onPress={onApplePress}>
-          <Text style={styles.btnText}> Continue with Apple</Text>
+          <Text style={styles.btnText}>{t.auth.signIn.continueWithApple}</Text>
         </Pressable>
       )}
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Don't have an account? </Text>
+        <Text style={styles.footerText}>{t.auth.signIn.noAccount}</Text>
         <Link href='/(auth)/sign-up' asChild>
           <Pressable>
-            <Text style={styles.link}>Sign up</Text>
+            <Text style={styles.link}>{t.auth.signIn.signUpLink}</Text>
           </Pressable>
         </Link>
       </View>

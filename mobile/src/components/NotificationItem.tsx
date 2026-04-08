@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { NotificationRecord } from '../hooks/use-notifications';
 import { formatRelativeTime } from '../utils/format-time';
+import { useTranslation } from '../i18n';
 
 type Props = {
   item: NotificationRecord;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function NotificationItem({ item, isLast }: Props) {
+  const t = useTranslation();
   return (
     <View style={[styles.container, !isLast && styles.divider]}>
       <View style={styles.content}>
@@ -23,10 +25,10 @@ export function NotificationItem({ item, isLast }: Props) {
           </Text>
         )}
         {!item.title && !item.text && (
-          <Text style={styles.empty}>(no content)</Text>
+          <Text style={styles.empty}>{t.notifications.noContent}</Text>
         )}
       </View>
-      <Text style={styles.time}>{formatRelativeTime(item.timestamp)}</Text>
+      <Text style={styles.time}>{formatRelativeTime(item.timestamp, t.time)}</Text>
     </View>
   );
 }

@@ -8,6 +8,7 @@ import { db } from '../src/db';
 import migrations from '../drizzle/migrations';
 import { queryClient } from '../src/api/query-client';
 import { useAppUpdate } from '../src/hooks/use-app-update';
+import { I18nProvider } from '../src/i18n';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -32,10 +33,12 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-      </QueryClientProvider>
-    </ClerkProvider>
+    <I18nProvider>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <QueryClientProvider client={queryClient}>
+          <AppContent />
+        </QueryClientProvider>
+      </ClerkProvider>
+    </I18nProvider>
   );
 }
