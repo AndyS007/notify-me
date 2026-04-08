@@ -1,6 +1,7 @@
-import { Redirect, Stack } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { useAuth } from '@clerk/expo';
 import { useEffect, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { useRegisterDevice } from '../../src/api/devices';
 
 export default function HomeLayout() {
@@ -22,5 +23,33 @@ export default function HomeLayout() {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: '#111', borderTopColor: '#222' },
+        tabBarActiveTintColor: '#fff',
+        tabBarInactiveTintColor: '#555',
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Notifications',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="notifications-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="devices"
+        options={{
+          title: 'Devices',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="phone-portrait-outline" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
+  );
 }

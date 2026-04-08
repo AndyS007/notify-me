@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import DeviceInfo from 'react-native-device-info';
 import { useApiClient, type ApiClient } from './client';
 import type { components } from './schema';
@@ -7,6 +7,7 @@ import type { components } from './schema';
 
 export type RegisterDeviceRequest = components['schemas']['RegisterDeviceRequest'];
 export type RegisterDeviceResponse = components['schemas']['RegisterDeviceResponse'];
+export type DeviceResponse = components['schemas']['DeviceResponse'];
 
 // ---- API functions ----
 
@@ -38,5 +39,18 @@ export function useRegisterDevice() {
   const client = useApiClient();
   return useMutation({
     mutationFn: () => registerDeviceApi(client),
+  });
+}
+
+async function fetchDevices(client: ApiClient): Promise<DeviceResponse[]> {
+  const { data } = await client.GET('/devices');
+  return data ?? [];
+}
+
+export function useDevices() {
+  const client = useApiClient();
+  return useQuery({
+    queryKey: ['devices'],
+    queryFn: () => fetchDevices(client),
   });
 }
