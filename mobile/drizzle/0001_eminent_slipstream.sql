@@ -1,0 +1,1 @@
+ALTER TABLE `notifications` ADD `synced` integer DEFAULT 0 NOT NULL;

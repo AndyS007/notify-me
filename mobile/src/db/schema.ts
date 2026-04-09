@@ -10,6 +10,7 @@ export const notifications = sqliteTable(
     text: text('text').notNull().default(''),
     timestamp: int('timestamp').notNull(),
     icon: text('icon'),
+    synced: int('synced').notNull().default(0),
   },
   (table) => [
     index('idx_pkg').on(table.packageName),
