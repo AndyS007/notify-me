@@ -19,7 +19,7 @@ export class ApiError extends Error {
 
 export type ApiClient = Client<paths>;
 
-function createApiClient(getToken: () => Promise<string | null>): ApiClient {
+export function createApiClient(getToken: () => Promise<string | null>): ApiClient {
   const client = createClient<paths>({ baseUrl: API_BASE_URL });
 
   client.use({
