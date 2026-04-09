@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, {
   FadeInDown,
   FadeOut,
   LinearTransition,
 } from 'react-native-reanimated';
+import { StyleSheet } from 'react-native-unistyles';
 import { AppIcon } from './AppIcon';
 import { NotificationItem } from './NotificationItem';
 import { NotificationGroup } from '../hooks/use-notifications';
@@ -77,9 +78,9 @@ export function AppNotificationGroup({ group, appInfo }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   card: {
-    backgroundColor: '#1c1c1e',
+    backgroundColor: theme.colors.surface,
     marginHorizontal: 16,
     marginVertical: 5,
     borderRadius: 16,
@@ -101,13 +102,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   appName: {
-    color: '#fff',
+    color: theme.colors.text,
     fontSize: 15,
     fontWeight: '600',
     flex: 1,
   },
   badge: {
-    backgroundColor: '#ff3b30',
+    backgroundColor: theme.colors.badge,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -116,12 +117,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   badgeText: {
-    color: '#fff',
+    color: theme.colors.badgeText,
     fontSize: 11,
     fontWeight: '700',
   },
   preview: {
-    color: '#888',
+    color: theme.colors.textSecondary,
     fontSize: 13,
   },
   headerMeta: {
@@ -129,15 +130,15 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   time: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 11,
   },
   chevron: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 9,
   },
   itemList: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#2c2c2c',
+    borderTopWidth: 0.5,
+    borderTopColor: theme.colors.divider,
   },
-});
+}));

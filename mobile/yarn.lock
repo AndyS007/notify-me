@@ -799,7 +799,7 @@
     "@babel/types" "^7.29.0"
     debug "^4.3.1"
 
-"@babel/types@^7.0.0", "@babel/types@^7.20.7", "@babel/types@^7.25.2", "@babel/types@^7.26.0", "@babel/types@^7.27.1", "@babel/types@^7.27.3", "@babel/types@^7.28.2", "@babel/types@^7.28.5", "@babel/types@^7.28.6", "@babel/types@^7.29.0", "@babel/types@^7.3.3":
+"@babel/types@7.29.0", "@babel/types@^7.0.0", "@babel/types@^7.20.7", "@babel/types@^7.25.2", "@babel/types@^7.26.0", "@babel/types@^7.27.1", "@babel/types@^7.27.3", "@babel/types@^7.28.2", "@babel/types@^7.28.5", "@babel/types@^7.28.6", "@babel/types@^7.29.0", "@babel/types@^7.3.3":
   version "7.29.0"
   resolved "https://registry.npmjs.org/@babel/types/-/types-7.29.0.tgz"
   integrity sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==
@@ -1559,26 +1559,9 @@
     debug "^4.3.4"
     getenv "^2.0.0"
 
-"@expo/fingerprint@0.16.6":
+"@expo/fingerprint@0.16.6", "@expo/fingerprint@^0.16.6":
   version "0.16.6"
   resolved "https://registry.npmjs.org/@expo/fingerprint/-/fingerprint-0.16.6.tgz"
-  integrity sha512-nRITNbnu3RKSHPvKVehrSU4KG2VY9V8nvULOHBw98ukHCAU4bGrU5APvcblOkX3JAap+xEHsg/mZvqlvkLInmQ==
-  dependencies:
-    "@expo/env" "^2.0.11"
-    "@expo/spawn-async" "^1.7.2"
-    arg "^5.0.2"
-    chalk "^4.1.2"
-    debug "^4.3.4"
-    getenv "^2.0.0"
-    glob "^13.0.0"
-    ignore "^5.3.1"
-    minimatch "^10.2.2"
-    resolve-from "^5.0.0"
-    semver "^7.6.0"
-
-"@expo/fingerprint@^0.16.6":
-  version "0.16.6"
-  resolved "https://registry.yarnpkg.com/@expo/fingerprint/-/fingerprint-0.16.6.tgz#98294fa92614a031f61bb2772a3b143b225fd63b"
   integrity sha512-nRITNbnu3RKSHPvKVehrSU4KG2VY9V8nvULOHBw98ukHCAU4bGrU5APvcblOkX3JAap+xEHsg/mZvqlvkLInmQ==
   dependencies:
     "@expo/env" "^2.0.11"
@@ -7809,6 +7792,13 @@ react-native-screens@~4.23.0:
   dependencies:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
+
+react-native-unistyles@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/react-native-unistyles/-/react-native-unistyles-3.2.2.tgz#0fb93296e503b4ee0cce42cb715a619cf0f9e715"
+  integrity sha512-Qo6JO8ZQ8iGkp0WyvIN3o/0refuvbkbhRI0OFdK7utkIFBH/qnT6VVVMAnzzNMcCNnHMpznz+ln23bwHGgP+sQ==
+  dependencies:
+    "@babel/types" "7.29.0"
 
 react-native-url-polyfill@2.0.0:
   version "2.0.0"

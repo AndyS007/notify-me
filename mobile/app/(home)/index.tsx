@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SQLite from 'expo-sqlite';
 import { useAuth } from '@clerk/expo';
 import { useRouter } from 'expo-router';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useNotifications } from '../../src/hooks/use-notifications';
 import { useAppList } from '../../src/hooks/use-app-list';
 import { usePermission } from '../../src/hooks/use-permission';
@@ -17,6 +18,7 @@ export default function ActivityScreen() {
   const { hasPermission, request, recheck } = usePermission();
   const { signOut } = useAuth();
   const router = useRouter();
+  const { theme } = useUnistyles();
 
   // Refresh list whenever the headless task writes a new notification to the DB
   useEffect(() => {
@@ -73,7 +75,7 @@ export default function ActivityScreen() {
           <RefreshControl
             refreshing={loading}
             onRefresh={refresh}
-            tintColor="#555"
+            tintColor={theme.colors.refreshIndicator}
           />
         }
       />
@@ -81,10 +83,10 @@ export default function ActivityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
-    backgroundColor: '#111',
+    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: 20,
@@ -100,16 +102,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   title: {
-    color: '#fff',
+    color: theme.colors.text,
     fontSize: 28,
     fontWeight: '700',
   },
   subtitle: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 14,
   },
   signOut: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 14,
   },
   listContent: {
@@ -119,4 +121,4 @@ const styles = StyleSheet.create({
   emptyContent: {
     flex: 1,
   },
-});
+}));

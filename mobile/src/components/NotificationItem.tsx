@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 import { NotificationRecord } from '../hooks/use-notifications';
 import { formatRelativeTime } from '../utils/format-time';
 
@@ -31,7 +32,7 @@ export function NotificationItem({ item, isLast }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -40,32 +41,32 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   divider: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#2c2c2c',
+    borderBottomWidth: 0.5,
+    borderBottomColor: theme.colors.divider,
   },
   content: {
     flex: 1,
     gap: 2,
   },
   title: {
-    color: '#e0e0e0',
+    color: theme.colors.text,
     fontSize: 13,
     fontWeight: '600',
   },
   text: {
-    color: '#888',
+    color: theme.colors.textSecondary,
     fontSize: 13,
     lineHeight: 18,
   },
   empty: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 12,
     fontStyle: 'italic',
   },
   time: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 11,
     marginTop: 2,
     flexShrink: 0,
   },
-});
+}));
