@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 
 type Props = {
   onPress: () => void;
@@ -20,28 +21,28 @@ export function PermissionBanner({ onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   container: {
     margin: 16,
     padding: 16,
-    backgroundColor: '#1c2f4a',
+    backgroundColor: theme.colors.bannerBg,
     borderRadius: 16,
     gap: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#2a4a6e',
+    borderWidth: 0.5,
+    borderColor: theme.colors.bannerBorder,
   },
   title: {
-    color: '#fff',
+    color: theme.colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
   subtitle: {
-    color: '#8aa8c8',
+    color: theme.colors.bannerSubtext,
     fontSize: 13,
     lineHeight: 18,
   },
   button: {
-    backgroundColor: '#0a84ff',
+    backgroundColor: theme.colors.accent,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 18,
@@ -49,8 +50,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   buttonText: {
-    color: '#fff',
+    color: theme.colors.accentText,
     fontSize: 13,
     fontWeight: '700',
   },
-});
+}));

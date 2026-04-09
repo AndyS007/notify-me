@@ -3,7 +3,6 @@ import {
   Alert,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -12,12 +11,14 @@ import { Link, useRouter } from 'expo-router';
 import { useSignUp } from '@clerk/expo';
 import { useSignInWithApple } from '@clerk/expo/apple';
 import { useSignInWithGoogle } from '@clerk/expo/google';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 export default function SignUpScreen() {
   const { signUp } = useSignUp();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
   const router = useRouter();
+  const { theme } = useUnistyles();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -106,7 +107,7 @@ export default function SignUpScreen() {
         <TextInput
           style={styles.input}
           placeholder="Verification code"
-          placeholderTextColor="#555"
+          placeholderTextColor={theme.colors.placeholder}
           keyboardType="number-pad"
           value={code}
           onChangeText={setCode}
@@ -132,7 +133,7 @@ export default function SignUpScreen() {
         <TextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#555"
+          placeholderTextColor={theme.colors.placeholder}
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
@@ -141,7 +142,7 @@ export default function SignUpScreen() {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#555"
+          placeholderTextColor={theme.colors.placeholder}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -171,7 +172,7 @@ export default function SignUpScreen() {
 
       {Platform.OS === 'ios' && (
         <Pressable style={[styles.btn, styles.appleBtn]} onPress={onApplePress}>
-          <Text style={styles.btnText}> Continue with Apple</Text>
+          <Text style={styles.appleBtnText}> Continue with Apple</Text>
         </Pressable>
       )}
 
@@ -187,22 +188,22 @@ export default function SignUpScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
-    backgroundColor: '#111',
+    backgroundColor: theme.colors.background,
     justifyContent: 'center',
     paddingHorizontal: 24,
     gap: 16,
   },
   title: {
-    color: '#fff',
+    color: theme.colors.text,
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 4,
   },
   subtitle: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 14,
     marginBottom: 8,
   },
@@ -210,17 +211,17 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   input: {
-    backgroundColor: '#1c1c1c',
-    color: '#fff',
+    backgroundColor: theme.colors.surface,
+    color: theme.colors.text,
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: theme.colors.border,
   },
   btn: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.primaryBtn,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -229,22 +230,27 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   btnText: {
-    color: '#111',
+    color: theme.colors.primaryBtnText,
     fontWeight: '600',
     fontSize: 15,
   },
   googleBtn: {
-    backgroundColor: '#1c1c1c',
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: theme.colors.border,
   },
   googleBtnText: {
-    color: '#fff',
+    color: theme.colors.text,
   },
   appleBtn: {
-    backgroundColor: '#000',
+    backgroundColor: theme.colors.appleBtn,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: theme.colors.appleBtnBorder,
+  },
+  appleBtnText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 15,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -254,10 +260,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: theme.colors.divider,
   },
   dividerLabel: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 13,
   },
   footer: {
@@ -266,12 +272,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   footerText: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 14,
   },
   link: {
-    color: '#fff',
+    color: theme.colors.text,
     fontSize: 14,
     fontWeight: '600',
   },
-});
+}));

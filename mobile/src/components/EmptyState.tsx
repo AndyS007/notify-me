@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 
 export function EmptyState() {
   return (
@@ -13,7 +14,7 @@ export function EmptyState() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -26,15 +27,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    color: '#fff',
+    color: theme.colors.text,
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
   },
   subtitle: {
-    color: '#555',
+    color: theme.colors.textTertiary,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
   },
-});
+}));
