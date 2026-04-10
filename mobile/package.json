@@ -46,7 +46,7 @@
     "react-native-android-notification-listener": "^5.0.1",
     "react-native-device-info": "^15.0.2",
     "react-native-gesture-handler": "~2.30.0",
-    "react-native-get-app-list": "^0.2.0",
+    "expo-android-app-list": "^1.0.0",
     "react-native-mmkv": "^4.3.0",
     "react-native-nitro-modules": "^0.35.2",
     "react-native-reanimated": "4.2.1",
