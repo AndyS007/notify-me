@@ -6,11 +6,46 @@ import { useAuth } from '@clerk/expo';
 import { useRouter } from 'expo-router';
 import { useAppList } from '../hooks/use-app-list';
 import { useAppSettings } from '../hooks/use-app-settings';
+import { useAppIcon } from '../hooks/use-app-icon';
 import { AppIcon } from '../components/AppIcon';
 import { ThemeToggle } from '../components/ThemeToggle';
 import type { AppInfo } from '../services/app-list-service';
 
 type AppRow = AppInfo & { enabled: boolean };
+
+function AppSettingsRow({
+  item,
+  onToggle,
+}: {
+  item: AppRow;
+  onToggle: (pkg: string, appName: string, value: boolean) => void;
+}) {
+  const { theme } = useUnistyles();
+  const icon = useAppIcon(item.packageName);
+
+  return (
+    <View style={styles.row}>
+      <AppIcon iconBase64={icon} appName={item.appName} size={40} />
+      <View style={styles.info}>
+        <Text style={styles.appName} numberOfLines={1}>
+          {item.appName}
+        </Text>
+        <Text style={styles.packageName} numberOfLines={1}>
+          {item.packageName}
+        </Text>
+      </View>
+      <Switch
+        value={item.enabled}
+        onValueChange={(val) => onToggle(item.packageName, item.appName, val)}
+        trackColor={{
+          false: theme.colors.border,
+          true: theme.colors.accent,
+        }}
+        thumbColor="#ffffff"
+      />
+    </View>
+  );
+}
 
 export default function AppSettingsScreen() {
   const { appMap, ready } = useAppList();
@@ -30,7 +65,6 @@ export default function AppSettingsScreen() {
     const list: AppRow[] = [];
     for (const [pkg, info] of appMap) {
       const setting = settings.get(pkg);
-      // Default to enabled if no setting exists
       const enabled = setting ? setting.enabled === 1 : true;
       list.push({ ...info, enabled });
     }
@@ -57,28 +91,9 @@ export default function AppSettingsScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: AppRow }) => (
-      <View style={styles.row}>
-        <AppIcon iconBase64={item.icon} appName={item.appName} size={40} />
-        <View style={styles.info}>
-          <Text style={styles.appName} numberOfLines={1}>
-            {item.appName}
-          </Text>
-          <Text style={styles.packageName} numberOfLines={1}>
-            {item.packageName}
-          </Text>
-        </View>
-        <Switch
-          value={item.enabled}
-          onValueChange={(val) => onToggle(item.packageName, item.appName, val)}
-          trackColor={{
-            false: theme.colors.border,
-            true: theme.colors.accent,
-          }}
-          thumbColor="#ffffff"
-        />
-      </View>
+      <AppSettingsRow item={item} onToggle={onToggle} />
     ),
-    [onToggle, theme],
+    [onToggle],
   );
 
   return (

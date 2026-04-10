@@ -9,6 +9,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { AppIcon } from './AppIcon';
 import { NotificationItem } from './NotificationItem';
 import { NotificationGroup } from '../hooks/use-notifications';
+import { useAppIcon } from '../hooks/use-app-icon';
 import { AppInfo } from '../services/app-list-service';
 import { formatRelativeTime } from '../utils/format-time';
 
@@ -19,9 +20,10 @@ type Props = {
 
 export function AppNotificationGroup({ group, appInfo }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const asyncIcon = useAppIcon(group.packageName);
 
   const displayName = appInfo?.appName || group.appName || group.packageName;
-  const icon = appInfo?.icon || group.icon;
+  const icon = asyncIcon || group.icon;
   const latest = group.items[0];
 
   return (
