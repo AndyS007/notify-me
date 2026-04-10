@@ -1,4 +1,4 @@
-import { int, sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
+import { int, sqliteTable, text, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const notifications = sqliteTable(
   'notifications',
@@ -15,5 +15,18 @@ export const notifications = sqliteTable(
   (table) => [
     index('idx_pkg').on(table.packageName),
     index('idx_ts').on(table.timestamp),
+  ],
+);
+
+export const appSettings = sqliteTable(
+  'app_settings',
+  {
+    id: int('id').primaryKey({ autoIncrement: true }),
+    packageName: text('package_name').notNull(),
+    appName: text('app_name').notNull().default(''),
+    enabled: int('enabled').notNull().default(1),
+  },
+  (table) => [
+    uniqueIndex('idx_app_settings_pkg').on(table.packageName),
   ],
 );

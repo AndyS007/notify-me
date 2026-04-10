@@ -1,6 +1,7 @@
 import RNAndroidNotificationListener from 'react-native-android-notification-listener';
 import { db } from '../db';
 import { notifications } from '../db/schema';
+import { isAppEnabled } from './app-settings-service';
 
 export type RawNotification = {
   app: string;
@@ -28,11 +29,22 @@ export async function saveNotification(
   payload: RawNotification,
   appName = '',
 ): Promise<void> {
+  const title = payload.title ?? '';
+  const text = payload.text || payload.bigText || '';
+
+  // Skip notifications with empty title and content
+  if (!title.trim() && !text.trim()) return;
+
+  // Skip notifications from disabled apps
+  const packageName = payload.app ?? '';
+  const enabled = await isAppEnabled(packageName);
+  if (!enabled) return;
+
   await db.insert(notifications).values({
-    packageName: payload.app ?? '',
+    packageName,
     appName,
-    title: payload.title ?? '',
-    text: payload.text || payload.bigText || '',
+    title,
+    text,
     timestamp: Date.now(),
     icon: null,
   });
