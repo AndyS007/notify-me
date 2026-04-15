@@ -1,4 +1,4 @@
-import * as ExpoAndroidAppList from 'expo-android-app-list';
+import { ExpoAndroidAppList } from "expo-android-app-list";
 
 export type AppInfo = {
   packageName: string;
