@@ -100,6 +100,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listSms"];
+        put?: never;
+        post: operations["createSms"];
+        delete: operations["deleteSmsBulk"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sms/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["batchCreateSms"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sms/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getSms"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteSms"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -170,6 +218,38 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+        };
+        CreateSmsRequest: {
+            deviceId?: string;
+            address: string;
+            body: string;
+            timestamp: number;
+        };
+        BatchCreateSmsRequest: {
+            messages: components["schemas"]["CreateSmsRequest"][];
+        };
+        SmsResponse: {
+            id?: string;
+            deviceId?: string;
+            address?: string;
+            body?: string;
+            timestamp?: number;
+            createdAt?: string;
+            updatedAt?: string;
+        };
+        BatchCreateSmsResponse: {
+            created?: number;
+            duplicates?: number;
+        };
+        DeleteSmsResponse: {
+            deleted?: number;
+        };
+        SmsPageResponse: {
+            content?: components["schemas"]["SmsResponse"][];
+            page?: number;
+            size?: number;
+            totalElements?: number;
+            totalPages?: number;
         };
     };
     responses: never;
@@ -378,6 +458,142 @@ export interface operations {
                     "*/*": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    listSms: {
+        parameters: {
+            query?: {
+                address?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SmsPageResponse"];
+                };
+            };
+        };
+    };
+    createSms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSmsRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SmsResponse"];
+                };
+            };
+        };
+    };
+    batchCreateSms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchCreateSmsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BatchCreateSmsResponse"];
+                };
+            };
+        };
+    };
+    getSms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SmsResponse"];
+                };
+            };
+        };
+    };
+    deleteSms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteSmsBulk: {
+        parameters: {
+            query?: {
+                address?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeleteSmsResponse"];
                 };
             };
         };

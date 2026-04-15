@@ -22,6 +22,13 @@
       "when": 1775800000000,
       "tag": "0002_app_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1776100000000,
+      "tag": "0003_sms_messages",
+      "breakpoints": true
     }
   ]
 }
