@@ -27,7 +27,7 @@
       "idx": 3,
       "version": "6",
       "when": 1776400000000,
-      "tag": "0003_apps_table",
+      "tag": "0003_app_settings_system",
       "breakpoints": true
     }
   ]

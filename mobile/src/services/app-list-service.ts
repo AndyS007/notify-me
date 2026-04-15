@@ -1,7 +1,7 @@
 import { ExpoAndroidAppList } from "expo-android-app-list";
-import { eq, sql } from "drizzle-orm";
+import { eq, gt, sql } from "drizzle-orm";
 import { db } from "../db";
-import { apps } from "../db/schema";
+import { appSettings } from "../db/schema";
 
 export type AppInfo = {
   packageName: string;
@@ -10,30 +10,33 @@ export type AppInfo = {
 };
 
 /**
- * Fetch the installed app list from the device and upsert it into SQLite.
- * Returns the freshly-synced rows.
+ * Fetch the installed app list from the device and upsert it into the
+ * `app_settings` table. On insert we seed `enabled` from `isSystemApp`
+ * (system apps default off, user apps default on). On conflict we refresh
+ * the metadata but preserve whatever `enabled` the user has chosen.
  */
 export async function syncAppsFromDevice(): Promise<AppInfo[]> {
   try {
     const devices = await ExpoAndroidAppList.getAll();
     if (devices.length === 0) return [];
     const now = Date.now();
-    // Upsert each app. Drizzle doesn't batch onConflictDoUpdate across multiple
-    // rows in a single insert, so loop — device counts are in the low hundreds.
     for (const a of devices) {
+      const isSystem = a.isSystemApp ? 1 : 0;
       await db
-        .insert(apps)
+        .insert(appSettings)
         .values({
           packageName: a.packageName,
           appName: a.appName,
-          isSystemApp: a.isSystemApp ? 1 : 0,
+          enabled: a.isSystemApp ? 0 : 1,
+          isSystemApp: isSystem,
           updatedAt: now,
         })
         .onConflictDoUpdate({
-          target: apps.packageName,
+          target: appSettings.packageName,
+          // Do NOT overwrite `enabled` — preserve the user's toggle.
           set: {
             appName: a.appName,
-            isSystemApp: a.isSystemApp ? 1 : 0,
+            isSystemApp: isSystem,
             updatedAt: now,
           },
         });
@@ -51,14 +54,14 @@ export async function syncAppsFromDevice(): Promise<AppInfo[]> {
 
 /**
  * Read the cached app list from SQLite. Pass `includeSystem=true` to include
- * system apps (by default they're hidden).
+ * system apps (by default they're hidden from the list view).
  */
 export async function getAllApps(
   includeSystem = false,
 ): Promise<Map<string, AppInfo>> {
   const rows = includeSystem
-    ? await db.select().from(apps)
-    : await db.select().from(apps).where(eq(apps.isSystemApp, 0));
+    ? await db.select().from(appSettings)
+    : await db.select().from(appSettings).where(eq(appSettings.isSystemApp, 0));
   return new Map(
     rows.map((r) => [
       r.packageName,
@@ -76,8 +79,8 @@ export async function getAppInfo(
 ): Promise<AppInfo | null> {
   const rows = await db
     .select()
-    .from(apps)
-    .where(eq(apps.packageName, packageName))
+    .from(appSettings)
+    .where(eq(appSettings.packageName, packageName))
     .limit(1);
   if (rows.length === 0) return null;
   const r = rows[0];
@@ -89,24 +92,16 @@ export async function getAppInfo(
 }
 
 /**
- * True iff the package is recorded as a system app in SQLite. Returns `false`
- * for unknown packages (safer default — we'd rather let a notification
- * through than silently drop it).
+ * True iff we've run at least one device sync (i.e. some row has a non-zero
+ * `updated_at`). Rows created solely by {@link setAppEnabled} have
+ * `updated_at = 0` and don't count — they represent a user toggle that
+ * raced the first sync.
  */
-export async function isKnownSystemApp(packageName: string): Promise<boolean> {
-  const rows = await db
-    .select({ isSystemApp: apps.isSystemApp })
-    .from(apps)
-    .where(eq(apps.packageName, packageName))
-    .limit(1);
-  if (rows.length === 0) return false;
-  return rows[0].isSystemApp === 1;
-}
-
-export async function hasAnyApps(): Promise<boolean> {
+export async function hasSyncedApps(): Promise<boolean> {
   const rows = await db
     .select({ count: sql<number>`count(*)` })
-    .from(apps)
+    .from(appSettings)
+    .where(gt(appSettings.updatedAt, 0))
     .limit(1);
   return (rows[0]?.count ?? 0) > 0;
 }

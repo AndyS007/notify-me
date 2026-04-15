@@ -1,7 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { appSettings } from '../db/schema';
-import { isKnownSystemApp } from './app-list-service';
 
 export type AppSettingRecord = typeof appSettings.$inferSelect;
 
@@ -11,11 +10,13 @@ export async function getAllAppSettings(): Promise<Map<string, AppSettingRecord>
 }
 
 /**
- * Resolve whether notifications from a package should be captured.
+ * Whether notifications from a package should be captured.
  *
- * - If the user has explicitly toggled the app, honor that setting.
- * - Otherwise, system apps are disabled by default; user-installed apps are
- *   enabled by default.
+ * After the first device sync, every installed app has a row in
+ * `app_settings` with `enabled` seeded from its `is_system_app` flag — so
+ * this is just a lookup. For packages that haven't been synced yet (e.g.
+ * a notification arrives before the UI ever opens), we fall through to
+ * `true` so we don't silently drop a real user notification.
  */
 export async function isAppEnabled(packageName: string): Promise<boolean> {
   const rows = await db
@@ -23,10 +24,8 @@ export async function isAppEnabled(packageName: string): Promise<boolean> {
     .from(appSettings)
     .where(eq(appSettings.packageName, packageName))
     .limit(1);
-  if (rows.length > 0) return rows[0].enabled === 1;
-  // No explicit setting — fall back to the system-app default.
-  const systemApp = await isKnownSystemApp(packageName);
-  return !systemApp;
+  if (rows.length === 0) return true;
+  return rows[0].enabled === 1;
 }
 
 export async function setAppEnabled(
@@ -35,7 +34,9 @@ export async function setAppEnabled(
   enabled: boolean,
 ): Promise<void> {
   const value = enabled ? 1 : 0;
-  // Upsert: insert or update on conflict
+  // Upsert: insert or update on conflict. `isSystemApp` is only set on the
+  // insert path (rare — the sync job usually creates the row first). On
+  // update we intentionally leave `isSystemApp` alone.
   await db
     .insert(appSettings)
     .values({ packageName, appName, enabled: value })

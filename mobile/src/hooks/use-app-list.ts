@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getAllApps,
-  hasAnyApps,
+  hasSyncedApps,
   syncAppsFromDevice,
   AppInfo,
 } from '../services/app-list-service';
@@ -23,8 +23,8 @@ export function useAppList(includeSystem = false) {
     (async () => {
       await readFromDb();
       if (cancelled) return;
-      const hasCached = await hasAnyApps();
-      if (!hasCached) {
+      const alreadySynced = await hasSyncedApps();
+      if (!alreadySynced) {
         await syncAppsFromDevice();
         if (cancelled) return;
         await readFromDb();

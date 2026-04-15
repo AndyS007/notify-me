@@ -121,46 +121,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": 1
-        }
-      },
-      "indexes": {
-        "idx_app_settings_pkg": {
-          "name": "idx_app_settings_pkg",
-          "columns": [
-            "package_name"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "apps": {
-      "name": "apps",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "package_name": {
-          "name": "package_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "app_name": {
-          "name": "app_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
         },
         "is_system_app": {
           "name": "is_system_app",
@@ -180,15 +140,15 @@
         }
       },
       "indexes": {
-        "idx_apps_pkg": {
-          "name": "idx_apps_pkg",
+        "idx_app_settings_pkg": {
+          "name": "idx_app_settings_pkg",
           "columns": [
             "package_name"
           ],
           "isUnique": true
         },
-        "idx_apps_system": {
-          "name": "idx_apps_system",
+        "idx_app_settings_system": {
+          "name": "idx_app_settings_system",
           "columns": [
             "is_system_app"
           ],
