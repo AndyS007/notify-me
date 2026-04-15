@@ -16,7 +16,9 @@ import { ThemeToggle } from '../components/ThemeToggle';
 
 export default function NotificationsScreen() {
   const { groups, loading, refresh } = useNotifications();
-  const { appMap } = useAppList();
+  // Include system apps in the lookup map so that any notifications from
+  // system apps the user has explicitly enabled still get their icon/name.
+  const { appMap } = useAppList(true);
   const { hasPermission, request, recheck } = usePermission();
   const { theme } = useUnistyles();
   const client = useApiClient();

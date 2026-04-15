@@ -13,6 +13,12 @@ import type { AppInfo } from '../services/app-list-service';
 
 type AppRow = AppInfo & { enabled: boolean };
 
+function resolveEnabled(info: AppInfo, setting?: { enabled: number }): boolean {
+  if (setting) return setting.enabled === 1;
+  // No explicit setting — system apps default to disabled, user apps to enabled.
+  return !info.isSystemApp;
+}
+
 function AppSettingsRow({
   item,
   onToggle,
@@ -48,7 +54,8 @@ function AppSettingsRow({
 }
 
 export default function AppSettingsScreen() {
-  const { appMap, ready } = useAppList();
+  const [showSystem, setShowSystem] = useState(false);
+  const { appMap, ready } = useAppList(showSystem);
   const { settings, loading, toggle } = useAppSettings();
   const { theme } = useUnistyles();
   const { signOut } = useAuth();
@@ -64,8 +71,7 @@ export default function AppSettingsScreen() {
     if (!ready) return [];
     const list: AppRow[] = [];
     for (const [pkg, info] of appMap) {
-      const setting = settings.get(pkg);
-      const enabled = setting ? setting.enabled === 1 : true;
+      const enabled = resolveEnabled(info, settings.get(pkg));
       list.push({ ...info, enabled });
     }
     list.sort((a, b) => a.appName.localeCompare(b.appName));
@@ -114,6 +120,15 @@ export default function AppSettingsScreen() {
           autoCorrect={false}
         />
       </View>
+
+      <Pressable
+        style={styles.systemToggleBtn}
+        onPress={() => setShowSystem((v) => !v)}
+      >
+        <Text style={styles.systemToggleText}>
+          {showSystem ? 'Hide system apps' : 'Show system apps'}
+        </Text>
+      </Pressable>
 
       <FlatList
         data={filtered}
@@ -172,6 +187,20 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 15,
     borderWidth: 1,
     borderColor: theme.colors.border,
+  },
+  systemToggleBtn: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    alignItems: 'center',
+  },
+  systemToggleText: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: '500',
   },
   row: {
     flexDirection: 'row',

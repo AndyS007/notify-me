@@ -4,12 +4,14 @@ import journal from './meta/_journal.json';
 import m0000 from './0000_dry_prism.sql';
 import m0001 from './0001_eminent_slipstream.sql';
 import m0002 from './0002_app_settings.sql';
+import m0003 from './0003_apps_table.sql';
 
   export default {
     journal,
     migrations: {
       m0000,
 m0001,
-m0002
+m0002,
+m0003
     }
   }
