@@ -23,7 +23,7 @@ export async function loadAppList(): Promise<Map<string, AppInfo>> {
       cache = new Map();
     }
   } catch (e) {
-    console.warn('Failed to load app list:', e);
+    console.warn("Failed to load app list:", e);
     cache = new Map();
   }
   return cache;
@@ -33,11 +33,11 @@ const iconCache = new Map<string, string>();
 
 export async function loadAppIcon(
   packageName: string,
-  size = 64,
+  size = 256,
 ): Promise<string | null> {
   if (iconCache.has(packageName)) return iconCache.get(packageName)!;
   try {
-    const base64 = await ExpoAndroidAppList.getAppIcon(packageName, size);
+    const base64 = await ExpoAndroidAppList.getAppIcon(packageName);
     if (base64) {
       iconCache.set(packageName, base64);
       return base64;
