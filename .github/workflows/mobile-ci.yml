@@ -44,3 +44,4 @@ jobs:
           profile: production
           branch: production
           working-directory: mobile
+          platform: android
