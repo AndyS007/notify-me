@@ -1,35 +1,27 @@
 import type { ApiClient } from './client';
+import type { components } from './schema';
 
-export type AppSettingItem = {
-  packageName: string;
-  appName: string;
-  enabled: boolean;
-  isSystemApp: boolean;
-  updatedAt: number;
-};
+// ---- Types ----
 
-type SyncAppSettingsRequest = {
-  settings: AppSettingItem[];
-};
+export type AppSettingItem = components['schemas']['AppSettingItem'];
+export type SyncAppSettingsRequest = components['schemas']['SyncAppSettingsRequest'];
+export type SyncAppSettingsResponse = components['schemas']['SyncAppSettingsResponse'];
 
-type SyncAppSettingsResponse = {
-  created: number;
-  updated: number;
-};
+// ---- API functions ----
 
 export async function pushAppSettingsApi(
   client: ApiClient,
   settings: AppSettingItem[],
 ): Promise<SyncAppSettingsResponse> {
-  const res = await client.PUT('/app-settings/sync' as any, {
-    body: { settings } as any,
+  const { data } = await client.PUT('/app-settings/sync', {
+    body: { settings },
   });
-  return (res.data ?? { created: 0, updated: 0 }) as SyncAppSettingsResponse;
+  return data!;
 }
 
 export async function pullAppSettingsApi(
   client: ApiClient,
 ): Promise<AppSettingItem[]> {
-  const res = await client.GET('/app-settings' as any);
-  return (res.data ?? []) as AppSettingItem[];
+  const { data } = await client.GET('/app-settings');
+  return data ?? [];
 }
