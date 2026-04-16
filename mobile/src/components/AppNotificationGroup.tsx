@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, {
   FadeInDown,
   FadeOut,
   LinearTransition,
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { StyleSheet } from 'react-native-unistyles';
 import { AppIcon } from './AppIcon';
 import { NotificationItem } from './NotificationItem';
+import { ContextMenu, type ContextMenuAction } from './ContextMenu';
 import { NotificationGroup } from '../hooks/use-notifications';
 import { useAppIcon } from '../hooks/use-app-icon';
 import { AppInfo } from '../services/app-list-service';
@@ -16,21 +18,46 @@ import { formatRelativeTime } from '../utils/format-time';
 type Props = {
   group: NotificationGroup;
   appInfo: AppInfo | undefined;
+  onDisableApp?: (packageName: string, appName: string) => void;
 };
 
-export function AppNotificationGroup({ group, appInfo }: Props) {
+export function AppNotificationGroup({ group, appInfo, onDisableApp }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const asyncIcon = useAppIcon(group.packageName);
 
   const displayName = appInfo?.appName || group.appName || group.packageName;
   const icon = asyncIcon || group.icon;
   const latest = group.items[0];
 
+  const handleLongPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setMenuVisible(true);
+  };
+
+  const menuActions = useMemo<ContextMenuAction[]>(
+    () => [
+      {
+        label: `Stop notifications from ${displayName}`,
+        destructive: true,
+        onPress: () => onDisableApp?.(group.packageName, displayName),
+      },
+    ],
+    [displayName, group.packageName, onDisableApp],
+  );
+
   return (
     <Animated.View layout={LinearTransition} style={styles.card}>
+      <ContextMenu
+        visible={menuVisible}
+        title={displayName}
+        actions={menuActions}
+        onClose={() => setMenuVisible(false)}
+      />
       <TouchableOpacity
         style={styles.header}
         onPress={() => setExpanded((v) => !v)}
+        onLongPress={handleLongPress}
         activeOpacity={0.75}
       >
         <AppIcon iconBase64={icon} appName={displayName} size={44} />
@@ -72,6 +99,7 @@ export function AppNotificationGroup({ group, appInfo }: Props) {
               key={item.id}
               item={item}
               isLast={index === group.items.length - 1}
+              onLongPress={handleLongPress}
             />
           ))}
         </Animated.View>

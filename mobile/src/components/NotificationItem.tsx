@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { NotificationRecord } from '../hooks/use-notifications';
 import { formatRelativeTime } from '../utils/format-time';
@@ -7,11 +7,15 @@ import { formatRelativeTime } from '../utils/format-time';
 type Props = {
   item: NotificationRecord;
   isLast: boolean;
+  onLongPress?: () => void;
 };
 
-export function NotificationItem({ item, isLast }: Props) {
+export function NotificationItem({ item, isLast, onLongPress }: Props) {
   return (
-    <View style={[styles.container, !isLast && styles.divider]}>
+    <Pressable
+      style={[styles.container, !isLast && styles.divider]}
+      onLongPress={onLongPress}
+    >
       <View style={styles.content}>
         {!!item.title && (
           <Text style={styles.title} numberOfLines={1}>
@@ -28,7 +32,7 @@ export function NotificationItem({ item, isLast }: Props) {
         )}
       </View>
       <Text style={styles.time}>{formatRelativeTime(item.timestamp)}</Text>
-    </View>
+    </Pressable>
   );
 }
 
