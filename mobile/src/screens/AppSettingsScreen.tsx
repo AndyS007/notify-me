@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useAuth } from '@clerk/expo';
 import { useRouter } from 'expo-router';
@@ -106,7 +107,16 @@ export default function AppSettingsScreen() {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>App Settings</Text>
-        <ThemeToggle />
+        <View style={styles.headerRight}>
+          <ThemeToggle />
+          <Pressable onPress={onSignOut} hitSlop={8}>
+            <Ionicons
+              name="log-out-outline"
+              size={22}
+              color={theme.colors.badge}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.searchContainer}>
@@ -143,11 +153,7 @@ export default function AppSettingsScreen() {
             </View>
           ) : null
         }
-        ListFooterComponent={
-          <Pressable style={styles.signOutBtn} onPress={onSignOut}>
-            <Text style={styles.signOutText}>Sign out</Text>
-          </Pressable>
-        }
+        ListFooterComponent={<View style={styles.listFooter} />}
         contentContainerStyle={
           filtered.length === 0 ? styles.emptyContent : styles.listContent
         }
@@ -168,6 +174,11 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   title: {
     color: theme.colors.text,
@@ -239,19 +250,7 @@ const styles = StyleSheet.create((theme) => ({
   emptyContent: {
     flex: 1,
   },
-  signOutBtn: {
-    marginHorizontal: 16,
-    marginTop: 24,
-    marginBottom: 16,
-    paddingVertical: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    alignItems: 'center',
-  },
-  signOutText: {
-    color: theme.colors.badge,
-    fontSize: 15,
-    fontWeight: '600',
+  listFooter: {
+    height: 40,
   },
 }));

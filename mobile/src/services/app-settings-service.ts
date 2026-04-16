@@ -34,14 +34,15 @@ export async function setAppEnabled(
   enabled: boolean,
 ): Promise<void> {
   const value = enabled ? 1 : 0;
+  const now = Date.now();
   // Upsert: insert or update on conflict. `isSystemApp` is only set on the
   // insert path (rare — the sync job usually creates the row first). On
   // update we intentionally leave `isSystemApp` alone.
   await db
     .insert(appSettings)
-    .values({ packageName, appName, enabled: value })
+    .values({ packageName, appName, enabled: value, updatedAt: now })
     .onConflictDoUpdate({
       target: appSettings.packageName,
-      set: { enabled: value, appName },
+      set: { enabled: value, appName, updatedAt: now },
     });
 }
