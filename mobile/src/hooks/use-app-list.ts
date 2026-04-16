@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getAllApps,
-  hasSyncedApps,
+  hasDeviceSyncedThisSession,
   syncAppsFromDevice,
   AppInfo,
 } from '../services/app-list-service';
@@ -17,14 +17,13 @@ export function useAppList(includeSystem = false) {
   }, [includeSystem]);
 
   // Initial load: read from SQLite first, then sync from the device in the
-  // background if the cache is empty (first launch / fresh install).
+  // background if we haven't already done so this session.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       await readFromDb();
       if (cancelled) return;
-      const alreadySynced = await hasSyncedApps();
-      if (!alreadySynced) {
+      if (!hasDeviceSyncedThisSession()) {
         await syncAppsFromDevice();
         if (cancelled) return;
         await readFromDb();

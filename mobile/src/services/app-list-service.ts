@@ -1,5 +1,5 @@
 import { ExpoAndroidAppList } from "expo-android-app-list";
-import { eq, gt, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { appSettings } from "../db/schema";
 
@@ -41,6 +41,7 @@ export async function syncAppsFromDevice(): Promise<AppInfo[]> {
           },
         });
     }
+    deviceSyncedThisSession = true;
     return devices.map((a) => ({
       packageName: a.packageName,
       appName: a.appName,
@@ -91,19 +92,15 @@ export async function getAppInfo(
   };
 }
 
+let deviceSyncedThisSession = false;
+
 /**
- * True iff we've run at least one device sync (i.e. some row has a non-zero
- * `updated_at`). Rows created solely by {@link setAppEnabled} have
- * `updated_at = 0` and don't count — they represent a user toggle that
- * raced the first sync.
+ * Whether we've already synced the installed-app list from the device
+ * during this app session. Resets on cold start so we always pick up
+ * newly installed / uninstalled apps.
  */
-export async function hasSyncedApps(): Promise<boolean> {
-  const rows = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(appSettings)
-    .where(gt(appSettings.updatedAt, 0))
-    .limit(1);
-  return (rows[0]?.count ?? 0) > 0;
+export function hasDeviceSyncedThisSession(): boolean {
+  return deviceSyncedThisSession;
 }
 
 const iconCache = new Map<string, string>();
