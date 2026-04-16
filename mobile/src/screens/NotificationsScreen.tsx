@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FlatList, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SQLite from 'expo-sqlite';
@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useNotifications } from '../hooks/use-notifications';
 import { useAppList } from '../hooks/use-app-list';
+import { useAppSettings } from '../hooks/use-app-settings';
 import { usePermission } from '../hooks/use-permission';
 import { useApiClient } from '../api/client';
 import { syncUnsynced, pullRemoteNotifications } from '../services/sync-service';
@@ -17,9 +18,27 @@ import { ThemeToggle } from '../components/ThemeToggle';
 export default function NotificationsScreen() {
   const { groups, loading, refresh } = useNotifications();
   const { appMap } = useAppList();
+  const { settings: appSettings, toggle: toggleApp, refresh: refreshSettings } = useAppSettings();
   const { hasPermission, request, recheck } = usePermission();
   const { theme } = useUnistyles();
   const client = useApiClient();
+
+  // Filter out groups whose app has been disabled
+  const visibleGroups = useMemo(
+    () =>
+      groups.filter((g) => {
+        const setting = appSettings.get(g.packageName);
+        return setting ? setting.enabled === 1 : true;
+      }),
+    [groups, appSettings],
+  );
+
+  const handleDisableApp = useCallback(
+    (packageName: string, appName: string) => {
+      toggleApp(packageName, appName, false);
+    },
+    [toggleApp],
+  );
 
   // Debounce timers
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,9 +65,12 @@ export default function NotificationsScreen() {
         refresh();
         triggerPushSync();
       }
+      if (tableName === 'app_settings') {
+        refreshSettings();
+      }
     });
     return () => sub.remove();
-  }, [refresh, triggerPushSync]);
+  }, [refresh, refreshSettings, triggerPushSync]);
 
   // On screen focus: refresh from local DB, push unsynced, pull remote
   useFocusEffect(
@@ -81,8 +103,8 @@ export default function NotificationsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Notifications</Text>
         <View style={styles.headerRight}>
-          {groups.length > 0 && (
-            <Text style={styles.subtitle}>{groups.length} apps</Text>
+          {visibleGroups.length > 0 && (
+            <Text style={styles.subtitle}>{visibleGroups.length} apps</Text>
           )}
           <ThemeToggle />
         </View>
@@ -93,17 +115,18 @@ export default function NotificationsScreen() {
       )}
 
       <FlatList
-        data={groups}
+        data={visibleGroups}
         keyExtractor={(g) => g.packageName}
         renderItem={({ item }) => (
           <AppNotificationGroup
             group={item}
             appInfo={appMap.get(item.packageName)}
+            onDisableApp={handleDisableApp}
           />
         )}
         ListEmptyComponent={!loading ? <EmptyState /> : null}
         contentContainerStyle={
-          groups.length === 0 ? styles.emptyContent : styles.listContent
+          visibleGroups.length === 0 ? styles.emptyContent : styles.listContent
         }
         refreshControl={
           <RefreshControl
