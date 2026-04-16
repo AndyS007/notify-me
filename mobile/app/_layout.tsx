@@ -1,20 +1,15 @@
-import { Text } from 'react-native';
-import { Slot } from 'expo-router';
-import { ClerkProvider } from '@clerk/expo';
-import { tokenCache } from '@clerk/expo/token-cache';
-import { resourceCache } from '@clerk/expo/resource-cache';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { db } from '../src/db';
-import migrations from '../drizzle/migrations';
-import { queryClient } from '../src/api/query-client';
-import { useAppUpdate } from '../src/hooks/use-app-update';
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { Slot } from "expo-router";
+import { Text } from "react-native";
+import migrations from "../drizzle/migrations";
+import { queryClient } from "../src/api/query-client";
+import { db } from "../src/db";
+import { useAppUpdate } from "../src/hooks/use-app-update";
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-
-if (!publishableKey) {
-  throw new Error('Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in .env');
-}
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 function AppContent() {
   useAppUpdate();
@@ -32,8 +27,12 @@ export default function RootLayout() {
     return null;
   }
 
+  if (!publishableKey) {
+    throw new Error("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in .env");
+  }
+
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache} __experimental_resourceCache={resourceCache}>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <QueryClientProvider client={queryClient}>
         <AppContent />
       </QueryClientProvider>
