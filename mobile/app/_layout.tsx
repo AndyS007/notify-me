@@ -2,6 +2,7 @@ import { Text } from 'react-native';
 import { Slot } from 'expo-router';
 import { ClerkProvider } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
+import { resourceCache } from '@clerk/expo/resource-cache';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { db } from '../src/db';
@@ -32,7 +33,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache} __experimental_resourceCache={resourceCache}>
       <QueryClientProvider client={queryClient}>
         <AppContent />
       </QueryClientProvider>
