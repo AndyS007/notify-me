@@ -1,4 +1,4 @@
-import { tokenCache } from "@clerk/expo/token-cache";
+import { getClerkInstance } from "@clerk/expo";
 import { createApiClient } from "../api/client";
 import { RawNotification, saveNotification } from "./notification-service";
 import { syncUnsynced } from "./sync-service";
@@ -10,8 +10,9 @@ const headlessTask = async ({ notification }: { notification: string }) => {
     console.log("headlessTask parsed", parsed);
     await saveNotification(parsed);
 
-    // Attempt background sync
-    const token = await tokenCache.getToken?.("__clerk_client_jwt");
+    // Attempt background sync using Clerk instance (supports token refresh)
+    const clerk = getClerkInstance();
+    const token = await clerk.session?.getToken();
     if (token) {
       const client = createApiClient(() => Promise.resolve(token));
       await syncUnsynced(client);
