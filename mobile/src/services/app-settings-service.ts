@@ -9,13 +9,21 @@ export async function getAllAppSettings(): Promise<Map<string, AppSettingRecord>
   return new Map(rows.map((r) => [r.packageName, r]));
 }
 
+/**
+ * Whether notifications from a package should be captured.
+ *
+ * After the first device sync, every installed app has a row in
+ * `app_settings` with `enabled` seeded from its `is_system_app` flag — so
+ * this is just a lookup. For packages that haven't been synced yet (e.g.
+ * a notification arrives before the UI ever opens), we fall through to
+ * `true` so we don't silently drop a real user notification.
+ */
 export async function isAppEnabled(packageName: string): Promise<boolean> {
   const rows = await db
     .select({ enabled: appSettings.enabled })
     .from(appSettings)
     .where(eq(appSettings.packageName, packageName))
     .limit(1);
-  // If no setting exists, app is enabled by default
   if (rows.length === 0) return true;
   return rows[0].enabled === 1;
 }
@@ -26,12 +34,15 @@ export async function setAppEnabled(
   enabled: boolean,
 ): Promise<void> {
   const value = enabled ? 1 : 0;
-  // Upsert: insert or update on conflict
+  const now = Date.now();
+  // Upsert: insert or update on conflict. `isSystemApp` is only set on the
+  // insert path (rare — the sync job usually creates the row first). On
+  // update we intentionally leave `isSystemApp` alone.
   await db
     .insert(appSettings)
-    .values({ packageName, appName, enabled: value })
+    .values({ packageName, appName, enabled: value, updatedAt: now })
     .onConflictDoUpdate({
       target: appSettings.packageName,
-      set: { enabled: value, appName },
+      set: { enabled: value, appName, updatedAt: now },
     });
 }

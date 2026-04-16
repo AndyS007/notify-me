@@ -84,6 +84,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/app-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAppSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app-settings/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["syncAppSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/hello": {
         parameters: {
             query?: never;
@@ -160,6 +192,20 @@ export interface components {
             size?: number;
             totalElements?: number;
             totalPages?: number;
+        };
+        AppSettingItem: {
+            packageName: string;
+            appName: string;
+            enabled: boolean;
+            isSystemApp: boolean;
+            updatedAt: number;
+        };
+        SyncAppSettingsRequest: {
+            settings: components["schemas"]["AppSettingItem"][];
+        };
+        SyncAppSettingsResponse: {
+            created?: number;
+            updated?: number;
         };
         RegisterDeviceResponse: {
             id?: string;
@@ -356,6 +402,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DeleteNotificationsResponse"];
+                };
+            };
+        };
+    };
+    getAppSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppSettingItem"][];
+                };
+            };
+        };
+    };
+    syncAppSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SyncAppSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SyncAppSettingsResponse"];
                 };
             };
         };

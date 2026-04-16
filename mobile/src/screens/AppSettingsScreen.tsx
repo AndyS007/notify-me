@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useAuth } from '@clerk/expo';
 import { useRouter } from 'expo-router';
@@ -12,6 +13,12 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import type { AppInfo } from '../services/app-list-service';
 
 type AppRow = AppInfo & { enabled: boolean };
+
+function resolveEnabled(info: AppInfo, setting?: { enabled: number }): boolean {
+  if (setting) return setting.enabled === 1;
+  // No explicit setting — system apps default to disabled, user apps to enabled.
+  return !info.isSystemApp;
+}
 
 function AppSettingsRow({
   item,
@@ -48,7 +55,8 @@ function AppSettingsRow({
 }
 
 export default function AppSettingsScreen() {
-  const { appMap, ready } = useAppList();
+  const [showSystem, setShowSystem] = useState(false);
+  const { appMap, ready } = useAppList(showSystem);
   const { settings, loading, toggle } = useAppSettings();
   const { theme } = useUnistyles();
   const { signOut } = useAuth();
@@ -64,8 +72,7 @@ export default function AppSettingsScreen() {
     if (!ready) return [];
     const list: AppRow[] = [];
     for (const [pkg, info] of appMap) {
-      const setting = settings.get(pkg);
-      const enabled = setting ? setting.enabled === 1 : true;
+      const enabled = resolveEnabled(info, settings.get(pkg));
       list.push({ ...info, enabled });
     }
     list.sort((a, b) => a.appName.localeCompare(b.appName));
@@ -100,7 +107,16 @@ export default function AppSettingsScreen() {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>App Settings</Text>
-        <ThemeToggle />
+        <View style={styles.headerRight}>
+          <ThemeToggle />
+          <Pressable onPress={onSignOut} hitSlop={8}>
+            <Ionicons
+              name="log-out-outline"
+              size={22}
+              color={theme.colors.badge}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.searchContainer}>
@@ -115,6 +131,15 @@ export default function AppSettingsScreen() {
         />
       </View>
 
+      <Pressable
+        style={styles.systemToggleBtn}
+        onPress={() => setShowSystem((v) => !v)}
+      >
+        <Text style={styles.systemToggleText}>
+          {showSystem ? 'Hide system apps' : 'Show system apps'}
+        </Text>
+      </Pressable>
+
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.packageName}
@@ -128,11 +153,7 @@ export default function AppSettingsScreen() {
             </View>
           ) : null
         }
-        ListFooterComponent={
-          <Pressable style={styles.signOutBtn} onPress={onSignOut}>
-            <Text style={styles.signOutText}>Sign out</Text>
-          </Pressable>
-        }
+        ListFooterComponent={<View style={styles.listFooter} />}
         contentContainerStyle={
           filtered.length === 0 ? styles.emptyContent : styles.listContent
         }
@@ -154,6 +175,11 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   title: {
     color: theme.colors.text,
     fontSize: 28,
@@ -172,6 +198,20 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 15,
     borderWidth: 1,
     borderColor: theme.colors.border,
+  },
+  systemToggleBtn: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    alignItems: 'center',
+  },
+  systemToggleText: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: '500',
   },
   row: {
     flexDirection: 'row',
@@ -210,19 +250,7 @@ const styles = StyleSheet.create((theme) => ({
   emptyContent: {
     flex: 1,
   },
-  signOutBtn: {
-    marginHorizontal: 16,
-    marginTop: 24,
-    marginBottom: 16,
-    paddingVertical: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    alignItems: 'center',
-  },
-  signOutText: {
-    color: theme.colors.badge,
-    fontSize: 15,
-    fontWeight: '600',
+  listFooter: {
+    height: 40,
   },
 }));

@@ -25,8 +25,11 @@ export const appSettings = sqliteTable(
     packageName: text('package_name').notNull(),
     appName: text('app_name').notNull().default(''),
     enabled: int('enabled').notNull().default(1),
+    isSystemApp: int('is_system_app').notNull().default(0),
+    updatedAt: int('updated_at').notNull().default(0),
   },
   (table) => [
     uniqueIndex('idx_app_settings_pkg').on(table.packageName),
+    index('idx_app_settings_system').on(table.isSystemApp),
   ],
 );
