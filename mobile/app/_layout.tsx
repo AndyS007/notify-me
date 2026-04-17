@@ -1,3 +1,4 @@
+import { config } from "@/src/config";
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,8 +9,6 @@ import migrations from "../drizzle/migrations";
 import { queryClient } from "../src/api/query-client";
 import { db } from "../src/db";
 import { useAppUpdate } from "../src/hooks/use-app-update";
-
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 function AppContent() {
   useAppUpdate();
@@ -27,12 +26,11 @@ export default function RootLayout() {
     return null;
   }
 
-  if (!publishableKey) {
-    throw new Error("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in .env");
-  }
-
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+    <ClerkProvider
+      publishableKey={config.publishableKey}
+      tokenCache={tokenCache}
+    >
       <QueryClientProvider client={queryClient}>
         <AppContent />
       </QueryClientProvider>

@@ -1,11 +1,8 @@
 import { useAuth } from "@clerk/expo";
 import createClient, { type Client } from "openapi-fetch";
 import { useCallback, useMemo } from "react";
+import { config } from "../config";
 import type { paths } from "./schema";
-
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://notify-me-backend-p7ft.onrender.com";
 
 export class ApiError extends Error {
   constructor(
@@ -19,8 +16,10 @@ export class ApiError extends Error {
 
 export type ApiClient = Client<paths>;
 
-export function createApiClient(getToken: () => Promise<string | null>): ApiClient {
-  const client = createClient<paths>({ baseUrl: API_BASE_URL });
+export function createApiClient(
+  getToken: () => Promise<string | null>,
+): ApiClient {
+  const client = createClient<paths>({ baseUrl: config.apiBaseUrl });
 
   client.use({
     async onRequest({ request }) {
