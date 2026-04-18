@@ -1,10 +1,12 @@
-import { eq } from 'drizzle-orm';
-import { db } from '../db';
-import { appSettings } from '../db/schema';
+import { eq } from "drizzle-orm";
+import { db } from "../db";
+import { appSettings } from "../db/schema";
 
 export type AppSettingRecord = typeof appSettings.$inferSelect;
 
-export async function getAllAppSettings(): Promise<Map<string, AppSettingRecord>> {
+export async function getAllAppSettings(): Promise<
+  Map<string, AppSettingRecord>
+> {
   const rows = await db.select().from(appSettings);
   return new Map(rows.map((r) => [r.packageName, r]));
 }
@@ -19,6 +21,7 @@ export async function getAllAppSettings(): Promise<Map<string, AppSettingRecord>
  * `true` so we don't silently drop a real user notification.
  */
 export async function isAppEnabled(packageName: string): Promise<boolean> {
+  if (packageName === "com.andys007.notifyme") return false;
   const rows = await db
     .select({ enabled: appSettings.enabled })
     .from(appSettings)

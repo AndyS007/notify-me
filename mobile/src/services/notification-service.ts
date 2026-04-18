@@ -1,7 +1,7 @@
-import RNAndroidNotificationListener from 'react-native-android-notification-listener';
-import { db } from '../db';
-import { notifications } from '../db/schema';
-import { isAppEnabled } from './app-settings-service';
+import RNAndroidNotificationListener from "react-native-android-notification-listener";
+import { db } from "../db";
+import { notifications } from "../db/schema";
+import { isAppEnabled } from "./app-settings-service";
 
 export type RawNotification = {
   app: string;
@@ -14,7 +14,7 @@ export type RawNotification = {
   audioContentsURI: string;
   imageBackgroundURI: string;
   extraInfoText: string;
-  groupedMessages: Array<{ title: string; text: string }>;
+  groupedMessages: { title: string; text: string }[];
 };
 
 export async function getPermissionStatus(): Promise<string> {
@@ -27,16 +27,16 @@ export function openPermissionSettings(): void {
 
 export async function saveNotification(
   payload: RawNotification,
-  appName = '',
+  appName = "",
 ): Promise<void> {
-  const title = payload.title ?? '';
-  const text = payload.text || payload.bigText || '';
+  const title = payload.title ?? "";
+  const text = payload.text || payload.bigText || "";
 
   // Skip notifications with empty title and content
   if (!title.trim() && !text.trim()) return;
 
   // Skip notifications from disabled apps
-  const packageName = payload.app ?? '';
+  const packageName = payload.app ?? "";
   const enabled = await isAppEnabled(packageName);
   if (!enabled) return;
 
