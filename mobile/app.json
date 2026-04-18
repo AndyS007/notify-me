@@ -28,10 +28,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.andys007.notifyme",
-      "permissions": [
-        "android.permission.READ_SMS",
-        "android.permission.RECEIVE_SMS"
-      ]
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
