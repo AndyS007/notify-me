@@ -153,7 +153,8 @@ class NotificationController(
     ) {
         if (notifications.isEmpty()) return
 
-        val targets = deviceRepository.findByUserAndExpoPushTokenIsNotNull(user)
+        val targets = deviceRepository
+            .findByUserAndExpoPushTokenIsNotNullAndPushEnabledTrue(user)
             .filter { it.deviceId != originDeviceId }
         if (targets.isEmpty()) return
 

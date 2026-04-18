@@ -41,6 +41,9 @@ class Device(
     @Column(name = "platform")
     var platform: String? = null,
 
+    @Column(name = "push_enabled", nullable = false)
+    var pushEnabled: Boolean = true,
+
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: Instant = Instant.now(),
 

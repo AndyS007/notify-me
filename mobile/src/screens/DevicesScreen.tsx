@@ -2,15 +2,23 @@ import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Switch,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useDevices, type DeviceResponse } from '../api/devices';
+import {
+  useDevices,
+  useUpdateDevicePushEnabled,
+  type DeviceResponse,
+} from '../api/devices';
 import { ThemeToggle } from '../components/ThemeToggle';
 
 function DeviceCard({ device }: { device: DeviceResponse }) {
+  const { theme } = useUnistyles();
+  const { mutate: updatePushEnabled, isPending } = useUpdateDevicePushEnabled();
+
   const updatedAt = device.updatedAt ? new Date(device.updatedAt) : null;
   const lastSeen = updatedAt
     ? updatedAt.toLocaleDateString(undefined, {
@@ -20,6 +28,14 @@ function DeviceCard({ device }: { device: DeviceResponse }) {
       })
     : null;
 
+  const pushEnabled = device.pushEnabled ?? true;
+  const hasToken = !!device.expoPushToken;
+
+  const onTogglePush = (next: boolean) => {
+    if (!device.id) return;
+    updatePushEnabled({ id: device.id, pushEnabled: next });
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -28,6 +44,24 @@ function DeviceCard({ device }: { device: DeviceResponse }) {
         </Text>
         {lastSeen && <Text style={styles.lastSeen}>Last seen {lastSeen}</Text>}
       </View>
+
+      <View style={styles.pushRow}>
+        <View style={styles.pushTextCol}>
+          <Text style={styles.pushLabel}>Push notifications</Text>
+          <Text style={styles.pushHint}>
+            {hasToken
+              ? 'Receive notifications from other devices on this one'
+              : 'No push token — open the app on this device to register'}
+          </Text>
+        </View>
+        <Switch
+          value={pushEnabled}
+          onValueChange={onTogglePush}
+          disabled={!hasToken || isPending || !device.id}
+          trackColor={{ false: theme.colors.border, true: theme.colors.accent }}
+        />
+      </View>
+
       <View style={styles.metaRow}>
         <Text style={styles.metaLabel}>Brand</Text>
         <Text style={styles.metaValue}>{device.brand ?? '—'}</Text>
@@ -156,6 +190,30 @@ const styles = StyleSheet.create((theme) => ({
     marginRight: 8,
   },
   lastSeen: {
+    color: theme.colors.textTertiary,
+    fontSize: 12,
+  },
+  pushRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.colors.border,
+    marginVertical: 4,
+    gap: 12,
+  },
+  pushTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  pushLabel: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  pushHint: {
     color: theme.colors.textTertiary,
     fontSize: 12,
   },
