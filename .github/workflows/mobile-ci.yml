@@ -1,19 +1,23 @@
 name: Mobile CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'mobile/**'
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to run'
+        required: true
+        type: choice
+        options:
+          - eas-update
+          - eas-build
 
 env:
   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
 jobs:
-  continuously-deploy:
+  eas-update:
+    if: ${{ inputs.action == 'eas-update' }}
     runs-on: ubuntu-latest
-    concurrency: continuous-deploy-fingerprint-main
     permissions:
       contents: read
 
@@ -38,10 +42,37 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Continuously Deploy
-        uses: expo/expo-github-action/continuous-deploy-fingerprint@main
+      - name: EAS Update
+        run: eas update --channel production --auto
+        working-directory: mobile
+
+  eas-build:
+    if: ${{ inputs.action == 'eas-build' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          profile: production
-          branch: production
-          working-directory: mobile
-          platform: android
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: mobile/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: mobile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@main
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build
+        run: eas build --profile production --platform android --non-interactive
+        working-directory: mobile
