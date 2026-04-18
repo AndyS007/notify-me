@@ -4,12 +4,16 @@ import { useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useUnistyles } from 'react-native-unistyles';
 import { useRegisterDevice } from '../../src/api/devices';
+import { useApiClient } from '../../src/api/client';
+import { startSmsListener } from '../../src/services/sms-listener';
+import { syncUnsynced } from '../../src/services/sync-service';
 
 export default function HomeLayout() {
   const { isSignedIn, isLoaded } = useAuth();
   const { mutate: registerDevice } = useRegisterDevice();
   const registered = useRef(false);
   const { theme } = useUnistyles();
+  const client = useApiClient();
 
   useEffect(() => {
     if (!isSignedIn || registered.current) return;
@@ -18,6 +22,16 @@ export default function HomeLayout() {
       onError: (err) => console.warn('Device registration failed:', err),
     });
   }, [isSignedIn, registerDevice]);
+
+  // Start the SMS listener once the user is authenticated. It writes inbound
+  // messages straight into the notifications table and triggers the shared
+  // sync so SMS rows propagate to the backend just like regular notifications.
+  useEffect(() => {
+    if (!isSignedIn) return;
+    startSmsListener(() => {
+      syncUnsynced(client).catch(() => {});
+    }).catch(() => {});
+  }, [isSignedIn, client]);
 
   if (!isLoaded) return null;
 

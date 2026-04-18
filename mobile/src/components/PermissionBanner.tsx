@@ -4,18 +4,23 @@ import { StyleSheet } from 'react-native-unistyles';
 
 type Props = {
   onPress: () => void;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
 };
 
-export function PermissionBanner({ onPress }: Props) {
+export function PermissionBanner({
+  onPress,
+  title = 'Notification access required',
+  subtitle = 'Grant notification listener access so this app can track incoming notifications.',
+  buttonText = 'Grant Access',
+}: Props) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notification access required</Text>
-      <Text style={styles.subtitle}>
-        Grant notification listener access so this app can track incoming
-        notifications.
-      </Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
       <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.8}>
-        <Text style={styles.buttonText}>Grant Access</Text>
+        <Text style={styles.buttonText}>{buttonText}</Text>
       </TouchableOpacity>
     </View>
   );

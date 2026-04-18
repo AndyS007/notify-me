@@ -8,8 +8,10 @@ import { useNotifications } from '../hooks/use-notifications';
 import { useAppList } from '../hooks/use-app-list';
 import { useAppSettings } from '../hooks/use-app-settings';
 import { usePermission } from '../hooks/use-permission';
+import { useSmsPermission } from '../hooks/use-sms-permission';
 import { useApiClient } from '../api/client';
 import { syncUnsynced, pullRemoteNotifications } from '../services/sync-service';
+import { startSmsListener } from '../services/sms-listener';
 import { AppNotificationGroup } from '../components/AppNotificationGroup';
 import { EmptyState } from '../components/EmptyState';
 import { PermissionBanner } from '../components/PermissionBanner';
@@ -22,6 +24,11 @@ export default function NotificationsScreen() {
   const { appMap } = useAppList(true);
   const { settings: appSettings, toggle: toggleApp, refresh: refreshSettings } = useAppSettings();
   const { hasPermission, request, recheck } = usePermission();
+  const {
+    hasPermission: hasSmsPermission,
+    request: requestSms,
+    recheck: recheckSms,
+  } = useSmsPermission();
   const { theme } = useUnistyles();
   const client = useApiClient();
 
@@ -90,6 +97,23 @@ export default function NotificationsScreen() {
     return () => clearInterval(id);
   }, [hasPermission, recheck]);
 
+  // Same polling for the SMS permission; once granted, (re)start the listener.
+  useEffect(() => {
+    if (hasSmsPermission) {
+      startSmsListener(triggerPushSync).catch(() => {});
+      return;
+    }
+    const id = setInterval(recheckSms, 3000);
+    return () => clearInterval(id);
+  }, [hasSmsPermission, recheckSms, triggerPushSync]);
+
+  const handleRequestSms = useCallback(async () => {
+    const granted = await requestSms();
+    if (granted) {
+      startSmsListener(triggerPushSync).catch(() => {});
+    }
+  }, [requestSms, triggerPushSync]);
+
   const onRefresh = useCallback(async () => {
     try {
       await pullRemoteNotifications(client);
@@ -114,6 +138,14 @@ export default function NotificationsScreen() {
 
       {hasPermission === false && (
         <PermissionBanner onPress={request} />
+      )}
+
+      {hasSmsPermission === false && (
+        <PermissionBanner
+          onPress={handleRequestSms}
+          title="SMS access required"
+          subtitle="Grant READ_SMS and RECEIVE_SMS so incoming text messages are captured alongside notifications."
+        />
       )}
 
       <FlatList
