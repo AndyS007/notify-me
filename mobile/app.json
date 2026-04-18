@@ -64,7 +64,15 @@
       "expo-font",
       "expo-image",
       "expo-web-browser",
-      "./plugins/withAllowBackupFix.js"
+      "./plugins/withAllowBackupFix.js",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "notify-me-gw"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

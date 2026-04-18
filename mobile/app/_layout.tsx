@@ -11,6 +11,21 @@ import { queryClient } from "../src/api/query-client";
 import { db } from "../src/db";
 import { useAppUpdate } from "../src/hooks/use-app-update";
 import { initPushNotifications } from "../src/services/push-service";
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://7054d28acc84ba0d73c4b7a0c917fe1f@o4511240273461248.ingest.us.sentry.io/4511240331264000',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  enableLogs: false,
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 function AppContent() {
   useAppUpdate();
@@ -22,7 +37,7 @@ function AppContent() {
   return <Slot />;
 }
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
 
   if (error) {
@@ -43,4 +58,4 @@ export default function RootLayout() {
       </QueryClientProvider>
     </ClerkProvider>
   );
-}
+});

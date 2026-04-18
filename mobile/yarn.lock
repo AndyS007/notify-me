@@ -2517,6 +2517,143 @@
     "@noble/hashes" "~1.8.0"
     "@scure/base" "~1.2.5"
 
+"@sentry-internal/browser-utils@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/browser-utils/-/browser-utils-10.48.0.tgz#e3901479410580a5eaf117232da2191edcb7ea38"
+  integrity sha512-SCiTLBXzugFKxev6NoKYBIhQoDk0gUh0AVVVepCBqfCJiWBG01Zvv0R5tCVohr4cWRllkQ8mlBdNQd/I7s9tdA==
+  dependencies:
+    "@sentry/core" "10.48.0"
+
+"@sentry-internal/feedback@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/feedback/-/feedback-10.48.0.tgz#9c34bf39a41fad49f88a8f4d33009df019b9d609"
+  integrity sha512-tGkEyOM1HDS9qebDphUMEnyk3qq/50AnuTBiFmMJyjNzowylVGmRRk0sr3xkmbVHCDXQCiYnDmSVlJ2x4SDMrQ==
+  dependencies:
+    "@sentry/core" "10.48.0"
+
+"@sentry-internal/replay-canvas@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/replay-canvas/-/replay-canvas-10.48.0.tgz#5156b40f9df7e520eb1cef789725ef30d46246d4"
+  integrity sha512-9nWuN2z4O+iwbTfuYV5ZmngBgJU/ZxfOo47A5RJP3Nu/kl59aJ1lUhILYOKyeNOIC/JyeERmpIcTxnlPXQzZ3Q==
+  dependencies:
+    "@sentry-internal/replay" "10.48.0"
+    "@sentry/core" "10.48.0"
+
+"@sentry-internal/replay@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/replay/-/replay-10.48.0.tgz#09794a7a6b1127829fae02cad58428b547d14131"
+  integrity sha512-sevRTePfuk4PNuz9KAKpmTZEomAU0aLXyIhOwA0OnUDdxPhkY8kq5lwDbuxTHv6DQUjUX3YgFbY45VH1JEqHKA==
+  dependencies:
+    "@sentry-internal/browser-utils" "10.48.0"
+    "@sentry/core" "10.48.0"
+
+"@sentry/babel-plugin-component-annotate@5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@sentry/babel-plugin-component-annotate/-/babel-plugin-component-annotate-5.2.0.tgz#6d6f3c47d7f795f5dfbb9b59abef6ab33e5e7f2d"
+  integrity sha512-8LbOI5Kzb5F0+7LVQPi2+zGz1iPiRRFhM+7uZ/ZQ33L9BmDOYNIy3xWxCfMw2JCuMXXaxF47XCjGmR22/B0WPg==
+
+"@sentry/browser@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-10.48.0.tgz#45896eb9176ad0ad0a0281674db3db994f614bee"
+  integrity sha512-4jt2zX2ExgFcNe2x+W+/k81fmDUsOrquGtt028CiGuDuma6kEsWBI4JbooT1jhj2T+eeUxe3YGbM23Zhh7Ghhw==
+  dependencies:
+    "@sentry-internal/browser-utils" "10.48.0"
+    "@sentry-internal/feedback" "10.48.0"
+    "@sentry-internal/replay" "10.48.0"
+    "@sentry-internal/replay-canvas" "10.48.0"
+    "@sentry/core" "10.48.0"
+
+"@sentry/cli-darwin@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-darwin/-/cli-darwin-3.3.5.tgz#3050686897f4db8881265784fa8d94d36dd45112"
+  integrity sha512-E/SIY6+j2nt6Ri9nMt78sYle3LiF6uZyz4HGmvcEMU6HXjegmAayhy0J10JST+vZTzN6VixD8sUsa5UeJiOPcg==
+
+"@sentry/cli-linux-arm64@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-arm64/-/cli-linux-arm64-3.3.5.tgz#989737cbf80d1a0c9f0447daab6698fe07472bb7"
+  integrity sha512-/W7HTk2OFKD0bguTvQR1ue6pkFQWaGiqPafOSIQKyq0aGfbZhBn/Uj+IRefgMZMhJQ29xRz0y/iGRGKE+ef4Vg==
+
+"@sentry/cli-linux-arm@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-arm/-/cli-linux-arm-3.3.5.tgz#a3a413005798ff3301dbe0048db09ce1854a1f8f"
+  integrity sha512-EGuEIvC2OQyar/vu+jAQEmovTMgxpoxdx5knnzL5dLhIemjEUNqwv/sXq+m/Aj+ThqCMofcTWB2TOZXsTtl0Tw==
+
+"@sentry/cli-linux-i686@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-i686/-/cli-linux-i686-3.3.5.tgz#ed3a7b76dc0b25066586fe214fb7d4cf3afb1c7c"
+  integrity sha512-qODMEWLEeUNp3IUlwwISB37EXSo8qgMmHQuLKfxDjpIKw+7NAFfptOloqPrHkLWK3TzFr+Nv643wIKZaYrz28Q==
+
+"@sentry/cli-linux-x64@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-x64/-/cli-linux-x64-3.3.5.tgz#40504a1a204af50c0a5d9472d0849c5834983208"
+  integrity sha512-DCz7lQ4PySjQ1WvWOQ/uTdwauRo1D7hSHazxZ+fUAnK/epSPM9qLkjDMlD8uM5CaLoR8+ZTs7N94vV5LZs2QpA==
+
+"@sentry/cli-win32-arm64@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-arm64/-/cli-win32-arm64-3.3.5.tgz#31d31bb80c81a90928c83c0e807b87ee49d05e00"
+  integrity sha512-VMNsHiyZcP8Ft3fcK/1zoO4L66soe1eSfXg2tglFQSc/2MYA5v1Br9B1GtjBwDIc3EmdPtFZhOGLyqIzszMxJw==
+
+"@sentry/cli-win32-i686@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-i686/-/cli-win32-i686-3.3.5.tgz#8bb61b677b0f90ff4d179c165ea5106a12a29dab"
+  integrity sha512-BE6aHOIpsm4jgavsvvXNcSikAr/8NSva3rk1N3BzoOLuX+dcFxBI60K1i2VzB1vsgtivJJo9YySNCi60dBgWTg==
+
+"@sentry/cli-win32-x64@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-x64/-/cli-win32-x64-3.3.5.tgz#7a26000a766a32b3c7c78b078b2e69ef5100bdf9"
+  integrity sha512-MSU+PtBuiLjEbiPFOvxk4CI3TCagwkIg9kvJ+DrI3+pBY0Sga/dOyeWKTIgb01xSVcfjdw0UkpU52VCvzTT9ew==
+
+"@sentry/cli@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@sentry/cli/-/cli-3.3.5.tgz#fdeaf2f344f8ca4ce91140abc14b0acfc3c066b2"
+  integrity sha512-eyLHTj0rpeCsOUX+1ZU8UEWRXy6nXvTXNdhtAt1t6YXan9gSsAexZf28zVmDcYcP8WRbK0D2JMLp7NcaQCQgEA==
+  dependencies:
+    progress "^2.0.3"
+    proxy-from-env "^1.1.0"
+    undici "^6.22.0"
+    which "^2.0.2"
+  optionalDependencies:
+    "@sentry/cli-darwin" "3.3.5"
+    "@sentry/cli-linux-arm" "3.3.5"
+    "@sentry/cli-linux-arm64" "3.3.5"
+    "@sentry/cli-linux-i686" "3.3.5"
+    "@sentry/cli-linux-x64" "3.3.5"
+    "@sentry/cli-win32-arm64" "3.3.5"
+    "@sentry/cli-win32-i686" "3.3.5"
+    "@sentry/cli-win32-x64" "3.3.5"
+
+"@sentry/core@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-10.48.0.tgz#ee5ab1aa5bbc3f96fe675af3b929c9446d1ee298"
+  integrity sha512-h8F+fXVwYC9ro5ZaO8V+v3vqc0awlXHGblEAuVxSGgh4IV/oFX+QVzXeDTTrFOFS6v/Vn5vAyu240eJrJAS6/g==
+
+"@sentry/react-native@^8.8.0":
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/@sentry/react-native/-/react-native-8.8.0.tgz#379b0fc155b1c903a9482e87a4f2bd1ae90b953b"
+  integrity sha512-Qsb/Bnuf6mOeDEtM56jZYzvENMDPX3btCVNHt9MG4LDLKr4iQfRPmUX9+WwnAmEoAlJkBQJlFQLCXApXEB1LEA==
+  dependencies:
+    "@sentry/babel-plugin-component-annotate" "5.2.0"
+    "@sentry/browser" "10.48.0"
+    "@sentry/cli" "3.3.5"
+    "@sentry/core" "10.48.0"
+    "@sentry/react" "10.48.0"
+    "@sentry/types" "10.48.0"
+
+"@sentry/react@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry/react/-/react-10.48.0.tgz#31eae868d4ec86c73a2f9ac4316f8a168aa2c194"
+  integrity sha512-uc93vKjmu6gNns+JAX4qquuxWpAMit0uGPA1TYlMjct9NG1uX3TkDPJAr9Pgd1lOXx8mKqCmj5fK33QeExMpPw==
+  dependencies:
+    "@sentry/browser" "10.48.0"
+    "@sentry/core" "10.48.0"
+
+"@sentry/types@10.48.0":
+  version "10.48.0"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-10.48.0.tgz#37366367baeace6b665d7d3aea4bab2aa27ec03f"
+  integrity sha512-HiguzLr+vlor1ky0rpWHmZoravFsnx65kXqB94yqYMo7V3QgSOPzWrOjv518a2yZc/1boufQ3LINq6ZDhO2l1g==
+  dependencies:
+    "@sentry/core" "10.48.0"
+
 "@sinclair/typebox@^0.27.8":
   version "0.27.10"
   resolved "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.27.10.tgz"
@@ -7114,6 +7251,11 @@ prop-types@^15.8.1:
     object-assign "^4.1.1"
     react-is "^16.13.1"
 
+proxy-from-env@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
+  integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
+
 punycode@^2.1.0, punycode@^2.1.1:
   version "2.3.1"
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz"
@@ -8194,6 +8336,11 @@ undici-types@~7.18.0:
   resolved "https://registry.npmjs.org/undici-types/-/undici-types-7.18.2.tgz"
   integrity sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==
 
+undici@^6.22.0:
+  version "6.25.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.25.0.tgz#8c4efb8c998dc187fc1cfb5dde1ef19a211849fb"
+  integrity sha512-ZgpWDC5gmNiuY9CnLVXEH8rl50xhRCuLNA97fAUnKi8RRuV4E6KG31pDTsLVUKnohJE0I3XDrTeEydAXRw47xg==
+
 unicode-canonical-property-names-ecmascript@^2.0.0:
   version "2.0.1"
   resolved "https://registry.npmjs.org/unicode-canonical-property-names-ecmascript/-/unicode-canonical-property-names-ecmascript-2.0.1.tgz"
@@ -8454,7 +8601,7 @@ which-typed-array@^1.1.16, which-typed-array@^1.1.19:
     gopd "^1.2.0"
     has-tostringtag "^1.0.2"
 
-which@^2.0.1:
+which@^2.0.1, which@^2.0.2:
   version "2.0.2"
   resolved "https://registry.npmjs.org/which/-/which-2.0.2.tgz"
   integrity sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
