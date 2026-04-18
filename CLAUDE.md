@@ -94,5 +94,5 @@ Three JPA entities: `User`, `Device`, `Notification`. The unique constraint on `
 
 - when using third-party library, don't
   shing to `main` triggers the `.github/workflows/mobile-ci.yml` workflow, which runs `eas update --channel production`.
-- when using thrird-party library, don't create a type file, should always
-  refernece the type from the library itself, don't take a guess
+- when using thrird-party library, don't create a type file if it already has been typed, should always
+  refernece the type from the library itself, don't take a guess, but do create one if it's js library
