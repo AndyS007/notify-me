@@ -1,11 +1,11 @@
-import { and, eq, between } from 'drizzle-orm';
-import { db } from '../db';
-import { notifications } from '../db/schema';
+import { between, eq } from "drizzle-orm";
+import { ApiClient } from "../api/client";
 import {
-  syncNotificationsApi,
   fetchNotificationsApi,
-  type ApiClient,
-} from '../api/notifications';
+  syncNotificationsApi,
+} from "../api/notifications";
+import { db } from "../db";
+import { notifications } from "../db/schema";
 
 const BATCH_SIZE = 100;
 
@@ -100,9 +100,9 @@ export async function pullRemoteNotifications(
 
     await db.insert(notifications).values({
       packageName: item.packageName,
-      appName: item.appName ?? '',
-      title: item.title ?? '',
-      text: item.text ?? '',
+      appName: item.appName ?? "",
+      title: item.title ?? "",
+      text: item.text ?? "",
       timestamp: item.timestamp,
       icon: null,
       synced: 1,
