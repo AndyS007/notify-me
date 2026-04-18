@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start --dev-client",
-    "android": "expo run:android --active-arch-only",
+    "android": "expo run:android",
     "android:release": "expo run:android --variant release",
     "ios": "expo run:ios",
     "ios:release": "expo run:ios --configuration Release",
