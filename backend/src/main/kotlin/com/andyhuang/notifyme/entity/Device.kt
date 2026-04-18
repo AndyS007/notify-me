@@ -41,7 +41,11 @@ class Device(
     @Column(name = "platform")
     var platform: String? = null,
 
-    @Column(name = "push_enabled", nullable = false)
+    @Column(
+        name = "push_enabled",
+        nullable = false,
+        columnDefinition = "boolean not null default true",
+    )
     var pushEnabled: Boolean = true,
 
     @Column(name = "created_at", nullable = false, updatable = false)
