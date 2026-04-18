@@ -49,6 +49,14 @@
           }
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#2563EB",
+          "defaultChannel": "notifications"
+        }
+      ],
       "expo-font",
       "expo-image",
       "expo-web-browser",

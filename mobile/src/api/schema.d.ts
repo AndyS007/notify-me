@@ -145,6 +145,8 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+            expoPushToken?: string;
+            platform?: string;
             createdAt?: string;
             updatedAt?: string;
         };
@@ -156,6 +158,8 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+            expoPushToken?: string;
+            platform?: string;
         };
         CreateNotificationRequest: {
             deviceId?: string;
@@ -216,6 +220,8 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+            expoPushToken?: string;
+            platform?: string;
         };
     };
     responses: never;

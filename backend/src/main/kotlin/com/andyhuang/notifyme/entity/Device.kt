@@ -35,6 +35,12 @@ class Device(
     @Column(name = "app_version")
     val appVersion: String?,
 
+    @Column(name = "expo_push_token")
+    var expoPushToken: String? = null,
+
+    @Column(name = "platform")
+    var platform: String? = null,
+
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: Instant = Instant.now(),
 

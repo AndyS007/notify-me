@@ -4,14 +4,21 @@ import { tokenCache } from "@clerk/expo/token-cache";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Slot } from "expo-router";
+import { useEffect } from "react";
 import { Text } from "react-native";
 import migrations from "../drizzle/migrations";
 import { queryClient } from "../src/api/query-client";
 import { db } from "../src/db";
 import { useAppUpdate } from "../src/hooks/use-app-update";
+import { initPushNotifications } from "../src/services/push-service";
 
 function AppContent() {
   useAppUpdate();
+  useEffect(() => {
+    initPushNotifications().catch((err) =>
+      console.warn("[push] init failed:", err),
+    );
+  }, []);
   return <Slot />;
 }
 

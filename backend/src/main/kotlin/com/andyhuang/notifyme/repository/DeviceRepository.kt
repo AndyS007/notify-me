@@ -8,4 +8,5 @@ import java.util.UUID
 interface DeviceRepository : JpaRepository<Device, UUID> {
     fun findByUserAndDeviceId(user: User, deviceId: String): Device?
     fun findByUser(user: User): List<Device>
+    fun findByUserAndExpoPushTokenIsNotNull(user: User): List<Device>
 }

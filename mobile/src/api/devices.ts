@@ -1,7 +1,9 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import DeviceInfo from 'react-native-device-info';
+import { Platform } from 'react-native';
 import { useApiClient, type ApiClient } from './client';
 import type { components } from './schema';
+import { registerForPushTokenAsync } from '../services/push-service';
 
 // ---- Types (generated from backend OpenAPI) ----
 
@@ -12,9 +14,10 @@ export type DeviceResponse = components['schemas']['DeviceResponse'];
 // ---- API functions ----
 
 async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
-  const [deviceId, deviceName] = await Promise.all([
+  const [deviceId, deviceName, expoPushToken] = await Promise.all([
     DeviceInfo.getUniqueId(),
     DeviceInfo.getDeviceName(),
+    registerForPushTokenAsync(),
   ]);
   return {
     deviceId,
@@ -24,6 +27,8 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
     osName: DeviceInfo.getSystemName(),
     osVersion: DeviceInfo.getSystemVersion(),
     appVersion: DeviceInfo.getVersion(),
+    expoPushToken: expoPushToken ?? undefined,
+    platform: Platform.OS,
   };
 }
 

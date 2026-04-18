@@ -21,6 +21,8 @@ data class RegisterDeviceRequest(
     val osName: String?,
     val osVersion: String?,
     val appVersion: String?,
+    val expoPushToken: String? = null,
+    val platform: String? = null,
 )
 
 data class RegisterDeviceResponse(
@@ -32,6 +34,8 @@ data class RegisterDeviceResponse(
     val osName: String?,
     val osVersion: String?,
     val appVersion: String?,
+    val expoPushToken: String?,
+    val platform: String?,
 )
 
 data class DeviceResponse(
@@ -43,6 +47,8 @@ data class DeviceResponse(
     val osName: String?,
     val osVersion: String?,
     val appVersion: String?,
+    val expoPushToken: String?,
+    val platform: String?,
     val createdAt: String,
     val updatedAt: String,
 )
@@ -66,6 +72,8 @@ class DeviceController(
                 osName = device.osName,
                 osVersion = device.osVersion,
                 appVersion = device.appVersion,
+                expoPushToken = device.expoPushToken,
+                platform = device.platform,
                 createdAt = device.createdAt.toString(),
                 updatedAt = device.updatedAt.toString(),
             )
@@ -82,6 +90,8 @@ class DeviceController(
 
         val device = deviceRepository.findByUserAndDeviceId(user, request.deviceId)
             ?.also {
+                it.expoPushToken = request.expoPushToken ?: it.expoPushToken
+                it.platform = request.platform ?: it.platform
                 it.updatedAt = Instant.now()
                 deviceRepository.save(it)
             }
@@ -95,6 +105,8 @@ class DeviceController(
                     osName = request.osName,
                     osVersion = request.osVersion,
                     appVersion = request.appVersion,
+                    expoPushToken = request.expoPushToken,
+                    platform = request.platform,
                 )
             )
 
@@ -108,6 +120,8 @@ class DeviceController(
                 osName = device.osName,
                 osVersion = device.osVersion,
                 appVersion = device.appVersion,
+                expoPushToken = device.expoPushToken,
+                platform = device.platform,
             )
         )
     }

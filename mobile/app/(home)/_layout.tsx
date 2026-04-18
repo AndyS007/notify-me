@@ -4,12 +4,19 @@ import { useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useUnistyles } from 'react-native-unistyles';
 import { useRegisterDevice } from '../../src/api/devices';
+import { useApiClient } from '../../src/api/client';
+import { pullRemoteNotifications } from '../../src/services/sync-service';
+import {
+  addPushReceivedListener,
+  addPushResponseListener,
+} from '../../src/services/push-service';
 
 export default function HomeLayout() {
   const { isSignedIn, isLoaded } = useAuth();
   const { mutate: registerDevice } = useRegisterDevice();
   const registered = useRef(false);
   const { theme } = useUnistyles();
+  const apiClient = useApiClient();
 
   useEffect(() => {
     if (!isSignedIn || registered.current) return;
@@ -18,6 +25,27 @@ export default function HomeLayout() {
       onError: (err) => console.warn('Device registration failed:', err),
     });
   }, [isSignedIn, registerDevice]);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+
+    // When a push arrives we pull fresh notifications into local SQLite so
+    // that when the user focuses the list it reflects what the other device
+    // just captured. The screen itself re-loads on focus.
+    const syncOnPush = () => {
+      pullRemoteNotifications(apiClient).catch((err) =>
+        console.warn('[push] pull sync failed:', err),
+      );
+    };
+
+    const receivedSub = addPushReceivedListener(syncOnPush);
+    const responseSub = addPushResponseListener(syncOnPush);
+
+    return () => {
+      receivedSub.remove();
+      responseSub.remove();
+    };
+  }, [isSignedIn, apiClient]);
 
   if (!isLoaded) return null;
 
