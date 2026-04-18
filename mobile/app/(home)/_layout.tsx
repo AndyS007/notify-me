@@ -5,8 +5,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUnistyles } from 'react-native-unistyles';
 import { useRegisterDevice } from '../../src/api/devices';
 import { useApiClient } from '../../src/api/client';
+import {
+  pullRemoteNotifications,
+  syncUnsynced,
+} from '../../src/services/sync-service';
+import {
+  addPushReceivedListener,
+  addPushResponseListener,
+} from '../../src/services/push-service';
 import { startSmsListener } from '../../src/services/sms-listener';
-import { syncUnsynced } from '../../src/services/sync-service';
 
 export default function HomeLayout() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -22,6 +29,27 @@ export default function HomeLayout() {
       onError: (err) => console.warn('Device registration failed:', err),
     });
   }, [isSignedIn, registerDevice]);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+
+    // When a push arrives we pull fresh notifications into local SQLite so
+    // that when the user focuses the list it reflects what the other device
+    // just captured. The screen itself re-loads on focus.
+    const syncOnPush = () => {
+      pullRemoteNotifications(client).catch((err) =>
+        console.warn('[push] pull sync failed:', err),
+      );
+    };
+
+    const receivedSub = addPushReceivedListener(syncOnPush);
+    const responseSub = addPushResponseListener(syncOnPush);
+
+    return () => {
+      receivedSub.remove();
+      responseSub.remove();
+    };
+  }, [isSignedIn, client]);
 
   // Start the SMS listener once the user is authenticated. It writes inbound
   // messages straight into the notifications table and triggers the shared

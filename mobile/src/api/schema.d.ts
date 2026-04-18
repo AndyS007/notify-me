@@ -36,6 +36,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateDevice"];
+        trace?: never;
+    };
     "/notifications": {
         parameters: {
             query?: never;
@@ -145,6 +161,9 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+            expoPushToken?: string;
+            platform?: string;
+            pushEnabled?: boolean;
             createdAt?: string;
             updatedAt?: string;
         };
@@ -156,6 +175,11 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+            expoPushToken?: string;
+            platform?: string;
+        };
+        UpdateDeviceRequest: {
+            pushEnabled?: boolean;
         };
         CreateNotificationRequest: {
             deviceId?: string;
@@ -216,6 +240,9 @@ export interface components {
             osName?: string;
             osVersion?: string;
             appVersion?: string;
+            expoPushToken?: string;
+            platform?: string;
+            pushEnabled?: boolean;
         };
     };
     responses: never;
@@ -266,6 +293,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RegisterDeviceResponse"];
+                };
+            };
+        };
+    };
+    updateDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDeviceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeviceResponse"];
                 };
             };
         };

@@ -5,6 +5,8 @@ import com.andyhuang.notifyme.entity.User
 import com.andyhuang.notifyme.filter.ClerkAuthFilter
 import com.andyhuang.notifyme.repository.DeviceRepository
 import com.andyhuang.notifyme.repository.NotificationRepository
+import com.andyhuang.notifyme.service.ExpoPushMessage
+import com.andyhuang.notifyme.service.ExpoPushService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -65,6 +67,7 @@ data class NotificationPageResponse(
 class NotificationController(
     private val notificationRepository: NotificationRepository,
     private val deviceRepository: DeviceRepository,
+    private val expoPushService: ExpoPushService,
 ) {
 
     // POST /notifications — create single notification
@@ -92,6 +95,8 @@ class NotificationController(
             )
         )
 
+        fanOutPushNotifications(user, listOf(notification), request.deviceId)
+
         return ResponseEntity.status(HttpStatus.CREATED).body(notification.toResponse())
     }
 
@@ -105,6 +110,8 @@ class NotificationController(
         val user = httpRequest.getAttribute(ClerkAuthFilter.USER_ATTRIBUTE) as User
         var created = 0
         var duplicates = 0
+        val savedForFanOut = mutableListOf<Notification>()
+        val originDeviceIds = mutableSetOf<String>()
 
         for (item in request.notifications) {
             val device = item.deviceId?.let { deviceRepository.findByUserAndDeviceId(user, it) }
@@ -114,7 +121,7 @@ class NotificationController(
                 continue
             }
 
-            notificationRepository.save(
+            val saved = notificationRepository.save(
                 Notification(
                     user = user,
                     device = device,
@@ -125,10 +132,58 @@ class NotificationController(
                     timestamp = item.timestamp,
                 )
             )
+            savedForFanOut.add(saved)
+            item.deviceId?.let { originDeviceIds.add(it) }
             created++
         }
 
+        // Fan out to all other devices of this user. We use the single origin
+        // deviceId when the batch came from one device (the common case) to
+        // avoid echoing the push back to the sender.
+        val singleOrigin = originDeviceIds.singleOrNull()
+        fanOutPushNotifications(user, savedForFanOut, singleOrigin)
+
         return ResponseEntity.ok(BatchCreateNotificationResponse(created = created, duplicates = duplicates))
+    }
+
+    private fun fanOutPushNotifications(
+        user: User,
+        notifications: List<Notification>,
+        originDeviceId: String?,
+    ) {
+        if (notifications.isEmpty()) return
+
+        val targets = deviceRepository
+            .findByUserAndExpoPushTokenIsNotNullAndPushEnabledTrue(user)
+            .filter { it.deviceId != originDeviceId }
+        if (targets.isEmpty()) return
+
+        val messages = mutableListOf<ExpoPushMessage>()
+        for (device in targets) {
+            val token = device.expoPushToken ?: continue
+            for (n in notifications) {
+                val pushTitle = if (n.appName.isNotBlank()) n.appName else n.title
+                val pushBody = when {
+                    n.appName.isNotBlank() && n.title.isNotBlank() && n.text.isNotBlank() ->
+                        "${n.title} — ${n.text}"
+                    n.title.isNotBlank() && n.text.isNotBlank() -> n.text
+                    n.text.isNotBlank() -> n.text
+                    else -> n.title
+                }
+                messages += ExpoPushMessage(
+                    to = token,
+                    title = pushTitle,
+                    body = pushBody,
+                    data = mapOf(
+                        "type" to "notification",
+                        "notificationId" to n.id.toString(),
+                        "packageName" to n.packageName,
+                        "timestamp" to n.timestamp,
+                    ),
+                )
+            }
+        }
+        expoPushService.sendAsync(messages)
     }
 
     // GET /notifications — paginated list
