@@ -30,18 +30,3 @@ export const appSettings = sqliteTable(
     uniqueIndex('idx_app_settings_pkg').on(table.packageName),
   ],
 );
-
-export const smsMessages = sqliteTable(
-  'sms_messages',
-  {
-    id: int('id').primaryKey({ autoIncrement: true }),
-    address: text('address').notNull(),
-    body: text('body').notNull().default(''),
-    timestamp: int('timestamp').notNull(),
-    synced: int('synced').notNull().default(0),
-  },
-  (table) => [
-    index('idx_sms_address').on(table.address),
-    index('idx_sms_ts').on(table.timestamp),
-  ],
-);

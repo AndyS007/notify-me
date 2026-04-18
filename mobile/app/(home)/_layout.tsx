@@ -6,7 +6,7 @@ import { useUnistyles } from 'react-native-unistyles';
 import { useRegisterDevice } from '../../src/api/devices';
 import { useApiClient } from '../../src/api/client';
 import { startSmsListener } from '../../src/services/sms-listener';
-import { syncUnsyncedSms } from '../../src/services/sms-sync-service';
+import { syncUnsynced } from '../../src/services/sync-service';
 
 export default function HomeLayout() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -23,13 +23,13 @@ export default function HomeLayout() {
     });
   }, [isSignedIn, registerDevice]);
 
-  // Start SMS listener once the user is authenticated. The listener itself
-  // checks permission and is a no-op if permission hasn't been granted yet
-  // (the SMS screen provides the permission-request UI).
+  // Start the SMS listener once the user is authenticated. It writes inbound
+  // messages straight into the notifications table and triggers the shared
+  // sync so SMS rows propagate to the backend just like regular notifications.
   useEffect(() => {
     if (!isSignedIn) return;
     startSmsListener(() => {
-      syncUnsyncedSms(client).catch(() => {});
+      syncUnsynced(client).catch(() => {});
     }).catch(() => {});
   }, [isSignedIn, client]);
 
@@ -57,15 +57,6 @@ export default function HomeLayout() {
           title: 'Notifications',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sms"
-        options={{
-          title: 'SMS',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubble-outline" size={size} color={color} />
           ),
         }}
       />
