@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { ExpoAndroidAppList } from "expo-android-app-list";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
@@ -16,6 +17,7 @@ export type AppInfo = {
  * the metadata but preserve whatever `enabled` the user has chosen.
  */
 export async function syncAppsFromDevice(): Promise<AppInfo[]> {
+  if (Platform.OS !== "android") return [];
   try {
     const devices = await ExpoAndroidAppList.getAll();
     if (devices.length === 0) return [];
@@ -107,6 +109,7 @@ export async function loadAppIcon(
   packageName: string,
   _size = 256,
 ): Promise<string | null> {
+  if (Platform.OS !== "android") return null;
   if (iconCache.has(packageName)) return iconCache.get(packageName)!;
   try {
     const base64 = await ExpoAndroidAppList.getAppIcon(packageName);

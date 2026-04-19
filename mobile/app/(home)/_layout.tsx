@@ -1,6 +1,7 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@clerk/expo";
 import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUnistyles } from "react-native-unistyles";
 import { useRegisterDevice } from "../../src/api/devices";
@@ -101,6 +102,7 @@ export default function HomeLayout() {
         name="settings"
         options={{
           title: "App Settings",
+          href: Platform.OS === "android" ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),

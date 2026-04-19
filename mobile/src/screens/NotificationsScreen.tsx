@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { FlatList, RefreshControl, Text, View } from "react-native";
+import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SQLite from "expo-sqlite";
 import { useFocusEffect } from "@react-navigation/native";
@@ -143,9 +143,11 @@ export default function NotificationsScreen() {
         </View>
       </View>
 
-      {hasPermission === false && <PermissionBanner onPress={request} />}
+      {Platform.OS === "android" && hasPermission === false && (
+        <PermissionBanner onPress={request} />
+      )}
 
-      {hasSmsPermission === false && (
+      {Platform.OS === "android" && hasSmsPermission === false && (
         <PermissionBanner
           onPress={handleRequestSms}
           title="SMS access required"

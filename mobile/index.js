@@ -1,9 +1,13 @@
 import "./src/theme/unistyles";
-import { AppRegistry } from "react-native";
-import { RNAndroidNotificationListenerHeadlessJsName } from "react-native-android-notification-listener";
+import { AppRegistry, Platform } from "react-native";
 import "expo-router/entry";
 
-AppRegistry.registerHeadlessTask(
-  RNAndroidNotificationListenerHeadlessJsName,
-  () => require("./src/services/headless-task").default,
-);
+if (Platform.OS === "android") {
+  const {
+    RNAndroidNotificationListenerHeadlessJsName,
+  } = require("react-native-android-notification-listener");
+  AppRegistry.registerHeadlessTask(
+    RNAndroidNotificationListenerHeadlessJsName,
+    () => require("./src/services/headless-task").default,
+  );
+}
