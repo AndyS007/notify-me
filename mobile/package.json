@@ -13,7 +13,11 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "db:generate": "drizzle-kit generate",
-    "api:types": "openapi-typescript http://localhost:8080/v3/api-docs -o src/api/schema.d.ts"
+    "api:types": "openapi-typescript http://localhost:8080/v3/api-docs -o src/api/schema.d.ts",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx,json}": "prettier --write"
   },
   "dependencies": {
     "@clerk/expo": "^3.1.6",
@@ -68,7 +72,10 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~55.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "openapi-typescript": "^7.13.0",
+    "prettier": "^3.8.3",
     "typescript": "~5.9.2"
   },
   "private": true,
