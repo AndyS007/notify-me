@@ -75,9 +75,7 @@ export async function getAllApps(
   );
 }
 
-export async function getAppInfo(
-  packageName: string,
-): Promise<AppInfo | null> {
+export async function getAppInfo(packageName: string): Promise<AppInfo | null> {
   const rows = await db
     .select()
     .from(appSettings)

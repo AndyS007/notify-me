@@ -1,19 +1,19 @@
-import { Redirect, Tabs } from 'expo-router';
-import { useAuth } from '@clerk/expo';
-import { useEffect, useRef } from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import { useUnistyles } from 'react-native-unistyles';
-import { useRegisterDevice } from '../../src/api/devices';
-import { useApiClient } from '../../src/api/client';
+import { Redirect, Tabs } from "expo-router";
+import { useAuth } from "@clerk/expo";
+import { useEffect, useRef } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useUnistyles } from "react-native-unistyles";
+import { useRegisterDevice } from "../../src/api/devices";
+import { useApiClient } from "../../src/api/client";
 import {
   pullRemoteNotifications,
   syncUnsynced,
-} from '../../src/services/sync-service';
+} from "../../src/services/sync-service";
 import {
   addPushReceivedListener,
   addPushResponseListener,
-} from '../../src/services/push-service';
-import { startSmsListener } from '../../src/services/sms-listener';
+} from "../../src/services/push-service";
+import { startSmsListener } from "../../src/services/sms-listener";
 
 export default function HomeLayout() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -26,7 +26,7 @@ export default function HomeLayout() {
     if (!isSignedIn || registered.current) return;
     registered.current = true;
     registerDevice(undefined, {
-      onError: (err) => console.warn('Device registration failed:', err),
+      onError: (err) => console.warn("Device registration failed:", err),
     });
   }, [isSignedIn, registerDevice]);
 
@@ -38,7 +38,7 @@ export default function HomeLayout() {
     // just captured. The screen itself re-loads on focus.
     const syncOnPush = () => {
       pullRemoteNotifications(client).catch((err) =>
-        console.warn('[push] pull sync failed:', err),
+        console.warn("[push] pull sync failed:", err),
       );
     };
 
@@ -82,7 +82,7 @@ export default function HomeLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Notifications',
+          title: "Notifications",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
           ),
@@ -91,7 +91,7 @@ export default function HomeLayout() {
       <Tabs.Screen
         name="devices"
         options={{
-          title: 'Devices',
+          title: "Devices",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="phone-portrait-outline" size={size} color={color} />
           ),
@@ -100,7 +100,7 @@ export default function HomeLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'App Settings',
+          title: "App Settings",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),

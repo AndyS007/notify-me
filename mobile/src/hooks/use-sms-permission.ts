@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
   getSmsPermissionStatus,
   requestSmsPermission,
-} from '../services/sms-listener';
+} from "../services/sms-listener";
 
 export function useSmsPermission() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);

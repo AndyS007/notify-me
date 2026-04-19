@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Alert,
   Platform,
@@ -6,12 +6,12 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import { useSignUp } from '@clerk/expo';
-import { useSignInWithApple } from '@clerk/expo/apple';
-import { useSignInWithGoogle } from '@clerk/expo/google';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+} from "react-native";
+import { Link, useRouter } from "expo-router";
+import { useSignUp } from "@clerk/expo";
+import { useSignInWithApple } from "@clerk/expo/apple";
+import { useSignInWithGoogle } from "@clerk/expo/google";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 export default function SignUpScreen() {
   const { signUp } = useSignUp();
@@ -20,33 +20,36 @@ export default function SignUpScreen() {
   const router = useRouter();
   const { theme } = useUnistyles();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [pendingVerification, setPendingVerification] = useState(false);
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const onSignUpPress = async () => {
     setLoading(true);
     try {
-      const { error } = await signUp.password({ emailAddress: email, password });
+      const { error } = await signUp.password({
+        emailAddress: email,
+        password,
+      });
       if (error) {
-        Alert.alert('Sign up failed', error.message);
+        Alert.alert("Sign up failed", error.message);
         return;
       }
-      if (signUp.status === 'missing_requirements') {
+      if (signUp.status === "missing_requirements") {
         const { error: sendError } = await signUp.verifications.sendEmailCode();
         if (sendError) {
-          Alert.alert('Failed to send verification code', sendError.message);
+          Alert.alert("Failed to send verification code", sendError.message);
           return;
         }
         setPendingVerification(true);
-      } else if (signUp.status === 'complete') {
+      } else if (signUp.status === "complete") {
         await signUp.finalize();
-        router.replace('/(home)');
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      Alert.alert('Sign up failed', err.message);
+      Alert.alert("Sign up failed", err.message);
     } finally {
       setLoading(false);
     }
@@ -57,15 +60,15 @@ export default function SignUpScreen() {
     try {
       const { error } = await signUp.verifications.verifyEmailCode({ code });
       if (error) {
-        Alert.alert('Verification failed', error.message);
+        Alert.alert("Verification failed", error.message);
         return;
       }
-      if (signUp.status === 'complete') {
+      if (signUp.status === "complete") {
         await signUp.finalize();
-        router.replace('/(home)');
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      Alert.alert('Verification failed', err.message);
+      Alert.alert("Verification failed", err.message);
     } finally {
       setLoading(false);
     }
@@ -77,11 +80,11 @@ export default function SignUpScreen() {
         await startAppleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace('/(home)');
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      if (err.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Apple sign-in failed', err.message);
+      if (err.code === "ERR_REQUEST_CANCELED") return;
+      Alert.alert("Apple sign-in failed", err.message);
     }
   };
 
@@ -91,11 +94,11 @@ export default function SignUpScreen() {
         await startGoogleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace('/(home)');
+        router.replace("/(home)");
       }
     } catch (err: any) {
-      if (err.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Google sign-in failed', err.message);
+      if (err.code === "ERR_REQUEST_CANCELED") return;
+      Alert.alert("Google sign-in failed", err.message);
     }
   };
 
@@ -118,7 +121,7 @@ export default function SignUpScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? 'Verifying…' : 'Verify'}
+            {loading ? "Verifying…" : "Verify"}
           </Text>
         </Pressable>
       </View>
@@ -153,7 +156,7 @@ export default function SignUpScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? 'Creating account…' : 'Sign up'}
+            {loading ? "Creating account…" : "Sign up"}
           </Text>
         </Pressable>
       </View>
@@ -170,7 +173,7 @@ export default function SignUpScreen() {
         </Text>
       </Pressable>
 
-      {Platform.OS === 'ios' && (
+      {Platform.OS === "ios" && (
         <Pressable style={[styles.btn, styles.appleBtn]} onPress={onApplePress}>
           <Text style={styles.appleBtnText}> Continue with Apple</Text>
         </Pressable>
@@ -192,14 +195,14 @@ const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
     gap: 16,
   },
   title: {
     color: theme.colors.text,
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 4,
   },
   subtitle: {
@@ -224,14 +227,14 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.primaryBtn,
     borderRadius: 10,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
   btnDisabled: {
     opacity: 0.5,
   },
   btnText: {
     color: theme.colors.primaryBtnText,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 15,
   },
   googleBtn: {
@@ -248,13 +251,13 @@ const styles = StyleSheet.create((theme) => ({
     borderColor: theme.colors.appleBtnBorder,
   },
   appleBtnText: {
-    color: '#ffffff',
-    fontWeight: '600',
+    color: "#ffffff",
+    fontWeight: "600",
     fontSize: 15,
   },
   dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   dividerLine: {
@@ -267,8 +270,8 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 13,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 8,
   },
   footerText: {
@@ -278,6 +281,6 @@ const styles = StyleSheet.create((theme) => ({
   link: {
     color: theme.colors.text,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 }));

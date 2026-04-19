@@ -1,15 +1,21 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useApiClient, type ApiClient } from './client';
-import type { components } from './schema';
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useApiClient, type ApiClient } from "./client";
+import type { components } from "./schema";
 
 // ---- Types ----
 
-export type CreateNotificationRequest = components['schemas']['CreateNotificationRequest'];
-export type BatchCreateNotificationRequest = components['schemas']['BatchCreateNotificationRequest'];
-export type BatchCreateNotificationResponse = components['schemas']['BatchCreateNotificationResponse'];
-export type NotificationResponse = components['schemas']['NotificationResponse'];
-export type NotificationPageResponse = components['schemas']['NotificationPageResponse'];
-export type DeleteNotificationsResponse = components['schemas']['DeleteNotificationsResponse'];
+export type CreateNotificationRequest =
+  components["schemas"]["CreateNotificationRequest"];
+export type BatchCreateNotificationRequest =
+  components["schemas"]["BatchCreateNotificationRequest"];
+export type BatchCreateNotificationResponse =
+  components["schemas"]["BatchCreateNotificationResponse"];
+export type NotificationResponse =
+  components["schemas"]["NotificationResponse"];
+export type NotificationPageResponse =
+  components["schemas"]["NotificationPageResponse"];
+export type DeleteNotificationsResponse =
+  components["schemas"]["DeleteNotificationsResponse"];
 
 // ---- API functions ----
 
@@ -17,7 +23,7 @@ export async function syncNotificationsApi(
   client: ApiClient,
   request: BatchCreateNotificationRequest,
 ): Promise<BatchCreateNotificationResponse> {
-  const { data } = await client.POST('/notifications/batch', { body: request });
+  const { data } = await client.POST("/notifications/batch", { body: request });
   return data!;
 }
 
@@ -25,7 +31,7 @@ export async function fetchNotificationsApi(
   client: ApiClient,
   params?: { packageName?: string; page?: number; size?: number },
 ): Promise<NotificationPageResponse> {
-  const { data } = await client.GET('/notifications', {
+  const { data } = await client.GET("/notifications", {
     params: { query: params },
   });
   return data!;
@@ -35,7 +41,7 @@ export async function deleteNotificationApi(
   client: ApiClient,
   id: string,
 ): Promise<void> {
-  await client.DELETE('/notifications/{id}', {
+  await client.DELETE("/notifications/{id}", {
     params: { path: { id } },
   });
 }
@@ -44,7 +50,7 @@ export async function deleteAllNotificationsApi(
   client: ApiClient,
   packageName?: string,
 ): Promise<DeleteNotificationsResponse> {
-  const { data } = await client.DELETE('/notifications', {
+  const { data } = await client.DELETE("/notifications", {
     params: { query: packageName ? { packageName } : {} },
   });
   return data!;
@@ -63,7 +69,7 @@ export function useSyncNotifications() {
 export function useRemoteNotifications(packageName?: string, page?: number) {
   const client = useApiClient();
   return useQuery({
-    queryKey: ['remote-notifications', packageName, page],
+    queryKey: ["remote-notifications", packageName, page],
     queryFn: () => fetchNotificationsApi(client, { packageName, page }),
   });
 }

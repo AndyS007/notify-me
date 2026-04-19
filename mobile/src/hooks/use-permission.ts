@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
-import { getPermissionStatus, openPermissionSettings } from '../services/notification-service';
+import { useState, useEffect } from "react";
+import {
+  getPermissionStatus,
+  openPermissionSettings,
+} from "../services/notification-service";
 
 export function usePermission() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   const check = async () => {
     const status = await getPermissionStatus();
-    setHasPermission(status === 'authorized');
+    setHasPermission(status === "authorized");
   };
 
   useEffect(() => {

@@ -1,1 +1,1 @@
-export { default } from '../../src/screens/NotificationsScreen';
+export { default } from "../../src/screens/NotificationsScreen";

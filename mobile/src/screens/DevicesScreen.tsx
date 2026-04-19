@@ -1,19 +1,13 @@
-import React from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import React from "react";
+import { ActivityIndicator, FlatList, Switch, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
   useDevices,
   useUpdateDevicePushEnabled,
   type DeviceResponse,
-} from '../api/devices';
-import { ThemeToggle } from '../components/ThemeToggle';
+} from "../api/devices";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 function DeviceCard({ device }: { device: DeviceResponse }) {
   const { theme } = useUnistyles();
@@ -22,9 +16,9 @@ function DeviceCard({ device }: { device: DeviceResponse }) {
   const updatedAt = device.updatedAt ? new Date(device.updatedAt) : null;
   const lastSeen = updatedAt
     ? updatedAt.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       })
     : null;
 
@@ -40,7 +34,7 @@ function DeviceCard({ device }: { device: DeviceResponse }) {
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.deviceName} numberOfLines={1}>
-          {device.deviceName ?? device.model ?? 'Unknown Device'}
+          {device.deviceName ?? device.model ?? "Unknown Device"}
         </Text>
         {lastSeen && <Text style={styles.lastSeen}>Last seen {lastSeen}</Text>}
       </View>
@@ -50,8 +44,8 @@ function DeviceCard({ device }: { device: DeviceResponse }) {
           <Text style={styles.pushLabel}>Push notifications</Text>
           <Text style={styles.pushHint}>
             {hasToken
-              ? 'Receive notifications from other devices on this one'
-              : 'No push token — open the app on this device to register'}
+              ? "Receive notifications from other devices on this one"
+              : "No push token — open the app on this device to register"}
           </Text>
         </View>
         <Switch
@@ -64,23 +58,23 @@ function DeviceCard({ device }: { device: DeviceResponse }) {
 
       <View style={styles.metaRow}>
         <Text style={styles.metaLabel}>Brand</Text>
-        <Text style={styles.metaValue}>{device.brand ?? '—'}</Text>
+        <Text style={styles.metaValue}>{device.brand ?? "—"}</Text>
       </View>
       <View style={styles.metaRow}>
         <Text style={styles.metaLabel}>Model</Text>
-        <Text style={styles.metaValue}>{device.model ?? '—'}</Text>
+        <Text style={styles.metaValue}>{device.model ?? "—"}</Text>
       </View>
       <View style={styles.metaRow}>
         <Text style={styles.metaLabel}>OS</Text>
         <Text style={styles.metaValue}>
           {device.osName && device.osVersion
             ? `${device.osName} ${device.osVersion}`
-            : device.osName ?? '—'}
+            : (device.osName ?? "—")}
         </Text>
       </View>
       <View style={styles.metaRow}>
         <Text style={styles.metaLabel}>App version</Text>
-        <Text style={styles.metaValue}>{device.appVersion ?? '—'}</Text>
+        <Text style={styles.metaValue}>{device.appVersion ?? "—"}</Text>
       </View>
     </View>
   );
@@ -91,7 +85,7 @@ export default function DevicesScreen() {
   const { theme } = useUnistyles();
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Devices</Text>
         <View style={styles.headerRight}>
@@ -117,7 +111,9 @@ export default function DevicesScreen() {
             </View>
           }
           contentContainerStyle={
-            (devices?.length ?? 0) === 0 ? styles.emptyContent : styles.listContent
+            (devices?.length ?? 0) === 0
+              ? styles.emptyContent
+              : styles.listContent
           }
           onRefresh={refetch}
           refreshing={isRefetching}
@@ -136,19 +132,19 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   title: {
     color: theme.colors.text,
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   subtitle: {
     color: theme.colors.textTertiary,
@@ -156,8 +152,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   centered: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyText: {
     color: theme.colors.textTertiary,
@@ -177,15 +173,15 @@ const styles = StyleSheet.create((theme) => ({
     gap: 8,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 4,
   },
   deviceName: {
     color: theme.colors.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
     marginRight: 8,
   },
@@ -194,9 +190,9 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
   },
   pushRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -211,15 +207,15 @@ const styles = StyleSheet.create((theme) => ({
   pushLabel: {
     color: theme.colors.text,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   pushHint: {
     color: theme.colors.textTertiary,
     fontSize: 12,
   },
   metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   metaLabel: {
     color: theme.colors.textSecondary,

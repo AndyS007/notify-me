@@ -1,17 +1,22 @@
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 // The library ships no TypeScript declarations; per project convention we do
 // not fabricate one — everything below is typed as `any`.
 // @ts-expect-error — untyped third-party module
-import { checkIfHasSMSPermission, requestReadSMSPermission, startReadSMS, stopReadSMS } from '@maniac-tech/react-native-expo-read-sms';
-import { db } from '../db';
-import { notifications } from '../db/schema';
+import {
+  checkIfHasSMSPermission,
+  requestReadSMSPermission,
+  startReadSMS,
+  stopReadSMS,
+} from "@maniac-tech/react-native-expo-read-sms";
+import { db } from "../db";
+import { notifications } from "../db/schema";
 
 /**
  * Synthetic package identifier stored on every SMS row so that inbound SMS
  * naturally groups into a single "app" alongside real Android notifications.
  */
-export const SMS_PACKAGE_NAME = 'sms';
-export const SMS_APP_NAME = 'SMS';
+export const SMS_PACKAGE_NAME = "sms";
+export const SMS_APP_NAME = "SMS";
 
 export type SmsPermissionStatus = {
   hasReceiveSmsPermission: boolean;
@@ -19,14 +24,14 @@ export type SmsPermissionStatus = {
 };
 
 export async function getSmsPermissionStatus(): Promise<SmsPermissionStatus> {
-  if (Platform.OS !== 'android') {
+  if (Platform.OS !== "android") {
     return { hasReceiveSmsPermission: false, hasReadSmsPermission: false };
   }
   return checkIfHasSMSPermission();
 }
 
 export async function requestSmsPermission(): Promise<boolean> {
-  if (Platform.OS !== 'android') return false;
+  if (Platform.OS !== "android") return false;
   return requestReadSMSPermission();
 }
 
@@ -37,20 +42,20 @@ export async function requestSmsPermission(): Promise<boolean> {
  */
 function parseNativeSmsPayload(raw: string): { address: string; body: string } {
   let inner = raw;
-  if (inner.startsWith('[') && inner.endsWith(']')) {
+  if (inner.startsWith("[") && inner.endsWith("]")) {
     inner = inner.slice(1, -1);
   }
   // Arrays.toString separator is ", ". Body may contain commas, so split on
   // the FIRST occurrence only.
-  const sepIdx = inner.indexOf(', ');
+  const sepIdx = inner.indexOf(", ");
   if (sepIdx === -1) {
-    return { address: inner.trim(), body: '' };
+    return { address: inner.trim(), body: "" };
   }
   const address = inner.slice(0, sepIdx).trim();
   const body = inner.slice(sepIdx + 2);
   return {
-    address: address === 'null' ? '' : address,
-    body: body === 'null' ? '' : body,
+    address: address === "null" ? "" : address,
+    body: body === "null" ? "" : body,
   };
 }
 
@@ -75,7 +80,7 @@ let listening = false;
 export async function startSmsListener(
   onMessage?: () => void,
 ): Promise<boolean> {
-  if (Platform.OS !== 'android') return false;
+  if (Platform.OS !== "android") return false;
   if (listening) return true;
 
   const { hasReadSmsPermission, hasReceiveSmsPermission } =
@@ -83,14 +88,14 @@ export async function startSmsListener(
   if (!hasReadSmsPermission || !hasReceiveSmsPermission) return false;
 
   startReadSMS((status: string, sms: string) => {
-    if (status !== 'success' || typeof sms !== 'string' || !sms) return;
+    if (status !== "success" || typeof sms !== "string" || !sms) return;
     try {
       const { address, body } = parseNativeSmsPayload(sms);
       persistSms(address, body)
         .then(() => onMessage?.())
-        .catch((err) => console.log('SMS save error', err));
+        .catch((err) => console.log("SMS save error", err));
     } catch (err) {
-      console.log('SMS parse error', err);
+      console.log("SMS parse error", err);
     }
   });
 
@@ -99,7 +104,7 @@ export async function startSmsListener(
 }
 
 export function stopSmsListener(): void {
-  if (Platform.OS !== 'android') return;
+  if (Platform.OS !== "android") return;
   if (!listening) return;
   stopReadSMS();
   listening = false;

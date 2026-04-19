@@ -1,12 +1,12 @@
-import { eq } from 'drizzle-orm';
-import { db } from '../db';
-import { appSettings } from '../db/schema';
+import { eq } from "drizzle-orm";
+import { db } from "../db";
+import { appSettings } from "../db/schema";
 import {
   pushAppSettingsApi,
   pullAppSettingsApi,
   type AppSettingItem,
-} from '../api/app-settings';
-import type { ApiClient } from '../api/client';
+} from "../api/app-settings";
+import type { ApiClient } from "../api/client";
 
 /**
  * Push all local app settings to the backend.
@@ -82,9 +82,7 @@ export async function pullAppSettings(
 /**
  * Full bidirectional sync: push local → pull remote.
  */
-export async function syncAppSettings(
-  client: ApiClient,
-): Promise<void> {
+export async function syncAppSettings(client: ApiClient): Promise<void> {
   await pushAppSettings(client);
   await pullAppSettings(client);
 }

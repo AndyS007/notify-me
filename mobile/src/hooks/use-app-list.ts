@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   getAllApps,
   hasDeviceSyncedThisSession,
   syncAppsFromDevice,
   AppInfo,
-} from '../services/app-list-service';
+} from "../services/app-list-service";
 
 export function useAppList(includeSystem = false) {
   const [appMap, setAppMap] = useState<Map<string, AppInfo>>(new Map());

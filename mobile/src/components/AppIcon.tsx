@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, View, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { Image, View, Text, StyleSheet } from "react-native";
 
 type Props = {
   iconBase64?: string | null;
@@ -8,13 +8,16 @@ type Props = {
 };
 
 export function AppIcon({ iconBase64, appName, size = 44 }: Props) {
-  const initial = (appName[0] ?? '?').toUpperCase();
+  const initial = (appName[0] ?? "?").toUpperCase();
 
   if (iconBase64) {
     return (
       <Image
         source={{ uri: `data:image/png;base64,${iconBase64}` }}
-        style={[styles.image, { width: size, height: size, borderRadius: size / 5 }]}
+        style={[
+          styles.image,
+          { width: size, height: size, borderRadius: size / 5 },
+        ]}
       />
     );
   }
@@ -47,14 +50,14 @@ function stringToColor(str: string): string {
 
 const styles = StyleSheet.create({
   image: {
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   fallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   initial: {
-    color: '#fff',
-    fontWeight: '700',
+    color: "#fff",
+    fontWeight: "700",
   },
 });

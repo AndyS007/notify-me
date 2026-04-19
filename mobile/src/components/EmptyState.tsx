@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import React from "react";
+import { View, Text } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 
 export function EmptyState() {
   return (
@@ -17,8 +17,8 @@ export function EmptyState() {
 const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 40,
     gap: 12,
   },
@@ -29,13 +29,13 @@ const styles = StyleSheet.create((theme) => ({
   title: {
     color: theme.colors.text,
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   subtitle: {
     color: theme.colors.textTertiary,
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
 }));

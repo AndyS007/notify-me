@@ -1,6 +1,6 @@
-import React from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import React from "react";
+import { Modal, Pressable, Text, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 
 export type ContextMenuAction = {
   label: string;
@@ -75,8 +75,8 @@ export function ContextMenu({ visible, title, actions, onClose }: Props) {
 const styles = StyleSheet.create((theme) => ({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
   },
   sheetContainer: {
     marginHorizontal: 12,
@@ -86,23 +86,23 @@ const styles = StyleSheet.create((theme) => ({
   sheet: {
     backgroundColor: theme.colors.surface,
     borderRadius: 14,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   headerRow: {
     padding: 14,
     borderBottomWidth: 0.5,
     borderBottomColor: theme.colors.divider,
-    alignItems: 'center',
+    alignItems: "center",
   },
   titleText: {
     color: theme.colors.textSecondary,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   action: {
     paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionDivider: {
     borderBottomWidth: 0.5,
@@ -122,11 +122,11 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.surface,
     paddingVertical: 16,
     borderRadius: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cancelText: {
     color: theme.colors.text,
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 }));

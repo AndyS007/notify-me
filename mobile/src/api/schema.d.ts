@@ -4,525 +4,525 @@
  */
 
 export interface paths {
-    "/devices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["listDevices"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  "/devices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["registerDevice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["listDevices"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/devices/register": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["updateDevice"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["registerDevice"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/devices/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["listNotifications"];
-        put?: never;
-        post: operations["createNotification"];
-        delete: operations["deleteNotifications"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["updateDevice"];
+    trace?: never;
+  };
+  "/notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications/batch": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["batchCreateNotifications"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["listNotifications"];
+    put?: never;
+    post: operations["createNotification"];
+    delete: operations["deleteNotifications"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/notifications/batch": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getNotification"];
-        put?: never;
-        post?: never;
-        delete: operations["deleteNotification"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["batchCreateNotifications"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/notifications/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/app-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getAppSettings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["getNotification"];
+    put?: never;
+    post?: never;
+    delete: operations["deleteNotification"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/app-settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/app-settings/sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["syncAppSettings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["getAppSettings"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/app-settings/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/hello": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["hello"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put: operations["syncAppSettings"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/hello": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get: operations["hello"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        DeviceResponse: {
-            id?: string;
-            deviceId?: string;
-            deviceName?: string;
-            brand?: string;
-            model?: string;
-            osName?: string;
-            osVersion?: string;
-            appVersion?: string;
-            expoPushToken?: string;
-            platform?: string;
-            pushEnabled?: boolean;
-            createdAt?: string;
-            updatedAt?: string;
-        };
-        RegisterDeviceRequest: {
-            deviceId?: string;
-            deviceName?: string;
-            brand?: string;
-            model?: string;
-            osName?: string;
-            osVersion?: string;
-            appVersion?: string;
-            expoPushToken?: string;
-            platform?: string;
-        };
-        UpdateDeviceRequest: {
-            pushEnabled?: boolean;
-        };
-        CreateNotificationRequest: {
-            deviceId?: string;
-            packageName: string;
-            appName: string;
-            title: string;
-            text: string;
-            timestamp: number;
-        };
-        BatchCreateNotificationRequest: {
-            notifications: components["schemas"]["CreateNotificationRequest"][];
-        };
-        NotificationResponse: {
-            id?: string;
-            deviceId?: string;
-            packageName?: string;
-            appName?: string;
-            title?: string;
-            text?: string;
-            timestamp?: number;
-            createdAt?: string;
-            updatedAt?: string;
-        };
-        BatchCreateNotificationResponse: {
-            created?: number;
-            duplicates?: number;
-        };
-        DeleteNotificationsResponse: {
-            deleted?: number;
-        };
-        NotificationPageResponse: {
-            content?: components["schemas"]["NotificationResponse"][];
-            page?: number;
-            size?: number;
-            totalElements?: number;
-            totalPages?: number;
-        };
-        AppSettingItem: {
-            packageName: string;
-            appName: string;
-            enabled: boolean;
-            isSystemApp: boolean;
-            updatedAt: number;
-        };
-        SyncAppSettingsRequest: {
-            settings: components["schemas"]["AppSettingItem"][];
-        };
-        SyncAppSettingsResponse: {
-            created?: number;
-            updated?: number;
-        };
-        RegisterDeviceResponse: {
-            id?: string;
-            deviceId?: string;
-            deviceName?: string;
-            brand?: string;
-            model?: string;
-            osName?: string;
-            osVersion?: string;
-            appVersion?: string;
-            expoPushToken?: string;
-            platform?: string;
-            pushEnabled?: boolean;
-        };
+  schemas: {
+    DeviceResponse: {
+      id?: string;
+      deviceId?: string;
+      deviceName?: string;
+      brand?: string;
+      model?: string;
+      osName?: string;
+      osVersion?: string;
+      appVersion?: string;
+      expoPushToken?: string;
+      platform?: string;
+      pushEnabled?: boolean;
+      createdAt?: string;
+      updatedAt?: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    RegisterDeviceRequest: {
+      deviceId?: string;
+      deviceName?: string;
+      brand?: string;
+      model?: string;
+      osName?: string;
+      osVersion?: string;
+      appVersion?: string;
+      expoPushToken?: string;
+      platform?: string;
+    };
+    UpdateDeviceRequest: {
+      pushEnabled?: boolean;
+    };
+    CreateNotificationRequest: {
+      deviceId?: string;
+      packageName: string;
+      appName: string;
+      title: string;
+      text: string;
+      timestamp: number;
+    };
+    BatchCreateNotificationRequest: {
+      notifications: components["schemas"]["CreateNotificationRequest"][];
+    };
+    NotificationResponse: {
+      id?: string;
+      deviceId?: string;
+      packageName?: string;
+      appName?: string;
+      title?: string;
+      text?: string;
+      timestamp?: number;
+      createdAt?: string;
+      updatedAt?: string;
+    };
+    BatchCreateNotificationResponse: {
+      created?: number;
+      duplicates?: number;
+    };
+    DeleteNotificationsResponse: {
+      deleted?: number;
+    };
+    NotificationPageResponse: {
+      content?: components["schemas"]["NotificationResponse"][];
+      page?: number;
+      size?: number;
+      totalElements?: number;
+      totalPages?: number;
+    };
+    AppSettingItem: {
+      packageName: string;
+      appName: string;
+      enabled: boolean;
+      isSystemApp: boolean;
+      updatedAt: number;
+    };
+    SyncAppSettingsRequest: {
+      settings: components["schemas"]["AppSettingItem"][];
+    };
+    SyncAppSettingsResponse: {
+      created?: number;
+      updated?: number;
+    };
+    RegisterDeviceResponse: {
+      id?: string;
+      deviceId?: string;
+      deviceName?: string;
+      brand?: string;
+      model?: string;
+      osName?: string;
+      osVersion?: string;
+      appVersion?: string;
+      expoPushToken?: string;
+      platform?: string;
+      pushEnabled?: boolean;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    listDevices: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["DeviceResponse"][];
-                };
-            };
-        };
+  listDevices: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    registerDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterDeviceRequest"];
-            };
+        content: {
+          "*/*": components["schemas"]["DeviceResponse"][];
         };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["RegisterDeviceResponse"];
-                };
-            };
-        };
+      };
     };
-    updateDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateDeviceRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["DeviceResponse"];
-                };
-            };
-        };
+  };
+  registerDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    listNotifications: {
-        parameters: {
-            query?: {
-                packageName?: string;
-                page?: number;
-                size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["NotificationPageResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterDeviceRequest"];
+      };
     };
-    createNotification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateNotificationRequest"];
-            };
+        content: {
+          "*/*": components["schemas"]["RegisterDeviceResponse"];
         };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["NotificationResponse"];
-                };
-            };
-        };
+      };
     };
-    batchCreateNotifications: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BatchCreateNotificationRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["BatchCreateNotificationResponse"];
-                };
-            };
-        };
+  };
+  updateDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    getNotification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["NotificationResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateDeviceRequest"];
+      };
     };
-    deleteNotification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          "*/*": components["schemas"]["DeviceResponse"];
         };
+      };
     };
-    deleteNotifications: {
-        parameters: {
-            query?: {
-                packageName?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["DeleteNotificationsResponse"];
-                };
-            };
-        };
+  };
+  listNotifications: {
+    parameters: {
+      query?: {
+        packageName?: string;
+        page?: number;
+        size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    getAppSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AppSettingItem"][];
-                };
-            };
+        content: {
+          "*/*": components["schemas"]["NotificationPageResponse"];
         };
+      };
     };
-    syncAppSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SyncAppSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["SyncAppSettingsResponse"];
-                };
-            };
-        };
+  };
+  createNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    hello: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateNotificationRequest"];
+      };
     };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["NotificationResponse"];
+        };
+      };
+    };
+  };
+  batchCreateNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchCreateNotificationRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["BatchCreateNotificationResponse"];
+        };
+      };
+    };
+  };
+  getNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["NotificationResponse"];
+        };
+      };
+    };
+  };
+  deleteNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  deleteNotifications: {
+    parameters: {
+      query?: {
+        packageName?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["DeleteNotificationsResponse"];
+        };
+      };
+    };
+  };
+  getAppSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["AppSettingItem"][];
+        };
+      };
+    };
+  };
+  syncAppSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SyncAppSettingsRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["SyncAppSettingsResponse"];
+        };
+      };
+    };
+  };
+  hello: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": {
+            [key: string]: string;
+          };
+        };
+      };
+    };
+  };
 }

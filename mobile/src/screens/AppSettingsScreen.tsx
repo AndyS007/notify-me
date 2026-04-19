@@ -1,16 +1,23 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, Switch, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useAuth } from '@clerk/expo';
-import { useRouter } from 'expo-router';
-import { useAppList } from '../hooks/use-app-list';
-import { useAppSettings } from '../hooks/use-app-settings';
-import { useAppIcon } from '../hooks/use-app-icon';
-import { AppIcon } from '../components/AppIcon';
-import { ThemeToggle } from '../components/ThemeToggle';
-import type { AppInfo } from '../services/app-list-service';
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useAuth } from "@clerk/expo";
+import { useRouter } from "expo-router";
+import { useAppList } from "../hooks/use-app-list";
+import { useAppSettings } from "../hooks/use-app-settings";
+import { useAppIcon } from "../hooks/use-app-icon";
+import { AppIcon } from "../components/AppIcon";
+import { ThemeToggle } from "../components/ThemeToggle";
+import type { AppInfo } from "../services/app-list-service";
 
 type AppRow = AppInfo & { enabled: boolean };
 
@@ -61,11 +68,11 @@ export default function AppSettingsScreen() {
   const { theme } = useUnistyles();
   const { signOut } = useAuth();
   const router = useRouter();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   const onSignOut = async () => {
     await signOut();
-    router.replace('/(auth)/sign-in');
+    router.replace("/(auth)/sign-in");
   };
 
   const apps = useMemo<AppRow[]>(() => {
@@ -104,7 +111,7 @@ export default function AppSettingsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>App Settings</Text>
         <View style={styles.headerRight}>
@@ -136,7 +143,7 @@ export default function AppSettingsScreen() {
         onPress={() => setShowSystem((v) => !v)}
       >
         <Text style={styles.systemToggleText}>
-          {showSystem ? 'Hide system apps' : 'Show system apps'}
+          {showSystem ? "Hide system apps" : "Show system apps"}
         </Text>
       </Pressable>
 
@@ -148,7 +155,7 @@ export default function AppSettingsScreen() {
           !loading && ready ? (
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
-                {search ? 'No matching apps' : 'No apps found'}
+                {search ? "No matching apps" : "No apps found"}
               </Text>
             </View>
           ) : null
@@ -171,19 +178,19 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   title: {
     color: theme.colors.text,
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   searchContainer: {
     paddingHorizontal: 16,
@@ -206,16 +213,16 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    alignItems: 'center',
+    alignItems: "center",
   },
   systemToggleText: {
     color: theme.colors.text,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
     gap: 12,
@@ -229,7 +236,7 @@ const styles = StyleSheet.create((theme) => ({
   appName: {
     color: theme.colors.text,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   packageName: {
     color: theme.colors.textTertiary,
@@ -237,8 +244,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   empty: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyText: {
     color: theme.colors.textTertiary,

@@ -1,9 +1,10 @@
-import { Alert } from 'react-native';
-import * as Updates from 'expo-updates';
-import { useEffect, useRef } from 'react';
+import { Alert } from "react-native";
+import * as Updates from "expo-updates";
+import { useEffect, useRef } from "react";
 
 export function useAppUpdate() {
-  const { isUpdateAvailable, isUpdatePending, isDownloading } = Updates.useUpdates();
+  const { isUpdateAvailable, isUpdatePending, isDownloading } =
+    Updates.useUpdates();
   const alertShown = useRef(false);
 
   // Check for updates on mount (only in non-dev builds where updates are enabled)
@@ -27,21 +28,24 @@ export function useAppUpdate() {
     alertShown.current = true;
 
     Alert.alert(
-      'Update Available',
-      'A new version is ready. Install now for the latest improvements.',
+      "Update Available",
+      "A new version is ready. Install now for the latest improvements.",
       [
         {
-          text: 'Later',
-          style: 'cancel',
+          text: "Later",
+          style: "cancel",
           onPress: () => {
             alertShown.current = false;
           },
         },
         {
-          text: 'Install Now',
+          text: "Install Now",
           onPress: () => {
             Updates.fetchUpdateAsync().catch(() => {
-              Alert.alert('Update Failed', 'Could not download the update. Please try again later.');
+              Alert.alert(
+                "Update Failed",
+                "Could not download the update. Please try again later.",
+              );
               alertShown.current = false;
             });
           },

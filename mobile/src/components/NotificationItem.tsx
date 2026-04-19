@@ -1,8 +1,8 @@
-import React from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import { NotificationRecord } from '../hooks/use-notifications';
-import { formatRelativeTime } from '../utils/format-time';
+import React from "react";
+import { Pressable, Text, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { NotificationRecord } from "../hooks/use-notifications";
+import { formatRelativeTime } from "../utils/format-time";
 
 type Props = {
   item: NotificationRecord;
@@ -38,8 +38,8 @@ export function NotificationItem({ item, isLast, onLongPress }: Props) {
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     paddingHorizontal: 16,
     paddingVertical: 10,
     gap: 8,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create((theme) => ({
   title: {
     color: theme.colors.text,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   text: {
     color: theme.colors.textSecondary,
@@ -65,7 +65,7 @@ const styles = StyleSheet.create((theme) => ({
   empty: {
     color: theme.colors.textTertiary,
     fontSize: 12,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   time: {
     color: theme.colors.textTertiary,

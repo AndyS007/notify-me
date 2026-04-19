@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 
 type Props = {
   onPress: () => void;
@@ -11,15 +11,19 @@ type Props = {
 
 export function PermissionBanner({
   onPress,
-  title = 'Notification access required',
-  subtitle = 'Grant notification listener access so this app can track incoming notifications.',
-  buttonText = 'Grant Access',
+  title = "Notification access required",
+  subtitle = "Grant notification listener access so this app can track incoming notifications.",
+  buttonText = "Grant Access",
 }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
-      <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
         <Text style={styles.buttonText}>{buttonText}</Text>
       </TouchableOpacity>
     </View>
@@ -39,7 +43,7 @@ const styles = StyleSheet.create((theme) => ({
   title: {
     color: theme.colors.text,
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   subtitle: {
     color: theme.colors.bannerSubtext,
@@ -51,12 +55,12 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 18,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 4,
   },
   buttonText: {
     color: theme.colors.accentText,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 }));

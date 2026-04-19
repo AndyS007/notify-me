@@ -78,16 +78,16 @@ export default function SignInScreen() {
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          placeholder='Email'
+          placeholder="Email"
           placeholderTextColor={theme.colors.placeholder}
-          autoCapitalize='none'
-          keyboardType='email-address'
+          autoCapitalize="none"
+          keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
         <TextInput
           style={styles.input}
-          placeholder='Password'
+          placeholder="Password"
           placeholderTextColor={theme.colors.placeholder}
           secureTextEntry
           value={password}
@@ -124,7 +124,7 @@ export default function SignInScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don't have an account? </Text>
-        <Link href='/(auth)/sign-up' asChild>
+        <Link href="/(auth)/sign-up" asChild>
           <Pressable>
             <Text style={styles.link}>Sign up</Text>
           </Pressable>
@@ -189,7 +189,7 @@ const styles = StyleSheet.create((theme) => ({
     borderColor: theme.colors.appleBtnBorder,
   },
   appleBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontWeight: "600",
     fontSize: 15,
   },

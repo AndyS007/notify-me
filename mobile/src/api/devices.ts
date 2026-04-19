@@ -1,18 +1,20 @@
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import DeviceInfo from 'react-native-device-info';
-import { Platform } from 'react-native';
-import { useApiClient, type ApiClient } from './client';
-import type { components } from './schema';
-import { registerForPushTokenAsync } from '../services/push-service';
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import DeviceInfo from "react-native-device-info";
+import { Platform } from "react-native";
+import { useApiClient, type ApiClient } from "./client";
+import type { components } from "./schema";
+import { registerForPushTokenAsync } from "../services/push-service";
 
 // ---- Types (generated from backend OpenAPI) ----
 
-export type RegisterDeviceRequest = components['schemas']['RegisterDeviceRequest'];
-export type RegisterDeviceResponse = components['schemas']['RegisterDeviceResponse'];
-export type DeviceResponse = components['schemas']['DeviceResponse'];
-export type UpdateDeviceRequest = components['schemas']['UpdateDeviceRequest'];
+export type RegisterDeviceRequest =
+  components["schemas"]["RegisterDeviceRequest"];
+export type RegisterDeviceResponse =
+  components["schemas"]["RegisterDeviceResponse"];
+export type DeviceResponse = components["schemas"]["DeviceResponse"];
+export type UpdateDeviceRequest = components["schemas"]["UpdateDeviceRequest"];
 
-const DEVICES_QUERY_KEY = ['devices'] as const;
+const DEVICES_QUERY_KEY = ["devices"] as const;
 
 // ---- API functions ----
 
@@ -35,9 +37,11 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
   };
 }
 
-export async function registerDeviceApi(client: ApiClient): Promise<RegisterDeviceResponse> {
+export async function registerDeviceApi(
+  client: ApiClient,
+): Promise<RegisterDeviceResponse> {
   const body = await collectDeviceInfo();
-  const { data } = await client.POST('/devices/register', { body });
+  const { data } = await client.POST("/devices/register", { body });
   return data!;
 }
 
@@ -51,7 +55,7 @@ export function useRegisterDevice() {
 }
 
 async function fetchDevices(client: ApiClient): Promise<DeviceResponse[]> {
-  const { data } = await client.GET('/devices');
+  const { data } = await client.GET("/devices");
   return data ?? [];
 }
 
@@ -68,7 +72,7 @@ async function updateDeviceApi(
   id: string,
   body: UpdateDeviceRequest,
 ): Promise<DeviceResponse> {
-  const { data } = await client.PATCH('/devices/{id}', {
+  const { data } = await client.PATCH("/devices/{id}", {
     params: { path: { id } },
     body,
   });
@@ -83,7 +87,8 @@ export function useUpdateDevicePushEnabled() {
       updateDeviceApi(client, id, { pushEnabled }),
     onMutate: async ({ id, pushEnabled }) => {
       await queryClient.cancelQueries({ queryKey: DEVICES_QUERY_KEY });
-      const previous = queryClient.getQueryData<DeviceResponse[]>(DEVICES_QUERY_KEY);
+      const previous =
+        queryClient.getQueryData<DeviceResponse[]>(DEVICES_QUERY_KEY);
       queryClient.setQueryData<DeviceResponse[]>(DEVICES_QUERY_KEY, (old) =>
         old?.map((d) => (d.id === id ? { ...d, pushEnabled } : d)),
       );

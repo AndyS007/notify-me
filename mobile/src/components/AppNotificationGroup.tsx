@@ -1,19 +1,19 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import Animated, {
   FadeInDown,
   FadeOut,
   LinearTransition,
-} from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { StyleSheet } from 'react-native-unistyles';
-import { AppIcon } from './AppIcon';
-import { NotificationItem } from './NotificationItem';
-import { ContextMenu, type ContextMenuAction } from './ContextMenu';
-import { NotificationGroup } from '../hooks/use-notifications';
-import { useAppIcon } from '../hooks/use-app-icon';
-import { AppInfo } from '../services/app-list-service';
-import { formatRelativeTime } from '../utils/format-time';
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+import { StyleSheet } from "react-native-unistyles";
+import { AppIcon } from "./AppIcon";
+import { NotificationItem } from "./NotificationItem";
+import { ContextMenu, type ContextMenuAction } from "./ContextMenu";
+import { NotificationGroup } from "../hooks/use-notifications";
+import { useAppIcon } from "../hooks/use-app-icon";
+import { AppInfo } from "../services/app-list-service";
+import { formatRelativeTime } from "../utils/format-time";
 
 type Props = {
   group: NotificationGroup;
@@ -74,7 +74,7 @@ export function AppNotificationGroup({ group, appInfo, onDisableApp }: Props) {
 
           {!expanded && (
             <Text style={styles.preview} numberOfLines={1}>
-              {latest.title ? `${latest.title}: ` : ''}
+              {latest.title ? `${latest.title}: ` : ""}
               {latest.text}
             </Text>
           )}
@@ -84,7 +84,7 @@ export function AppNotificationGroup({ group, appInfo, onDisableApp }: Props) {
           <Text style={styles.time}>
             {formatRelativeTime(group.latestTimestamp)}
           </Text>
-          <Text style={styles.chevron}>{expanded ? '▲' : '▼'}</Text>
+          <Text style={styles.chevron}>{expanded ? "▲" : "▼"}</Text>
         </View>
       </TouchableOpacity>
 
@@ -114,11 +114,11 @@ const styles = StyleSheet.create((theme) => ({
     marginHorizontal: 16,
     marginVertical: 5,
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     gap: 12,
   },
@@ -127,14 +127,14 @@ const styles = StyleSheet.create((theme) => ({
     gap: 4,
   },
   nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   appName: {
     color: theme.colors.text,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
   },
   badge: {
@@ -142,21 +142,21 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 10,
     minWidth: 20,
     height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 5,
   },
   badgeText: {
     color: theme.colors.badgeText,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   preview: {
     color: theme.colors.textSecondary,
     fontSize: 13,
   },
   headerMeta: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     gap: 6,
   },
   time: {

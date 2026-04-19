@@ -71,16 +71,12 @@
       "indexes": {
         "idx_pkg": {
           "name": "idx_pkg",
-          "columns": [
-            "package_name"
-          ],
+          "columns": ["package_name"],
           "isUnique": false
         },
         "idx_ts": {
           "name": "idx_ts",
-          "columns": [
-            "timestamp"
-          ],
+          "columns": ["timestamp"],
           "isUnique": false
         }
       },

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { loadAppIcon } from '../services/app-list-service';
+import { useState, useEffect } from "react";
+import { loadAppIcon } from "../services/app-list-service";
 
 export function useAppIcon(packageName: string, size = 64) {
   const [icon, setIcon] = useState<string | null>(null);

@@ -1,28 +1,35 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FlatList, RefreshControl, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as SQLite from 'expo-sqlite';
-import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useNotifications } from '../hooks/use-notifications';
-import { useAppList } from '../hooks/use-app-list';
-import { useAppSettings } from '../hooks/use-app-settings';
-import { usePermission } from '../hooks/use-permission';
-import { useSmsPermission } from '../hooks/use-sms-permission';
-import { useApiClient } from '../api/client';
-import { syncUnsynced, pullRemoteNotifications } from '../services/sync-service';
-import { startSmsListener } from '../services/sms-listener';
-import { AppNotificationGroup } from '../components/AppNotificationGroup';
-import { EmptyState } from '../components/EmptyState';
-import { PermissionBanner } from '../components/PermissionBanner';
-import { ThemeToggle } from '../components/ThemeToggle';
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { FlatList, RefreshControl, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as SQLite from "expo-sqlite";
+import { useFocusEffect } from "@react-navigation/native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useNotifications } from "../hooks/use-notifications";
+import { useAppList } from "../hooks/use-app-list";
+import { useAppSettings } from "../hooks/use-app-settings";
+import { usePermission } from "../hooks/use-permission";
+import { useSmsPermission } from "../hooks/use-sms-permission";
+import { useApiClient } from "../api/client";
+import {
+  syncUnsynced,
+  pullRemoteNotifications,
+} from "../services/sync-service";
+import { startSmsListener } from "../services/sms-listener";
+import { AppNotificationGroup } from "../components/AppNotificationGroup";
+import { EmptyState } from "../components/EmptyState";
+import { PermissionBanner } from "../components/PermissionBanner";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 export default function NotificationsScreen() {
   const { groups, loading, refresh } = useNotifications();
   // Include system apps in the lookup map so that any notifications from
   // system apps the user has explicitly enabled still get their icon/name.
   const { appMap } = useAppList(true);
-  const { settings: appSettings, toggle: toggleApp, refresh: refreshSettings } = useAppSettings();
+  const {
+    settings: appSettings,
+    toggle: toggleApp,
+    refresh: refreshSettings,
+  } = useAppSettings();
   const { hasPermission, request, recheck } = usePermission();
   const {
     hasPermission: hasSmsPermission,
@@ -70,11 +77,11 @@ export default function NotificationsScreen() {
   // Refresh list + push sync whenever the headless task writes a new notification to the DB
   useEffect(() => {
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
-      if (tableName === 'notifications') {
+      if (tableName === "notifications") {
         refresh();
         triggerPushSync();
       }
-      if (tableName === 'app_settings') {
+      if (tableName === "app_settings") {
         refreshSettings();
       }
     });
@@ -87,7 +94,7 @@ export default function NotificationsScreen() {
       refresh();
       triggerPushSync();
       triggerPullSync();
-    }, [refresh, triggerPushSync, triggerPullSync])
+    }, [refresh, triggerPushSync, triggerPullSync]),
   );
 
   // Re-check permission every 3s while not yet granted (user may grant via settings)
@@ -125,7 +132,7 @@ export default function NotificationsScreen() {
   }, [client, refresh, triggerPushSync]);
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Notifications</Text>
         <View style={styles.headerRight}>
@@ -136,9 +143,7 @@ export default function NotificationsScreen() {
         </View>
       </View>
 
-      {hasPermission === false && (
-        <PermissionBanner onPress={request} />
-      )}
+      {hasPermission === false && <PermissionBanner onPress={request} />}
 
       {hasSmsPermission === false && (
         <PermissionBanner
@@ -183,19 +188,19 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   title: {
     color: theme.colors.text,
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   subtitle: {
     color: theme.colors.textTertiary,
