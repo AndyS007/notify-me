@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { FlatList, RefreshControl, Text, View } from "react-native";
+import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SQLite from "expo-sqlite";
 import { useFocusEffect } from "@react-navigation/native";
@@ -9,7 +9,6 @@ import { useAppList } from "../hooks/use-app-list";
 import { useAppSettings } from "../hooks/use-app-settings";
 import { usePermission } from "../hooks/use-permission";
 import { useSmsPermission } from "../hooks/use-sms-permission";
-import { useApiClient } from "../api/client";
 import {
   syncUnsynced,
   pullRemoteNotifications,
@@ -37,7 +36,6 @@ export default function NotificationsScreen() {
     recheck: recheckSms,
   } = useSmsPermission();
   const { theme } = useUnistyles();
-  const client = useApiClient();
 
   // Filter out groups whose app has been disabled
   const visibleGroups = useMemo(
@@ -63,16 +61,16 @@ export default function NotificationsScreen() {
   const triggerPushSync = useCallback(() => {
     if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
     pushTimerRef.current = setTimeout(() => {
-      syncUnsynced(client).catch(() => {});
+      syncUnsynced().catch(() => {});
     }, 1000);
-  }, [client]);
+  }, []);
 
   const triggerPullSync = useCallback(() => {
     if (pullTimerRef.current) clearTimeout(pullTimerRef.current);
     pullTimerRef.current = setTimeout(() => {
-      pullRemoteNotifications(client).catch(() => {});
+      pullRemoteNotifications().catch(() => {});
     }, 1000);
-  }, [client]);
+  }, []);
 
   // Refresh list + push sync whenever the headless task writes a new notification to the DB
   useEffect(() => {
@@ -123,13 +121,13 @@ export default function NotificationsScreen() {
 
   const onRefresh = useCallback(async () => {
     try {
-      await pullRemoteNotifications(client);
+      await pullRemoteNotifications();
     } catch {
       // pull failed — continue with local data
     }
     refresh();
     triggerPushSync();
-  }, [client, refresh, triggerPushSync]);
+  }, [refresh, triggerPushSync]);
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
@@ -143,9 +141,11 @@ export default function NotificationsScreen() {
         </View>
       </View>
 
-      {hasPermission === false && <PermissionBanner onPress={request} />}
+      {Platform.OS === "android" && hasPermission === false && (
+        <PermissionBanner onPress={request} />
+      )}
 
-      {hasSmsPermission === false && (
+      {Platform.OS === "android" && hasSmsPermission === false && (
         <PermissionBanner
           onPress={handleRequestSms}
           title="SMS access required"

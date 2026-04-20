@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import DeviceInfo from "react-native-device-info";
 import { Platform } from "react-native";
-import { useApiClient, type ApiClient } from "./client";
+import { client } from "./client";
 import type { components } from "./schema";
 import { registerForPushTokenAsync } from "../services/push-service";
 
@@ -37,38 +37,18 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
   };
 }
 
-export async function registerDeviceApi(
-  client: ApiClient,
-): Promise<RegisterDeviceResponse> {
+export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
   const body = await collectDeviceInfo();
   const { data } = await client.POST("/devices/register", { body });
   return data!;
 }
 
-// ---- Hooks ----
-
-export function useRegisterDevice() {
-  const client = useApiClient();
-  return useMutation({
-    mutationFn: () => registerDeviceApi(client),
-  });
-}
-
-async function fetchDevices(client: ApiClient): Promise<DeviceResponse[]> {
+async function fetchDevices(): Promise<DeviceResponse[]> {
   const { data } = await client.GET("/devices");
   return data ?? [];
 }
 
-export function useDevices() {
-  const client = useApiClient();
-  return useQuery({
-    queryKey: DEVICES_QUERY_KEY,
-    queryFn: () => fetchDevices(client),
-  });
-}
-
 async function updateDeviceApi(
-  client: ApiClient,
   id: string,
   body: UpdateDeviceRequest,
 ): Promise<DeviceResponse> {
@@ -79,12 +59,26 @@ async function updateDeviceApi(
   return data!;
 }
 
+// ---- Hooks ----
+
+export function useRegisterDevice() {
+  return useMutation({
+    mutationFn: () => registerDeviceApi(),
+  });
+}
+
+export function useDevices() {
+  return useQuery({
+    queryKey: DEVICES_QUERY_KEY,
+    queryFn: () => fetchDevices(),
+  });
+}
+
 export function useUpdateDevicePushEnabled() {
-  const client = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, pushEnabled }: { id: string; pushEnabled: boolean }) =>
-      updateDeviceApi(client, id, { pushEnabled }),
+      updateDeviceApi(id, { pushEnabled }),
     onMutate: async ({ id, pushEnabled }) => {
       await queryClient.cancelQueries({ queryKey: DEVICES_QUERY_KEY });
       const previous =

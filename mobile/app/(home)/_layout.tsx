@@ -1,10 +1,10 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@clerk/expo";
 import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUnistyles } from "react-native-unistyles";
 import { useRegisterDevice } from "../../src/api/devices";
-import { useApiClient } from "../../src/api/client";
 import {
   pullRemoteNotifications,
   syncUnsynced,
@@ -20,7 +20,6 @@ export default function HomeLayout() {
   const { mutate: registerDevice } = useRegisterDevice();
   const registered = useRef(false);
   const { theme } = useUnistyles();
-  const client = useApiClient();
 
   useEffect(() => {
     if (!isSignedIn || registered.current) return;
@@ -33,11 +32,8 @@ export default function HomeLayout() {
   useEffect(() => {
     if (!isSignedIn) return;
 
-    // When a push arrives we pull fresh notifications into local SQLite so
-    // that when the user focuses the list it reflects what the other device
-    // just captured. The screen itself re-loads on focus.
     const syncOnPush = () => {
-      pullRemoteNotifications(client).catch((err) =>
+      pullRemoteNotifications().catch((err) =>
         console.warn("[push] pull sync failed:", err),
       );
     };
@@ -49,17 +45,14 @@ export default function HomeLayout() {
       receivedSub.remove();
       responseSub.remove();
     };
-  }, [isSignedIn, client]);
+  }, [isSignedIn]);
 
-  // Start the SMS listener once the user is authenticated. It writes inbound
-  // messages straight into the notifications table and triggers the shared
-  // sync so SMS rows propagate to the backend just like regular notifications.
   useEffect(() => {
     if (!isSignedIn) return;
     startSmsListener(() => {
-      syncUnsynced(client).catch(() => {});
+      syncUnsynced().catch(() => {});
     }).catch(() => {});
-  }, [isSignedIn, client]);
+  }, [isSignedIn]);
 
   if (!isLoaded) return null;
 
@@ -101,6 +94,7 @@ export default function HomeLayout() {
         name="settings"
         options={{
           title: "App Settings",
+          href: Platform.OS === "android" ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),

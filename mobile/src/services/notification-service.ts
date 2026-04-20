@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import RNAndroidNotificationListener from "react-native-android-notification-listener";
 import { db } from "../db";
 import { notifications } from "../db/schema";
@@ -18,10 +19,14 @@ export type RawNotification = {
 };
 
 export async function getPermissionStatus(): Promise<string> {
+  // iOS has no equivalent to Android's NotificationListenerService — report
+  // authorized so the permission banner never appears on iOS.
+  if (Platform.OS !== "android") return "authorized";
   return RNAndroidNotificationListener.getPermissionStatus();
 }
 
 export function openPermissionSettings(): void {
+  if (Platform.OS !== "android") return;
   RNAndroidNotificationListener.requestPermission();
 }
 
