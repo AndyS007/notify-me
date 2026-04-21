@@ -19,7 +19,7 @@ import java.util.UUID
 // ---- DTOs ----
 
 data class CreateNotificationRequest(
-    val deviceId: String? = null,
+    val deviceId: String,
     val packageName: String,
     val appName: String,
     val title: String,
@@ -33,7 +33,7 @@ data class BatchCreateNotificationRequest(
 
 data class NotificationResponse(
     val id: String,
-    val deviceId: String?,
+    val deviceId: String,
     val packageName: String,
     val appName: String,
     val title: String,
@@ -77,7 +77,12 @@ class NotificationController(
         httpRequest: HttpServletRequest,
     ): ResponseEntity<NotificationResponse> {
         val user = httpRequest.getAttribute(ClerkAuthFilter.USER_ATTRIBUTE) as User
-        val device = request.deviceId?.let { deviceRepository.findByUserAndDeviceId(user, it) }
+
+        if (request.deviceId.isBlank()) {
+            return ResponseEntity.badRequest().build()
+        }
+        val device = deviceRepository.findByUserAndDeviceId(user, request.deviceId)
+            ?: return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build()
 
         if (notificationRepository.existsByNaturalKey(user, device, request.packageName, request.timestamp)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build()
@@ -108,13 +113,30 @@ class NotificationController(
         httpRequest: HttpServletRequest,
     ): ResponseEntity<BatchCreateNotificationResponse> {
         val user = httpRequest.getAttribute(ClerkAuthFilter.USER_ATTRIBUTE) as User
+
+        // Reject the whole batch if any item is missing a deviceId — the mobile
+        // app must register its device before syncing.
+        if (request.notifications.any { it.deviceId.isBlank() }) {
+            return ResponseEntity.badRequest().build()
+        }
+
+        // Resolve every referenced deviceId up front so we fail fast when the
+        // device isn't registered rather than partially saving.
+        val requestedDeviceIds = request.notifications.map { it.deviceId }.toSet()
+        val devicesByDeviceId = requestedDeviceIds
+            .mapNotNull { id -> deviceRepository.findByUserAndDeviceId(user, id)?.let { id to it } }
+            .toMap()
+        if (devicesByDeviceId.size != requestedDeviceIds.size) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build()
+        }
+
         var created = 0
         var duplicates = 0
         val savedForFanOut = mutableListOf<Notification>()
         val originDeviceIds = mutableSetOf<String>()
 
         for (item in request.notifications) {
-            val device = item.deviceId?.let { deviceRepository.findByUserAndDeviceId(user, it) }
+            val device = devicesByDeviceId.getValue(item.deviceId)
 
             if (notificationRepository.existsByNaturalKey(user, device, item.packageName, item.timestamp)) {
                 duplicates++
@@ -133,7 +155,7 @@ class NotificationController(
                 )
             )
             savedForFanOut.add(saved)
-            item.deviceId?.let { originDeviceIds.add(it) }
+            originDeviceIds.add(item.deviceId)
             created++
         }
 
@@ -257,7 +279,7 @@ class NotificationController(
 
     private fun Notification.toResponse() = NotificationResponse(
         id = id.toString(),
-        deviceId = device?.deviceId,
+        deviceId = device.deviceId,
         packageName = packageName,
         appName = appName,
         title = title,

@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 import RNAndroidNotificationListener from "react-native-android-notification-listener";
 import { db } from "../db";
 import { notifications } from "../db/schema";
+import { getLocalDeviceId } from "../api/devices";
 import { isAppEnabled } from "./app-settings-service";
 
 export type RawNotification = {
@@ -45,7 +46,10 @@ export async function saveNotification(
   const enabled = await isAppEnabled(packageName);
   if (!enabled) return;
 
+  const deviceId = await getLocalDeviceId();
+
   await db.insert(notifications).values({
+    deviceId,
     packageName,
     appName,
     title,

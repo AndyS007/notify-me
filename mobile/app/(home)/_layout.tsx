@@ -25,7 +25,11 @@ export default function HomeLayout() {
     if (!isSignedIn || registered.current) return;
     registered.current = true;
     registerDevice(undefined, {
-      onError: (err) => console.warn("Device registration failed:", err),
+      onError: (err) => {
+        console.warn("Device registration failed:", err);
+        // Allow the next run of this effect to retry (e.g. on re-sign-in).
+        registered.current = false;
+      },
     });
   }, [isSignedIn, registerDevice]);
 

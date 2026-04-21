@@ -28,10 +28,10 @@ interface NotificationRepository : JpaRepository<Notification, UUID> {
         SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END
         FROM Notification n
         WHERE n.user = :user
+          AND n.device = :device
           AND n.packageName = :packageName
           AND n.timestamp = :timestamp
-          AND (n.device = :device OR (n.device IS NULL AND :device IS NULL))
         """
     )
-    fun existsByNaturalKey(user: User, device: Device?, packageName: String, timestamp: Long): Boolean
+    fun existsByNaturalKey(user: User, device: Device, packageName: String, timestamp: Long): Boolean
 }

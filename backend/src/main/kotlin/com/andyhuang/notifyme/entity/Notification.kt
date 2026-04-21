@@ -23,8 +23,8 @@ class Notification(
     val user: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "device_id")
-    val device: Device? = null,
+    @JoinColumn(name = "device_id", nullable = false)
+    val device: Device,
 
     @Column(name = "package_name", nullable = false)
     val packageName: String,

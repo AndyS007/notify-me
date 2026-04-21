@@ -182,7 +182,7 @@ export interface components {
       pushEnabled?: boolean;
     };
     CreateNotificationRequest: {
-      deviceId?: string;
+      deviceId: string;
       packageName: string;
       appName: string;
       title: string;

@@ -18,9 +18,33 @@ const DEVICES_QUERY_KEY = ["devices"] as const;
 
 // ---- API functions ----
 
+// Cache the local deviceId. getUniqueId() is stable for the lifetime of the
+// install, so we read it once.
+let cachedDeviceId: string | null = null;
+
+export async function getLocalDeviceId(): Promise<string> {
+  if (cachedDeviceId) return cachedDeviceId;
+  cachedDeviceId = await DeviceInfo.getUniqueId();
+  return cachedDeviceId;
+}
+
+// Tracks whether the current install has completed a successful
+// /devices/register call. The backend rejects notification syncs from
+// unregistered devices, so the sync pipeline gates on this.
+let registrationPromise: Promise<RegisterDeviceResponse> | null = null;
+let deviceRegistered = false;
+
+export function isDeviceRegistered(): boolean {
+  return deviceRegistered;
+}
+
+export function waitForDeviceRegistration(): Promise<RegisterDeviceResponse> | null {
+  return registrationPromise;
+}
+
 async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
   const [deviceId, deviceName, expoPushToken] = await Promise.all([
-    DeviceInfo.getUniqueId(),
+    getLocalDeviceId(),
     DeviceInfo.getDeviceName(),
     registerForPushTokenAsync(),
   ]);
@@ -38,9 +62,19 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
 }
 
 export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
-  const body = await collectDeviceInfo();
-  const { data } = await client.POST("/devices/register", { body });
-  return data!;
+  if (registrationPromise) return registrationPromise;
+  registrationPromise = (async () => {
+    try {
+      const body = await collectDeviceInfo();
+      const { data } = await client.POST("/devices/register", { body });
+      deviceRegistered = true;
+      return data!;
+    } catch (err) {
+      registrationPromise = null;
+      throw err;
+    }
+  })();
+  return registrationPromise;
 }
 
 async function fetchDevices(): Promise<DeviceResponse[]> {
