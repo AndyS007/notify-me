@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUnistyles } from "react-native-unistyles";
-import { useRegisterDevice } from "../../src/api/devices";
+import { syncPushTokenAsync, useRegisterDevice } from "../../src/api/devices";
 import {
   pullRemoteNotifications,
   syncUnsynced,
@@ -25,6 +25,14 @@ export default function HomeLayout() {
     if (!isSignedIn || registered.current) return;
     registered.current = true;
     registerDevice(undefined, {
+      onSuccess: () => {
+        // Fire-and-forget the notification permission prompt + push token
+        // upload. This runs AFTER the device row exists so it only ever
+        // updates the expoPushToken column.
+        syncPushTokenAsync().catch((err) =>
+          console.warn("Push token sync failed:", err),
+        );
+      },
       onError: (err) => {
         console.warn("Device registration failed:", err);
         // Allow the next run of this effect to retry (e.g. on re-sign-in).

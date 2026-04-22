@@ -43,10 +43,9 @@ export function waitForDeviceRegistration(): Promise<RegisterDeviceResponse> | n
 }
 
 async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
-  const [deviceId, deviceName, expoPushToken] = await Promise.all([
+  const [deviceId, deviceName] = await Promise.all([
     getLocalDeviceId(),
     DeviceInfo.getDeviceName(),
-    registerForPushTokenAsync(),
   ]);
   return {
     deviceId,
@@ -56,7 +55,6 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
     osName: DeviceInfo.getSystemName(),
     osVersion: DeviceInfo.getSystemVersion(),
     appVersion: DeviceInfo.getVersion(),
-    expoPushToken: expoPushToken ?? undefined,
     platform: Platform.OS,
   };
 }
@@ -75,6 +73,35 @@ export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
     }
   })();
   return registrationPromise;
+}
+
+// Asks the OS for notification permission and, if granted, PATCHes the new
+// Expo push token onto the already-registered device. Safe to call multiple
+// times — the token won't change for the lifetime of the install. Sequenced
+// after registerDeviceApi so the device row exists before we try to update
+// it.
+export async function syncPushTokenAsync(): Promise<void> {
+  if (registrationPromise) {
+    try {
+      await registrationPromise;
+    } catch {
+      return;
+    }
+  } else if (!deviceRegistered) {
+    return;
+  }
+
+  const expoPushToken = await registerForPushTokenAsync();
+  if (!expoPushToken) return;
+
+  const deviceId = await getLocalDeviceId();
+  await client.POST("/devices/register", {
+    body: {
+      deviceId,
+      platform: Platform.OS,
+      expoPushToken,
+    },
+  });
 }
 
 async function fetchDevices(): Promise<DeviceResponse[]> {
