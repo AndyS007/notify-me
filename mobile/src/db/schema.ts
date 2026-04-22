@@ -10,6 +10,7 @@ export const notifications = sqliteTable(
   "notifications",
   {
     id: int("id").primaryKey({ autoIncrement: true }),
+    deviceId: text("device_id").notNull().default(""),
     packageName: text("package_name").notNull(),
     appName: text("app_name").notNull().default(""),
     title: text("title").notNull().default(""),

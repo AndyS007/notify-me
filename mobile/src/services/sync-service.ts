@@ -4,6 +4,11 @@ import {
   fetchNotificationsApi,
   syncNotificationsApi,
 } from "../api/notifications";
+import {
+  getLocalDeviceId,
+  isDeviceRegistered,
+  waitForDeviceRegistration,
+} from "../api/devices";
 import { db } from "../db";
 import { notifications } from "../db/schema";
 
@@ -17,6 +22,30 @@ export async function syncUnsynced(): Promise<{
   duplicates: number;
 }> {
   return pushMutex.runExclusive(async () => {
+    // The backend rejects notification syncs from unregistered devices, so we
+    // wait for registration before sending anything. If registration is still
+    // in flight we block on it; if it has never been attempted we bail out
+    // and leave the rows in the unsynced state for the next pass.
+    if (!isDeviceRegistered()) {
+      const pending = waitForDeviceRegistration();
+      if (!pending) return { created: 0, duplicates: 0 };
+      try {
+        await pending;
+      } catch {
+        return { created: 0, duplicates: 0 };
+      }
+    }
+
+    const localDeviceId = await getLocalDeviceId();
+
+    // Backfill any legacy rows that were inserted before device_id was a
+    // required column. They were all captured on THIS device, so stamping
+    // the current deviceId is correct.
+    await db
+      .update(notifications)
+      .set({ deviceId: localDeviceId })
+      .where(eq(notifications.deviceId, ""));
+
     const unsynced = await db
       .select()
       .from(notifications)
@@ -32,6 +61,7 @@ export async function syncUnsynced(): Promise<{
 
       const result = await syncNotificationsApi({
         notifications: chunk.map((n) => ({
+          deviceId: n.deviceId || localDeviceId,
           packageName: n.packageName,
           appName: n.appName,
           title: n.title,
@@ -93,6 +123,7 @@ export async function pullRemoteNotifications(): Promise<{ inserted: number }> {
       if (localKeys.has(key)) continue;
 
       await db.insert(notifications).values({
+        deviceId: item.deviceId ?? "",
         packageName: item.packageName,
         appName: item.appName ?? "",
         title: item.title ?? "",

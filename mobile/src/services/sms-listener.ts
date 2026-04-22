@@ -10,6 +10,7 @@ import {
 } from "@maniac-tech/react-native-expo-read-sms";
 import { db } from "../db";
 import { notifications } from "../db/schema";
+import { getLocalDeviceId } from "../api/devices";
 
 /**
  * Synthetic package identifier stored on every SMS row so that inbound SMS
@@ -61,7 +62,9 @@ function parseNativeSmsPayload(raw: string): { address: string; body: string } {
 
 async function persistSms(address: string, body: string): Promise<void> {
   if (!address && !body) return;
+  const deviceId = await getLocalDeviceId();
   await db.insert(notifications).values({
+    deviceId,
     packageName: SMS_PACKAGE_NAME,
     appName: SMS_APP_NAME,
     title: address,
