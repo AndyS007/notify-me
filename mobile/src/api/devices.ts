@@ -28,20 +28,6 @@ export async function getLocalDeviceId(): Promise<string> {
   return cachedDeviceId;
 }
 
-// Tracks whether the current install has completed a successful
-// /devices/register call. The backend rejects notification syncs from
-// unregistered devices, so the sync pipeline gates on this.
-let registrationPromise: Promise<RegisterDeviceResponse> | null = null;
-let deviceRegistered = false;
-
-export function isDeviceRegistered(): boolean {
-  return deviceRegistered;
-}
-
-export function waitForDeviceRegistration(): Promise<RegisterDeviceResponse> | null {
-  return registrationPromise;
-}
-
 async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
   const [deviceId, deviceName] = await Promise.all([
     getLocalDeviceId(),
@@ -60,37 +46,16 @@ async function collectDeviceInfo(): Promise<RegisterDeviceRequest> {
 }
 
 export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
-  if (registrationPromise) return registrationPromise;
-  registrationPromise = (async () => {
-    try {
-      const body = await collectDeviceInfo();
-      const { data } = await client.POST("/devices/register", { body });
-      deviceRegistered = true;
-      return data!;
-    } catch (err) {
-      registrationPromise = null;
-      throw err;
-    }
-  })();
-  return registrationPromise;
+  const body = await collectDeviceInfo();
+  const { data } = await client.POST("/devices/register", { body });
+  return data!;
 }
 
 // Asks the OS for notification permission and, if granted, PATCHes the new
-// Expo push token onto the already-registered device. Safe to call multiple
-// times — the token won't change for the lifetime of the install. Sequenced
-// after registerDeviceApi so the device row exists before we try to update
-// it.
+// Expo push token onto the already-registered device. Callers must ensure
+// registerDeviceApi has resolved first — the home layout chains this in the
+// register mutation's onSuccess.
 export async function syncPushTokenAsync(): Promise<void> {
-  if (registrationPromise) {
-    try {
-      await registrationPromise;
-    } catch {
-      return;
-    }
-  } else if (!deviceRegistered) {
-    return;
-  }
-
   const expoPushToken = await registerForPushTokenAsync();
   if (!expoPushToken) return;
 

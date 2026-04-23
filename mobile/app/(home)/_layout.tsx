@@ -1,7 +1,7 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@clerk/expo";
-import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+import { useEffect } from "react";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUnistyles } from "react-native-unistyles";
 import { syncPushTokenAsync, useRegisterDevice } from "../../src/api/devices";
@@ -17,13 +17,15 @@ import { startSmsListener } from "../../src/services/sms-listener";
 
 export default function HomeLayout() {
   const { isSignedIn, isLoaded } = useAuth();
-  const { mutate: registerDevice } = useRegisterDevice();
-  const registered = useRef(false);
+  const {
+    mutate: registerDevice,
+    isSuccess: isDeviceRegistered,
+    isPending: isRegistering,
+  } = useRegisterDevice();
   const { theme } = useUnistyles();
 
   useEffect(() => {
-    if (!isSignedIn || registered.current) return;
-    registered.current = true;
+    if (!isSignedIn || isDeviceRegistered || isRegistering) return;
     registerDevice(undefined, {
       onSuccess: () => {
         // Fire-and-forget the notification permission prompt + push token
@@ -35,14 +37,12 @@ export default function HomeLayout() {
       },
       onError: (err) => {
         console.warn("Device registration failed:", err);
-        // Allow the next run of this effect to retry (e.g. on re-sign-in).
-        registered.current = false;
       },
     });
-  }, [isSignedIn, registerDevice]);
+  }, [isSignedIn, isDeviceRegistered, isRegistering, registerDevice]);
 
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!isDeviceRegistered) return;
 
     const syncOnPush = () => {
       pullRemoteNotifications().catch((err) =>
@@ -57,19 +57,37 @@ export default function HomeLayout() {
       receivedSub.remove();
       responseSub.remove();
     };
-  }, [isSignedIn]);
+  }, [isDeviceRegistered]);
 
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!isDeviceRegistered) return;
     startSmsListener(() => {
       syncUnsynced().catch(() => {});
     }).catch(() => {});
-  }, [isSignedIn]);
+  }, [isDeviceRegistered]);
 
   if (!isLoaded) return null;
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  // Gate every home screen on the device being registered. Downstream code
+  // (sync-service, push listeners, SMS listener) can assume the backend has
+  // a row for this device.
+  if (!isDeviceRegistered) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: theme.colors.surface,
+        }}
+      >
+        <ActivityIndicator color={theme.colors.accent} />
+      </View>
+    );
   }
 
   return (

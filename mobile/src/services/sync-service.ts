@@ -4,11 +4,7 @@ import {
   fetchNotificationsApi,
   syncNotificationsApi,
 } from "../api/notifications";
-import {
-  getLocalDeviceId,
-  isDeviceRegistered,
-  waitForDeviceRegistration,
-} from "../api/devices";
+import { getLocalDeviceId } from "../api/devices";
 import { db } from "../db";
 import { notifications } from "../db/schema";
 
@@ -22,20 +18,6 @@ export async function syncUnsynced(): Promise<{
   duplicates: number;
 }> {
   return pushMutex.runExclusive(async () => {
-    // The backend rejects notification syncs from unregistered devices, so we
-    // wait for registration before sending anything. If registration is still
-    // in flight we block on it; if it has never been attempted we bail out
-    // and leave the rows in the unsynced state for the next pass.
-    if (!isDeviceRegistered()) {
-      const pending = waitForDeviceRegistration();
-      if (!pending) return { created: 0, duplicates: 0 };
-      try {
-        await pending;
-      } catch {
-        return { created: 0, duplicates: 0 };
-      }
-    }
-
     const localDeviceId = await getLocalDeviceId();
 
     // Backfill any legacy rows that were inserted before device_id was a
