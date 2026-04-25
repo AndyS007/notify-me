@@ -1,14 +1,14 @@
-import { between, eq } from "drizzle-orm";
 import { Mutex } from "async-mutex";
-import {
-  fetchNotificationsApi,
-  syncNotificationsApi,
-} from "../api/notifications";
+import { between, eq } from "drizzle-orm";
 import {
   getLocalDeviceId,
   isDeviceRegistered,
   waitForDeviceRegistration,
 } from "../api/devices";
+import {
+  fetchNotificationsApi,
+  syncNotificationsApi,
+} from "../api/notifications";
 import { db } from "../db";
 import { notifications } from "../db/schema";
 
@@ -37,14 +37,6 @@ export async function syncUnsynced(): Promise<{
     }
 
     const localDeviceId = await getLocalDeviceId();
-
-    // Backfill any legacy rows that were inserted before device_id was a
-    // required column. They were all captured on THIS device, so stamping
-    // the current deviceId is correct.
-    await db
-      .update(notifications)
-      .set({ deviceId: localDeviceId })
-      .where(eq(notifications.deviceId, ""));
 
     const unsynced = await db
       .select()
