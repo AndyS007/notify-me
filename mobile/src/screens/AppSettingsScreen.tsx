@@ -1,22 +1,12 @@
 import React, { useCallback, useMemo, useState } from "react";
-import {
-  FlatList,
-  Pressable,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useAuth } from "@clerk/expo";
-import { useRouter } from "expo-router";
 import { useAppList } from "../hooks/use-app-list";
 import { useAppSettings } from "../hooks/use-app-settings";
 import { useAppIcon } from "../hooks/use-app-icon";
 import { AppIcon } from "../components/AppIcon";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { ScreenHeader } from "../components/ScreenHeader";
 import type { AppInfo } from "../services/app-list-service";
 
 type AppRow = AppInfo & { enabled: boolean };
@@ -66,14 +56,7 @@ export default function AppSettingsScreen() {
   const { appMap, ready } = useAppList(showSystem);
   const { settings, loading, toggle } = useAppSettings();
   const { theme } = useUnistyles();
-  const { signOut } = useAuth();
-  const router = useRouter();
   const [search, setSearch] = useState("");
-
-  const onSignOut = async () => {
-    await signOut();
-    router.replace("/(auth)/sign-in");
-  };
 
   const apps = useMemo<AppRow[]>(() => {
     if (!ready) return [];
@@ -112,19 +95,7 @@ export default function AppSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>App Settings</Text>
-        <View style={styles.headerRight}>
-          <ThemeToggle />
-          <Pressable onPress={onSignOut} hitSlop={8}>
-            <Ionicons
-              name="log-out-outline"
-              size={22}
-              color={theme.colors.badge}
-            />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader title="App Settings" />
 
       <View style={styles.searchContainer}>
         <TextInput
@@ -173,24 +144,6 @@ const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  title: {
-    color: theme.colors.text,
-    fontSize: 28,
-    fontWeight: "700",
   },
   searchContainer: {
     paddingHorizontal: 16,

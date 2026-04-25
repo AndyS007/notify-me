@@ -7,7 +7,7 @@ import {
   useUpdateDevicePushEnabled,
   type DeviceResponse,
 } from "../api/devices";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { ScreenHeader } from "../components/ScreenHeader";
 
 function DeviceCard({ device }: { device: DeviceResponse }) {
   const { theme } = useUnistyles();
@@ -86,15 +86,14 @@ export default function DevicesScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Devices</Text>
-        <View style={styles.headerRight}>
-          {devices && devices.length > 0 && (
+      <ScreenHeader
+        title="Devices"
+        rightContent={
+          devices && devices.length > 0 ? (
             <Text style={styles.subtitle}>{devices.length} registered</Text>
-          )}
-          <ThemeToggle />
-        </View>
-      </View>
+          ) : null
+        }
+      />
 
       {isLoading ? (
         <View style={styles.centered}>
@@ -127,24 +126,6 @@ const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  title: {
-    color: theme.colors.text,
-    fontSize: 28,
-    fontWeight: "700",
   },
   subtitle: {
     color: theme.colors.textTertiary,

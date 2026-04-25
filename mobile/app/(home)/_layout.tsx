@@ -1,22 +1,23 @@
-import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@clerk/expo";
-import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Redirect } from "expo-router";
+import { Drawer } from "expo-router/drawer";
+import { useEffect, useRef } from "react";
 import { useUnistyles } from "react-native-unistyles";
 import { syncPushTokenAsync, useRegisterDevice } from "../../src/api/devices";
-import {
-  pullRemoteNotifications,
-  syncUnsynced,
-} from "../../src/services/sync-service";
+import { DrawerContent } from "../../src/components/DrawerContent";
 import {
   addPushReceivedListener,
   addPushResponseListener,
 } from "../../src/services/push-service";
 import { startSmsListener } from "../../src/services/sms-listener";
+import {
+  pullRemoteNotifications,
+  syncUnsynced,
+} from "../../src/services/sync-service";
 
 export default function HomeLayout() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn } = useAuth();
   const { mutate: registerDevice } = useRegisterDevice();
   const registered = useRef(false);
   const { theme } = useUnistyles();
@@ -66,52 +67,47 @@ export default function HomeLayout() {
     }).catch(() => {});
   }, [isSignedIn]);
 
-  if (!isLoaded) return null;
-
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
   return (
-    <Tabs
+    <Drawer
+      drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
+        drawerStyle: {
+          backgroundColor: theme.colors.background,
         },
-        tabBarActiveTintColor: theme.colors.accent,
-        tabBarInactiveTintColor: theme.colors.textTertiary,
+        drawerActiveTintColor: theme.colors.accent,
+        drawerInactiveTintColor: theme.colors.text,
+        drawerActiveBackgroundColor: theme.colors.surface,
+        drawerLabelStyle: {
+          fontSize: 15,
+          fontWeight: "500",
+        },
       }}
     >
-      <Tabs.Screen
-        name="index"
+      <Drawer.Screen
+        name="(tabs)"
         options={{
-          title: "Notifications",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications-outline" size={size} color={color} />
+          drawerLabel: "Home",
+          title: "Home",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
-        name="devices"
+      <Drawer.Screen
+        name="profile"
         options={{
-          title: "Devices",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="phone-portrait-outline" size={size} color={color} />
+          drawerLabel: "Profile",
+          title: "Profile",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person-circle-outline" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "App Settings",
-          href: Platform.OS === "android" ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    </Drawer>
   );
 }
