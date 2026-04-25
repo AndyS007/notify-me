@@ -14,12 +14,14 @@
     "apk": {
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "apk"
     },
     "development": {
       "autoIncrement": true,
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development"
     }
   },
   "submit": {
