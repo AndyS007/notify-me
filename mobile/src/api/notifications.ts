@@ -1,29 +1,23 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { client } from "./client";
-import type { components } from "./schema";
+import {
+  api,
+  type BatchCreateNotificationRequest,
+  type BatchCreateNotificationResponse,
+  type DeleteNotificationsResponse,
+  type NotificationPageResponse,
+} from "./backend";
 
-// ---- Types ----
-
-export type CreateNotificationRequest =
-  components["schemas"]["CreateNotificationRequest"];
-export type BatchCreateNotificationRequest =
-  components["schemas"]["BatchCreateNotificationRequest"];
-export type BatchCreateNotificationResponse =
-  components["schemas"]["BatchCreateNotificationResponse"];
-export type NotificationResponse =
-  components["schemas"]["NotificationResponse"];
-export type NotificationPageResponse =
-  components["schemas"]["NotificationPageResponse"];
-export type DeleteNotificationsResponse =
-  components["schemas"]["DeleteNotificationsResponse"];
-
-// ---- API functions ----
+export type {
+  BatchCreateNotificationRequest,
+  BatchCreateNotificationResponse,
+  NotificationPageResponse,
+  DeleteNotificationsResponse,
+};
 
 export async function syncNotificationsApi(
   request: BatchCreateNotificationRequest,
 ): Promise<BatchCreateNotificationResponse> {
-  const { data } = await client.POST("/notifications/batch", { body: request });
-  return data!;
+  return api.syncNotifications(request);
 }
 
 export async function fetchNotificationsApi(params?: {
@@ -31,28 +25,18 @@ export async function fetchNotificationsApi(params?: {
   page?: number;
   size?: number;
 }): Promise<NotificationPageResponse> {
-  const { data } = await client.GET("/notifications", {
-    params: { query: params },
-  });
-  return data!;
+  return api.fetchNotifications(params);
 }
 
 export async function deleteNotificationApi(id: string): Promise<void> {
-  await client.DELETE("/notifications/{id}", {
-    params: { path: { id } },
-  });
+  await api.deleteNotification(id);
 }
 
 export async function deleteAllNotificationsApi(
   packageName?: string,
 ): Promise<DeleteNotificationsResponse> {
-  const { data } = await client.DELETE("/notifications", {
-    params: { query: packageName ? { packageName } : {} },
-  });
-  return data!;
+  return api.deleteAllNotifications(packageName);
 }
-
-// ---- Hooks ----
 
 export function useSyncNotifications() {
   return useMutation({

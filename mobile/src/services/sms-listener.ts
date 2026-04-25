@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 // The library ships no TypeScript declarations; per project convention we do
 // not fabricate one — everything below is typed as `any`.
-// @ts-expect-error — untyped third-party module
+// @ts-ignore — untyped third-party module
 import {
   checkIfHasSMSPermission,
   requestReadSMSPermission,
