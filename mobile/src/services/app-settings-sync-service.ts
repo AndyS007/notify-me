@@ -22,7 +22,8 @@ export async function pushAppSettings(): Promise<{
     updatedAt: r.updatedAt,
   }));
 
-  return pushAppSettingsApi(items);
+  const result = await pushAppSettingsApi(items);
+  return { created: result.created ?? 0, updated: result.updated ?? 0 };
 }
 
 export async function pullAppSettings(): Promise<{ merged: number }> {

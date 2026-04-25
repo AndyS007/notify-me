@@ -1,25 +1,26 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import DeviceInfo from "react-native-device-info";
 import { Platform } from "react-native";
-import { client } from "./client";
-import type { components } from "./schema";
+import {
+  api,
+  type DeviceResponse,
+  type RegisterDeviceRequest,
+  type RegisterDeviceResponse,
+  type UpdateDeviceRequest,
+} from "./backend";
 import { registerForPushTokenAsync } from "../services/push-service";
 
-// ---- Types (generated from backend OpenAPI) ----
-
-export type RegisterDeviceRequest =
-  components["schemas"]["RegisterDeviceRequest"];
-export type RegisterDeviceResponse =
-  components["schemas"]["RegisterDeviceResponse"];
-export type DeviceResponse = components["schemas"]["DeviceResponse"];
-export type UpdateDeviceRequest = components["schemas"]["UpdateDeviceRequest"];
+export type {
+  RegisterDeviceRequest,
+  RegisterDeviceResponse,
+  DeviceResponse,
+  UpdateDeviceRequest,
+};
 
 const DEVICES_QUERY_KEY = ["devices"] as const;
 
-// ---- API functions ----
+// ---- API helpers ----
 
-// Cache the local deviceId. getUniqueId() is stable for the lifetime of the
-// install, so we read it once.
 let cachedDeviceId: string | null = null;
 
 export async function getLocalDeviceId(): Promise<string> {
@@ -28,9 +29,6 @@ export async function getLocalDeviceId(): Promise<string> {
   return cachedDeviceId;
 }
 
-// Tracks whether the current install has completed a successful
-// /devices/register call. The backend rejects notification syncs from
-// unregistered devices, so the sync pipeline gates on this.
 let registrationPromise: Promise<RegisterDeviceResponse> | null = null;
 let deviceRegistered = false;
 
@@ -64,9 +62,9 @@ export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
   registrationPromise = (async () => {
     try {
       const body = await collectDeviceInfo();
-      const { data } = await client.POST("/devices/register", { body });
+      const result = await api.registerDevice(body);
       deviceRegistered = true;
-      return data!;
+      return result;
     } catch (err) {
       registrationPromise = null;
       throw err;
@@ -75,11 +73,6 @@ export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
   return registrationPromise;
 }
 
-// Asks the OS for notification permission and, if granted, PATCHes the new
-// Expo push token onto the already-registered device. Safe to call multiple
-// times — the token won't change for the lifetime of the install. Sequenced
-// after registerDeviceApi so the device row exists before we try to update
-// it.
 export async function syncPushTokenAsync(): Promise<void> {
   if (registrationPromise) {
     try {
@@ -95,29 +88,22 @@ export async function syncPushTokenAsync(): Promise<void> {
   if (!expoPushToken) return;
 
   const deviceId = await getLocalDeviceId();
-  await client.POST("/devices/register", {
-    body: {
-      deviceId,
-      platform: Platform.OS,
-      expoPushToken,
-    },
+  await api.registerDevice({
+    deviceId,
+    platform: Platform.OS,
+    expoPushToken,
   });
 }
 
 async function fetchDevices(): Promise<DeviceResponse[]> {
-  const { data } = await client.GET("/devices");
-  return data ?? [];
+  return api.fetchDevices();
 }
 
 async function updateDeviceApi(
   id: string,
   body: UpdateDeviceRequest,
 ): Promise<DeviceResponse> {
-  const { data } = await client.PATCH("/devices/{id}", {
-    params: { path: { id } },
-    body,
-  });
-  return data!;
+  return api.updateDevice(id, body);
 }
 
 // ---- Hooks ----

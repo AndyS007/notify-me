@@ -1,26 +1,17 @@
-import { client } from "./client";
-import type { components } from "./schema";
+import {
+  api,
+  type AppSettingItem,
+  type SyncAppSettingsResponse,
+} from "./backend";
 
-// ---- Types ----
-
-export type AppSettingItem = components["schemas"]["AppSettingItem"];
-export type SyncAppSettingsRequest =
-  components["schemas"]["SyncAppSettingsRequest"];
-export type SyncAppSettingsResponse =
-  components["schemas"]["SyncAppSettingsResponse"];
-
-// ---- API functions ----
+export type { AppSettingItem, SyncAppSettingsResponse };
 
 export async function pushAppSettingsApi(
   settings: AppSettingItem[],
 ): Promise<SyncAppSettingsResponse> {
-  const { data } = await client.PUT("/app-settings/sync", {
-    body: { settings },
-  });
-  return data!;
+  return api.pushAppSettings(settings);
 }
 
 export async function pullAppSettingsApi(): Promise<AppSettingItem[]> {
-  const { data } = await client.GET("/app-settings");
-  return data ?? [];
+  return api.pullAppSettings();
 }
