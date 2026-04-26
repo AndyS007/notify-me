@@ -25,9 +25,14 @@ export default function UserProfileScreen() {
   const { theme } = useUnistyles();
   const onSignOut = useSignOutConfirm();
 
+  // Force background through React's render cycle. Unistyles' shadow-side
+  // reactivity doesn't propagate to react-native-safe-area-context's native
+  // view, so the bg sticks on the previous theme until the screen remounts.
+  const rootStyle = [styles.root, { backgroundColor: theme.colors.background }];
+
   if (!isLoaded || !user) {
     return (
-      <SafeAreaView style={styles.root} edges={["top"]}>
+      <SafeAreaView style={rootStyle} edges={["top"]}>
         <ScreenHeader title="Profile" />
         <View style={styles.centered}>
           <ActivityIndicator color={theme.colors.textSecondary} />
@@ -51,7 +56,7 @@ export default function UserProfileScreen() {
     : "—";
 
   return (
-    <SafeAreaView style={styles.root} edges={["top"]}>
+    <SafeAreaView style={rootStyle} edges={["top"]}>
       <ScreenHeader title="Profile" />
 
       <ScrollView contentContainerStyle={styles.scroll}>
