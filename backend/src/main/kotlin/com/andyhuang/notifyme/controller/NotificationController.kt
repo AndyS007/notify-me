@@ -43,9 +43,38 @@ data class NotificationResponse(
     val updatedAt: String,
 )
 
+/**
+ * Created notifications echoed back to the client so it can persist the
+ * server-assigned id locally (used for idempotent dedup on subsequent pulls).
+ * The client correlates entries by the natural key (deviceId, packageName,
+ * timestamp).
+ */
+data class CreatedNotificationItem(
+    val id: String,
+    val deviceId: String,
+    val packageName: String,
+    val timestamp: Long,
+)
+
 data class BatchCreateNotificationResponse(
     val created: Int,
     val duplicates: Int,
+    val createdItems: List<CreatedNotificationItem> = emptyList(),
+)
+
+data class AppSummaryResponse(
+    val packageName: String,
+    val appName: String,
+    val totalCount: Long,
+    val latest: NotificationResponse,
+)
+
+data class AppSummaryPageResponse(
+    val content: List<AppSummaryResponse>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
 )
 
 data class DeleteNotificationsResponse(
@@ -133,6 +162,7 @@ class NotificationController(
         var created = 0
         var duplicates = 0
         val savedForFanOut = mutableListOf<Notification>()
+        val createdItems = mutableListOf<CreatedNotificationItem>()
         val originDeviceIds = mutableSetOf<String>()
 
         for (item in request.notifications) {
@@ -155,6 +185,14 @@ class NotificationController(
                 )
             )
             savedForFanOut.add(saved)
+            createdItems.add(
+                CreatedNotificationItem(
+                    id = saved.id.toString(),
+                    deviceId = item.deviceId,
+                    packageName = saved.packageName,
+                    timestamp = saved.timestamp,
+                )
+            )
             originDeviceIds.add(item.deviceId)
             created++
         }
@@ -165,7 +203,13 @@ class NotificationController(
         val singleOrigin = originDeviceIds.singleOrNull()
         fanOutPushNotifications(user, savedForFanOut, singleOrigin)
 
-        return ResponseEntity.ok(BatchCreateNotificationResponse(created = created, duplicates = duplicates))
+        return ResponseEntity.ok(
+            BatchCreateNotificationResponse(
+                created = created,
+                duplicates = duplicates,
+                createdItems = createdItems,
+            )
+        )
     }
 
     private fun fanOutPushNotifications(
@@ -206,6 +250,47 @@ class NotificationController(
             }
         }
         expoPushService.sendAsync(messages)
+    }
+
+    // GET /notifications/apps — paginated list of apps with their latest notification
+    @GetMapping("/apps")
+    fun listApps(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int,
+        httpRequest: HttpServletRequest,
+    ): ResponseEntity<AppSummaryPageResponse> {
+        val user = httpRequest.getAttribute(ClerkAuthFilter.USER_ATTRIBUTE) as User
+        val pageable = PageRequest.of(page, size)
+
+        val latestPage = notificationRepository.findLatestPerApp(user, pageable)
+        val packageNames = latestPage.content.map { it.packageName }
+
+        val countMap: Map<String, Long> = if (packageNames.isEmpty()) {
+            emptyMap()
+        } else {
+            notificationRepository
+                .countByUserGroupedByPackageNames(user, packageNames)
+                .associate { row -> (row[0] as String) to (row[1] as Long) }
+        }
+
+        val content = latestPage.content.map { n ->
+            AppSummaryResponse(
+                packageName = n.packageName,
+                appName = n.appName,
+                totalCount = countMap[n.packageName] ?: 0L,
+                latest = n.toResponse(),
+            )
+        }
+
+        return ResponseEntity.ok(
+            AppSummaryPageResponse(
+                content = content,
+                page = latestPage.number,
+                size = latestPage.size,
+                totalElements = latestPage.totalElements,
+                totalPages = latestPage.totalPages,
+            )
+        )
     }
 
     // GET /notifications — paginated list

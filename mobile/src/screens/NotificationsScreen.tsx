@@ -1,28 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { FlatList, Platform, RefreshControl, Text } from "react-native";
+import React, { useCallback, useEffect, useRef } from "react";
+import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SQLite from "expo-sqlite";
 import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNotifications } from "../hooks/use-notifications";
+import { useAppSummaries, AppSummary } from "../hooks/use-app-summaries";
 import { useAppList } from "../hooks/use-app-list";
 import { useAppSettings } from "../hooks/use-app-settings";
 import { usePermission } from "../hooks/use-permission";
 import { useSmsPermission } from "../hooks/use-sms-permission";
 import {
-  syncUnsynced,
+  pullAppSummaries,
   pullRemoteNotifications,
+  syncUnsynced,
 } from "../services/sync-service";
 import { startSmsListener } from "../services/sms-listener";
-import { AppNotificationGroup } from "../components/AppNotificationGroup";
+import { AppSummaryRow } from "../components/AppSummaryRow";
 import { EmptyState } from "../components/EmptyState";
 import { PermissionBanner } from "../components/PermissionBanner";
 import { ScreenHeader } from "../components/ScreenHeader";
 
 export default function NotificationsScreen() {
-  const { groups, loading, refresh } = useNotifications();
-  // Include system apps in the lookup map so that any notifications from
-  // system apps the user has explicitly enabled still get their icon/name.
+  const { items, loading, hasMore, refresh, loadMore } = useAppSummaries();
   const { appMap } = useAppList(true);
   const {
     settings: appSettings,
@@ -36,16 +36,12 @@ export default function NotificationsScreen() {
     recheck: recheckSms,
   } = useSmsPermission();
   const { theme } = useUnistyles();
+  const router = useRouter();
 
-  // Filter out groups whose app has been disabled
-  const visibleGroups = useMemo(
-    () =>
-      groups.filter((g) => {
-        const setting = appSettings.get(g.packageName);
-        return setting ? setting.enabled === 1 : true;
-      }),
-    [groups, appSettings],
-  );
+  const visibleItems = items.filter((s) => {
+    const setting = appSettings.get(s.packageName);
+    return setting ? setting.enabled === 1 : true;
+  });
 
   const handleDisableApp = useCallback(
     (packageName: string, appName: string) => {
@@ -54,7 +50,19 @@ export default function NotificationsScreen() {
     [toggleApp],
   );
 
-  // Debounce timers
+  const handlePressApp = useCallback(
+    (summary: AppSummary) => {
+      router.push({
+        pathname: "/notifications/[packageName]",
+        params: {
+          packageName: summary.packageName,
+          appName: summary.appName,
+        },
+      });
+    },
+    [router],
+  );
+
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pullTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -65,14 +73,20 @@ export default function NotificationsScreen() {
     }, 1000);
   }, []);
 
+  // First the apps endpoint for fast first paint, then a full pull to keep
+  // the local mirror complete. Both write into the same `notifications` table
+  // which the SQLite change listener picks up.
   const triggerPullSync = useCallback(() => {
     if (pullTimerRef.current) clearTimeout(pullTimerRef.current);
     pullTimerRef.current = setTimeout(() => {
-      pullRemoteNotifications().catch(() => {});
+      pullAppSummaries({ page: 0, size: 30 })
+        .catch(() => {})
+        .finally(() => {
+          pullRemoteNotifications().catch(() => {});
+        });
     }, 1000);
   }, []);
 
-  // Refresh list + push sync whenever the headless task writes a new notification to the DB
   useEffect(() => {
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
       if (tableName === "notifications") {
@@ -86,7 +100,6 @@ export default function NotificationsScreen() {
     return () => sub.remove();
   }, [refresh, refreshSettings, triggerPushSync]);
 
-  // On screen focus: refresh from local DB, push unsynced, pull remote
   useFocusEffect(
     useCallback(() => {
       refresh();
@@ -95,14 +108,12 @@ export default function NotificationsScreen() {
     }, [refresh, triggerPushSync, triggerPullSync]),
   );
 
-  // Re-check permission every 3s while not yet granted (user may grant via settings)
   useEffect(() => {
     if (hasPermission) return;
     const id = setInterval(recheck, 3000);
     return () => clearInterval(id);
   }, [hasPermission, recheck]);
 
-  // Same polling for the SMS permission; once granted, (re)start the listener.
   useEffect(() => {
     if (hasSmsPermission) {
       startSmsListener(triggerPushSync).catch(() => {});
@@ -121,11 +132,12 @@ export default function NotificationsScreen() {
 
   const onRefresh = useCallback(async () => {
     try {
+      await pullAppSummaries({ page: 0, size: 30 });
       await pullRemoteNotifications();
     } catch {
-      // pull failed — continue with local data
+      // network failure — fall back to whatever's cached locally
     }
-    refresh();
+    await refresh();
     triggerPushSync();
   }, [refresh, triggerPushSync]);
 
@@ -134,8 +146,8 @@ export default function NotificationsScreen() {
       <ScreenHeader
         title="Notifications"
         rightContent={
-          visibleGroups.length > 0 ? (
-            <Text style={styles.subtitle}>{visibleGroups.length} apps</Text>
+          visibleItems.length > 0 ? (
+            <Text style={styles.subtitle}>{visibleItems.length} apps</Text>
           ) : null
         }
       />
@@ -153,19 +165,23 @@ export default function NotificationsScreen() {
       )}
 
       <FlatList
-        data={visibleGroups}
-        keyExtractor={(g) => g.packageName}
+        data={visibleItems}
+        keyExtractor={(s) => s.packageName}
         renderItem={({ item }) => (
-          <AppNotificationGroup
-            group={item}
+          <AppSummaryRow
+            summary={item}
             appInfo={appMap.get(item.packageName)}
+            onPress={handlePressApp}
             onDisableApp={handleDisableApp}
           />
         )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={!loading ? <EmptyState /> : null}
         contentContainerStyle={
-          visibleGroups.length === 0 ? styles.emptyContent : styles.listContent
+          visibleItems.length === 0 ? styles.emptyContent : undefined
         }
+        onEndReached={hasMore ? loadMore : undefined}
+        onEndReachedThreshold={0.5}
         refreshControl={
           <RefreshControl
             refreshing={loading}
@@ -187,11 +203,12 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textTertiary,
     fontSize: 14,
   },
-  listContent: {
-    paddingVertical: 8,
-    paddingBottom: 40,
-  },
   emptyContent: {
     flex: 1,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: 76,
+    backgroundColor: theme.colors.divider,
   },
 }));

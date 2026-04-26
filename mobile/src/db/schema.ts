@@ -10,6 +10,11 @@ export const notifications = sqliteTable(
   "notifications",
   {
     id: int("id").primaryKey({ autoIncrement: true }),
+    // Server-assigned UUID. Populated on push (returned by /notifications/batch)
+    // and on pull (from /notifications). Used as the canonical dedup key — the
+    // legacy packageName+timestamp pair is only consulted for rows that
+    // predate this column.
+    remoteId: text("remote_id"),
     deviceId: text("device_id").notNull().default(""),
     packageName: text("package_name").notNull(),
     appName: text("app_name").notNull().default(""),
@@ -22,8 +27,12 @@ export const notifications = sqliteTable(
   (table) => [
     index("idx_pkg").on(table.packageName),
     index("idx_ts").on(table.timestamp),
+    uniqueIndex("idx_notifications_remote_id").on(table.remoteId),
+    index("idx_notifications_pkg_ts").on(table.packageName, table.timestamp),
   ],
 );
+
+export type NotificationRecord = typeof notifications.$inferSelect;
 
 export const appSettings = sqliteTable(
   "app_settings",

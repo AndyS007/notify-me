@@ -12,8 +12,16 @@ export type BatchCreateNotificationRequest =
   components["schemas"]["BatchCreateNotificationRequest"];
 export type BatchCreateNotificationResponse =
   components["schemas"]["BatchCreateNotificationResponse"];
+export type CreatedNotificationItem =
+  components["schemas"]["CreatedNotificationItem"];
 export type NotificationPageResponse =
   components["schemas"]["NotificationPageResponse"];
+export type NotificationResponse =
+  components["schemas"]["NotificationResponse"];
+export type AppSummaryResponse =
+  components["schemas"]["AppSummaryResponse"];
+export type AppSummaryPageResponse =
+  components["schemas"]["AppSummaryPageResponse"];
 export type DeleteNotificationsResponse =
   components["schemas"]["DeleteNotificationsResponse"];
 
@@ -58,6 +66,16 @@ export const api = {
     size?: number;
   }): Promise<NotificationPageResponse> {
     const { data } = await client.GET("/notifications", {
+      params: { query: params },
+    });
+    return data!;
+  },
+
+  async fetchAppSummaries(params?: {
+    page?: number;
+    size?: number;
+  }): Promise<AppSummaryPageResponse> {
+    const { data } = await client.GET("/notifications/apps", {
       params: { query: params },
     });
     return data!;

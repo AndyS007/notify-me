@@ -84,6 +84,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/notifications/apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["listApps"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/notifications/{id}": {
     parameters: {
       query?: never;
@@ -203,9 +219,29 @@ export interface components {
       createdAt?: string;
       updatedAt?: string;
     };
+    CreatedNotificationItem: {
+      id: string;
+      deviceId: string;
+      packageName: string;
+      timestamp: number;
+    };
     BatchCreateNotificationResponse: {
       created?: number;
       duplicates?: number;
+      createdItems?: components["schemas"]["CreatedNotificationItem"][];
+    };
+    AppSummaryResponse: {
+      packageName: string;
+      appName: string;
+      totalCount: number;
+      latest: components["schemas"]["NotificationResponse"];
+    };
+    AppSummaryPageResponse: {
+      content?: components["schemas"]["AppSummaryResponse"][];
+      page?: number;
+      size?: number;
+      totalElements?: number;
+      totalPages?: number;
     };
     DeleteNotificationsResponse: {
       deleted?: number;
@@ -391,6 +427,29 @@ export interface operations {
         };
         content: {
           "*/*": components["schemas"]["BatchCreateNotificationResponse"];
+        };
+      };
+    };
+  };
+  listApps: {
+    parameters: {
+      query?: {
+        page?: number;
+        size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["AppSummaryPageResponse"];
         };
       };
     };
