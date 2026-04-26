@@ -1,11 +1,11 @@
 import { useAuth } from "@clerk/expo";
-import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import { Alert } from "react-native";
+import { db } from "../db";
+import { appSettings, notifications } from "../db/schema";
 
 export function useSignOutConfirm() {
   const { signOut } = useAuth();
-  const router = useRouter();
 
   return useCallback(() => {
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
@@ -14,10 +14,13 @@ export function useSignOutConfirm() {
         text: "Sign out",
         style: "destructive",
         onPress: async () => {
-          await signOut();
-          router.replace("/(auth)/sign-in");
+          await Promise.all([
+            db.delete(notifications),
+            db.delete(appSettings),
+            signOut(),
+          ]);
         },
       },
     ]);
-  }, [signOut, router]);
+  }, [signOut]);
 }
