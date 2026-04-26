@@ -1,6 +1,7 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   api,
+  type AppSummaryPageResponse,
   type BatchCreateNotificationRequest,
   type BatchCreateNotificationResponse,
   type DeleteNotificationsResponse,
@@ -8,6 +9,7 @@ import {
 } from "./backend";
 
 export type {
+  AppSummaryPageResponse,
   BatchCreateNotificationRequest,
   BatchCreateNotificationResponse,
   NotificationPageResponse,
@@ -28,6 +30,13 @@ export async function fetchNotificationsApi(params?: {
   return api.fetchNotifications(params);
 }
 
+export async function fetchAppSummariesApi(params?: {
+  page?: number;
+  size?: number;
+}): Promise<AppSummaryPageResponse> {
+  return api.fetchAppSummaries(params);
+}
+
 export async function deleteNotificationApi(id: string): Promise<void> {
   await api.deleteNotification(id);
 }
@@ -42,13 +51,6 @@ export function useSyncNotifications() {
   return useMutation({
     mutationFn: (request: BatchCreateNotificationRequest) =>
       syncNotificationsApi(request),
-  });
-}
-
-export function useRemoteNotifications(packageName?: string, page?: number) {
-  return useQuery({
-    queryKey: ["remote-notifications", packageName, page],
-    queryFn: () => fetchNotificationsApi({ packageName, page }),
   });
 }
 

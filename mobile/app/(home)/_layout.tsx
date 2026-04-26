@@ -111,6 +111,20 @@ export default function HomeLayout() {
           ),
         }}
       />
+      {/*
+       * The per-app notifications screen is reachable only via push from the
+       * chat-list view, so we keep it out of the drawer's menu but still
+       * registered as a Drawer.Screen so the drawer renders its own swipe
+       * gestures correctly.
+       */}
+      <Drawer.Screen
+        name="notifications/[packageName]"
+        options={{
+          drawerItemStyle: { display: "none" },
+          title: "Notifications",
+          swipeEnabled: false,
+        }}
+      />
     </Drawer>
   );
 }
