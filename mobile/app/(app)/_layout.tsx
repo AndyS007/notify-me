@@ -99,6 +99,7 @@ export default function HomeLayout() {
           drawerIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
+          swipeEnabled: false,
         }}
       />
       <Drawer.Screen
@@ -114,8 +115,11 @@ export default function HomeLayout() {
       <Drawer.Screen
         name="dev"
         options={{
-          drawerItemStyle: { display: "none" },
+          drawerLabel: "Dev",
           title: "Dev",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="construct-outline" size={size} color={color} />
+          ),
         }}
       />
     </Drawer>

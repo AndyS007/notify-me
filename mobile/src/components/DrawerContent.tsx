@@ -66,21 +66,6 @@ export function DrawerContent(props: DrawerContentComponentProps) {
       </DrawerContentScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
-        <Pressable
-          style={styles.devBtn}
-          onPress={() => {
-            props.navigation.closeDrawer();
-            router.push("/(app)/dev");
-          }}
-          hitSlop={6}
-        >
-          <Ionicons
-            name="construct-outline"
-            size={20}
-            color={theme.colors.text}
-          />
-          <Text style={styles.devText}>Dev</Text>
-        </Pressable>
         <View style={styles.themeRow}>
           <Text style={styles.themeLabel}>Theme</Text>
           <ThemeToggle />
