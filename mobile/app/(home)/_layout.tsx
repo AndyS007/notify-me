@@ -111,6 +111,13 @@ export default function HomeLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="dev"
+        options={{
+          drawerItemStyle: { display: "none" },
+          title: "Dev",
+        }}
+      />
     </Drawer>
   );
 }

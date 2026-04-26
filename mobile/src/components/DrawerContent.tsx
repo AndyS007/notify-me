@@ -66,6 +66,21 @@ export function DrawerContent(props: DrawerContentComponentProps) {
       </DrawerContentScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
+        <Pressable
+          style={styles.devBtn}
+          onPress={() => {
+            props.navigation.closeDrawer();
+            router.push("/(home)/dev");
+          }}
+          hitSlop={6}
+        >
+          <Ionicons
+            name="construct-outline"
+            size={20}
+            color={theme.colors.text}
+          />
+          <Text style={styles.devText}>Dev</Text>
+        </Pressable>
         <View style={styles.themeRow}>
           <Text style={styles.themeLabel}>Theme</Text>
           <ThemeToggle />
@@ -119,6 +134,17 @@ const styles = StyleSheet.create((theme) => ({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: theme.colors.divider,
     gap: 12,
+  },
+  devBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 10,
+  },
+  devText: {
+    color: theme.colors.text,
+    fontSize: 15,
+    fontWeight: "500",
   },
   themeRow: {
     flexDirection: "row",
