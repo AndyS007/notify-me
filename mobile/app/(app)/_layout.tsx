@@ -92,7 +92,7 @@ export default function HomeLayout() {
       }}
     >
       <Drawer.Screen
-        name="(app)"
+        name="(home)"
         options={{
           drawerLabel: "Home",
           title: "Home",

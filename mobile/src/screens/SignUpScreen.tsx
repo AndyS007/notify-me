@@ -46,7 +46,7 @@ export default function SignUpScreen() {
         setPendingVerification(true);
       } else if (signUp.status === "complete") {
         await signUp.finalize();
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       Alert.alert("Sign up failed", err.message);
@@ -65,7 +65,7 @@ export default function SignUpScreen() {
       }
       if (signUp.status === "complete") {
         await signUp.finalize();
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       Alert.alert("Verification failed", err.message);
@@ -80,7 +80,7 @@ export default function SignUpScreen() {
         await startAppleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
@@ -94,7 +94,7 @@ export default function SignUpScreen() {
         await startGoogleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;

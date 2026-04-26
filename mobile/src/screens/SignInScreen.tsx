@@ -34,7 +34,7 @@ export default function SignInScreen() {
       }
       if (signIn.status === "complete") {
         await signIn.finalize();
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       Alert.alert("Sign in failed", err.message);
@@ -49,7 +49,7 @@ export default function SignInScreen() {
         await startAppleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
@@ -63,7 +63,7 @@ export default function SignInScreen() {
         await startGoogleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
