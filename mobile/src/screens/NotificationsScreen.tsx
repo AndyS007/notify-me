@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
+import { FlatList, Platform, RefreshControl, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SQLite from "expo-sqlite";
 import { useFocusEffect } from "@react-navigation/native";
@@ -17,7 +17,7 @@ import { startSmsListener } from "../services/sms-listener";
 import { AppNotificationGroup } from "../components/AppNotificationGroup";
 import { EmptyState } from "../components/EmptyState";
 import { PermissionBanner } from "../components/PermissionBanner";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { ScreenHeader } from "../components/ScreenHeader";
 
 export default function NotificationsScreen() {
   const { groups, loading, refresh } = useNotifications();
@@ -131,15 +131,14 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Notifications</Text>
-        <View style={styles.headerRight}>
-          {visibleGroups.length > 0 && (
+      <ScreenHeader
+        title="Notifications"
+        rightContent={
+          visibleGroups.length > 0 ? (
             <Text style={styles.subtitle}>{visibleGroups.length} apps</Text>
-          )}
-          <ThemeToggle />
-        </View>
-      </View>
+          ) : null
+        }
+      />
 
       {Platform.OS === "android" && hasPermission === false && (
         <PermissionBanner onPress={request} />
@@ -183,24 +182,6 @@ const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  title: {
-    color: theme.colors.text,
-    fontSize: 28,
-    fontWeight: "700",
   },
   subtitle: {
     color: theme.colors.textTertiary,
