@@ -76,6 +76,9 @@ export default function HomeLayout() {
       drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
+        sceneStyle: {
+          backgroundColor: theme.colors.background,
+        },
         drawerStyle: {
           backgroundColor: theme.colors.background,
         },
