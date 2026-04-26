@@ -92,7 +92,7 @@ export default function HomeLayout() {
       }}
     >
       <Drawer.Screen
-        name="(tabs)"
+        name="(app)"
         options={{
           drawerLabel: "Home",
           title: "Home",
@@ -109,20 +109,6 @@ export default function HomeLayout() {
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person-circle-outline" size={size} color={color} />
           ),
-        }}
-      />
-      {/*
-       * The per-app notifications screen is reachable only via push from the
-       * chat-list view, so we keep it out of the drawer's menu but still
-       * registered as a Drawer.Screen so the drawer renders its own swipe
-       * gestures correctly.
-       */}
-      <Drawer.Screen
-        name="notifications/[packageName]"
-        options={{
-          drawerItemStyle: { display: "none" },
-          title: "Notifications",
-          swipeEnabled: false,
         }}
       />
     </Drawer>
