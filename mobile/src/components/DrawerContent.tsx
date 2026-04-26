@@ -33,7 +33,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
         accessibilityRole="button"
         onPress={() => {
           props.navigation.closeDrawer();
-          router.push("/(home)/profile");
+          router.push("/(app)/profile");
         }}
       >
         <Avatar
@@ -70,7 +70,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           style={styles.devBtn}
           onPress={() => {
             props.navigation.closeDrawer();
-            router.push("/(home)/dev");
+            router.push("/(app)/dev");
           }}
           hitSlop={6}
         >
