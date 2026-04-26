@@ -13,12 +13,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { AppIcon } from "../../../src/components/AppIcon";
-import { NotificationItem } from "../../../src/components/NotificationItem";
-import { useAppIcon } from "../../../src/hooks/use-app-icon";
-import { useAppList } from "../../../src/hooks/use-app-list";
-import { useAppNotifications } from "../../../src/hooks/use-app-notifications";
-import { pullAppNotifications } from "../../../src/services/sync-service";
+import { AppIcon } from "../../../../src/components/AppIcon";
+import { NotificationItem } from "../../../../src/components/NotificationItem";
+import { useAppIcon } from "../../../../src/hooks/use-app-icon";
+import { useAppList } from "../../../../src/hooks/use-app-list";
+import { useAppNotifications } from "../../../../src/hooks/use-app-notifications";
+import { pullAppNotifications } from "../../../../src/services/sync-service";
 
 const PAGE_SIZE = 50;
 
