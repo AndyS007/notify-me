@@ -21,7 +21,10 @@
       "autoIncrement": true,
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "channel": "development",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
