@@ -18,10 +18,11 @@
       "channel": "apk"
     },
     "development": {
-      "autoIncrement": true,
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
