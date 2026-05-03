@@ -1,5 +1,5 @@
 import { RawNotification, saveNotification } from "./notification-service";
-import { syncUnsynced } from "./sync-service";
+import { pushSync } from "./sync-service";
 
 const headlessTask = async ({ notification }: { notification: string }) => {
   if (!notification) return;
@@ -7,7 +7,7 @@ const headlessTask = async ({ notification }: { notification: string }) => {
     const parsed: RawNotification = JSON.parse(notification);
     console.log("headlessTask parsed", parsed);
     await saveNotification(parsed);
-    await syncUnsynced();
+    await pushSync();
   } catch (error) {
     console.log("headlessTask error", error);
   }

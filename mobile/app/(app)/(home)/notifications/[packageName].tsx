@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -18,7 +18,7 @@ import { NotificationItem } from "../../../../src/components/NotificationItem";
 import { useAppIcon } from "../../../../src/hooks/use-app-icon";
 import { useAppList } from "../../../../src/hooks/use-app-list";
 import { useAppNotifications } from "../../../../src/hooks/use-app-notifications";
-import { pullAppNotifications } from "../../../../src/services/sync-service";
+import { pullSync } from "../../../../src/services/sync-service";
 
 const PAGE_SIZE = 50;
 
@@ -43,36 +43,6 @@ export default function AppNotificationsScreen() {
     appInfo?.appName || params.appName || packageName || "Unknown app";
   const icon = asyncIcon ?? null;
 
-  // Tracks the next remote page to fetch on infinite scroll. Reset to 0 on
-  // refresh so we re-pull the head and detect any backend deletions/edits.
-  const remotePageRef = useRef(0);
-  const remoteExhaustedRef = useRef(false);
-
-  const pullRemote = useCallback(
-    async (page: number) => {
-      if (!packageName || remoteExhaustedRef.current) return;
-      try {
-        const resp = await pullAppNotifications(packageName, {
-          page,
-          size: PAGE_SIZE,
-        });
-        if (page + 1 >= resp.totalPages) {
-          remoteExhaustedRef.current = true;
-        }
-      } catch {
-        // Network error — leave the remote cursor where it is so the next
-        // attempt retries the same page.
-      }
-    },
-    [packageName],
-  );
-
-  // Reload when route param changes (navigating between two apps).
-  useEffect(() => {
-    remotePageRef.current = 0;
-    remoteExhaustedRef.current = false;
-  }, [packageName]);
-
   // Keep the local list fresh when the headless task or sync writes new rows.
   useEffect(() => {
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
@@ -85,31 +55,27 @@ export default function AppNotificationsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      remotePageRef.current = 0;
-      remoteExhaustedRef.current = false;
-      pullRemote(0).then(() => refresh());
-    }, [pullRemote, refresh]),
+      // Pull-sync runs at the global level (chat-list focus + push events),
+      // but kicking it off again on focus here keeps a stale detail view
+      // from lingering if the user navigated straight here.
+      pullSync().catch(() => {});
+      refresh();
+    }, [refresh]),
   );
 
   const onRefresh = useCallback(async () => {
-    remotePageRef.current = 0;
-    remoteExhaustedRef.current = false;
-    await pullRemote(0);
+    try {
+      await pullSync();
+    } catch {
+      // network failure — fall back to whatever's cached locally
+    }
     await refresh();
-  }, [pullRemote, refresh]);
+  }, [refresh]);
 
   const onEndReached = useCallback(() => {
-    if (!hasMore || loading) {
-      // Even if local has no more, see if the backend has more.
-      if (!remoteExhaustedRef.current) {
-        const next = remotePageRef.current + 1;
-        remotePageRef.current = next;
-        pullRemote(next);
-      }
-      return;
-    }
+    if (!hasMore || loading) return;
     loadMore();
-  }, [hasMore, loading, loadMore, pullRemote]);
+  }, [hasMore, loading, loadMore]);
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
@@ -138,9 +104,7 @@ export default function AppNotificationsScreen() {
 
       <FlatList
         data={items}
-        keyExtractor={(item) =>
-          item.remoteId ?? `${item.packageName}:${item.timestamp}:${item.id}`
-        }
+        keyExtractor={(item) => item.clientId}
         renderItem={({ item, index }) => (
           <NotificationItem
             item={item}

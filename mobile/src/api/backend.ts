@@ -8,22 +8,19 @@ export type RegisterDeviceResponse =
 export type DeviceResponse = components["schemas"]["DeviceResponse"];
 export type UpdateDeviceRequest = components["schemas"]["UpdateDeviceRequest"];
 
-export type BatchCreateNotificationRequest =
-  components["schemas"]["BatchCreateNotificationRequest"];
-export type BatchCreateNotificationResponse =
-  components["schemas"]["BatchCreateNotificationResponse"];
-export type CreatedNotificationItem =
-  components["schemas"]["CreatedNotificationItem"];
-export type NotificationPageResponse =
-  components["schemas"]["NotificationPageResponse"];
 export type NotificationResponse =
   components["schemas"]["NotificationResponse"];
-export type AppSummaryResponse =
-  components["schemas"]["AppSummaryResponse"];
+export type AppSummaryResponse = components["schemas"]["AppSummaryResponse"];
 export type AppSummaryPageResponse =
   components["schemas"]["AppSummaryPageResponse"];
-export type DeleteNotificationsResponse =
-  components["schemas"]["DeleteNotificationsResponse"];
+
+export type SyncPushItem = components["schemas"]["SyncPushItem"];
+export type SyncPushRequest = components["schemas"]["SyncPushRequest"];
+export type SyncPushResponse = components["schemas"]["SyncPushResponse"];
+export type SyncPushResultItem =
+  components["schemas"]["SyncPushResultItem"];
+export type SyncRecord = components["schemas"]["SyncRecord"];
+export type SyncPullResponse = components["schemas"]["SyncPullResponse"];
 
 export type AppSettingItem = components["schemas"]["AppSettingItem"];
 export type SyncAppSettingsResponse =
@@ -53,24 +50,6 @@ export const api = {
     return data!;
   },
 
-  async syncNotifications(
-    body: BatchCreateNotificationRequest,
-  ): Promise<BatchCreateNotificationResponse> {
-    const { data } = await client.POST("/notifications/batch", { body });
-    return data!;
-  },
-
-  async fetchNotifications(params?: {
-    packageName?: string;
-    page?: number;
-    size?: number;
-  }): Promise<NotificationPageResponse> {
-    const { data } = await client.GET("/notifications", {
-      params: { query: params },
-    });
-    return data!;
-  },
-
   async fetchAppSummaries(params?: {
     page?: number;
     size?: number;
@@ -81,18 +60,19 @@ export const api = {
     return data!;
   },
 
-  async deleteNotification(id: string): Promise<void> {
-    await client.DELETE("/notifications/{id}", {
-      params: { path: { id } },
+  async syncPull(params?: {
+    since?: number;
+    before?: number;
+    limit?: number;
+  }): Promise<SyncPullResponse> {
+    const { data } = await client.GET("/sync/notifications", {
+      params: { query: params },
     });
+    return data!;
   },
 
-  async deleteAllNotifications(
-    packageName?: string,
-  ): Promise<DeleteNotificationsResponse> {
-    const { data } = await client.DELETE("/notifications", {
-      params: { query: packageName ? { packageName } : {} },
-    });
+  async syncPush(body: SyncPushRequest): Promise<SyncPushResponse> {
+    const { data } = await client.POST("/sync/notifications", { body });
     return data!;
   },
 

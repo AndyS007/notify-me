@@ -11,10 +11,7 @@ import {
   addPushResponseListener,
 } from "../../src/services/push-service";
 import { startSmsListener } from "../../src/services/sms-listener";
-import {
-  pullRemoteNotifications,
-  syncUnsynced,
-} from "../../src/services/sync-service";
+import { pullSync, pushSync } from "../../src/services/sync-service";
 
 export default function HomeLayout() {
   const { isSignedIn } = useAuth();
@@ -46,7 +43,7 @@ export default function HomeLayout() {
     if (!isSignedIn) return;
 
     const syncOnPush = () => {
-      pullRemoteNotifications().catch((err) =>
+      pullSync().catch((err) =>
         console.warn("[push] pull sync failed:", err),
       );
     };
@@ -63,7 +60,7 @@ export default function HomeLayout() {
   useEffect(() => {
     if (!isSignedIn) return;
     startSmsListener(() => {
-      syncUnsynced().catch(() => {});
+      pushSync().catch(() => {});
     }).catch(() => {});
   }, [isSignedIn]);
 
