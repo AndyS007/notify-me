@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm";
+import { desc, isNull } from "drizzle-orm";
 import { useCallback, useEffect, useState } from "react";
 import { db } from "../db";
 import { notifications } from "../db/schema";
@@ -45,6 +45,7 @@ export function useAppSummaries(pageSize: number = DEFAULT_PAGE_SIZE) {
         text: notifications.text,
       })
       .from(notifications)
+      .where(isNull(notifications.deletedAt))
       .orderBy(desc(notifications.timestamp));
 
     const byPkg = new Map<

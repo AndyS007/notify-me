@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import * as Crypto from "expo-crypto";
 import RNAndroidNotificationListener from "react-native-android-notification-listener";
 import { getLocalDeviceId } from "../api/devices";
 import { db } from "../db";
@@ -50,13 +51,16 @@ export async function saveNotification(
   const deviceId = await getLocalDeviceId();
   const appInfo = await getAppInfo(packageName);
 
+  const now = Date.now();
   await db.insert(notifications).values({
+    clientId: Crypto.randomUUID(),
     deviceId,
     packageName,
     appName: appInfo?.appName ?? "",
     title,
     text,
-    timestamp: Date.now(),
+    timestamp: now,
+    updatedAt: now,
     icon: null,
   });
 }

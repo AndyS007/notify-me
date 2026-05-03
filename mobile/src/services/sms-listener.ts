@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import * as Crypto from "expo-crypto";
 // The library ships no TypeScript declarations; per project convention we do
 // not fabricate one — everything below is typed as `any`.
 // @ts-ignore — untyped third-party module
@@ -63,13 +64,16 @@ function parseNativeSmsPayload(raw: string): { address: string; body: string } {
 async function persistSms(address: string, body: string): Promise<void> {
   if (!address && !body) return;
   const deviceId = await getLocalDeviceId();
+  const now = Date.now();
   await db.insert(notifications).values({
+    clientId: Crypto.randomUUID(),
     deviceId,
     packageName: SMS_PACKAGE_NAME,
     appName: SMS_APP_NAME,
     title: address,
     text: body,
-    timestamp: Date.now(),
+    timestamp: now,
+    updatedAt: now,
     icon: null,
   });
 }

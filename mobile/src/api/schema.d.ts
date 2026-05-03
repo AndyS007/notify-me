@@ -52,38 +52,6 @@ export interface paths {
     patch: operations["updateDevice"];
     trace?: never;
   };
-  "/notifications": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["listNotifications"];
-    put?: never;
-    post: operations["createNotification"];
-    delete: operations["deleteNotifications"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/notifications/batch": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["batchCreateNotifications"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/notifications/apps": {
     parameters: {
       query?: never;
@@ -100,17 +68,17 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/notifications/{id}": {
+  "/sync/notifications": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["getNotification"];
+    get: operations["syncPullNotifications"];
     put?: never;
-    post?: never;
-    delete: operations["deleteNotification"];
+    post: operations["syncPushNotifications"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -197,38 +165,18 @@ export interface components {
     UpdateDeviceRequest: {
       pushEnabled?: boolean;
     };
-    CreateNotificationRequest: {
+    NotificationResponse: {
+      id: string;
       deviceId: string;
       packageName: string;
       appName: string;
       title: string;
       text: string;
       timestamp: number;
-    };
-    BatchCreateNotificationRequest: {
-      notifications: components["schemas"]["CreateNotificationRequest"][];
-    };
-    NotificationResponse: {
-      id?: string;
-      deviceId?: string;
-      packageName?: string;
-      appName?: string;
-      title?: string;
-      text?: string;
-      timestamp?: number;
-      createdAt?: string;
-      updatedAt?: string;
-    };
-    CreatedNotificationItem: {
-      id: string;
-      deviceId: string;
-      packageName: string;
-      timestamp: number;
-    };
-    BatchCreateNotificationResponse: {
-      created?: number;
-      duplicates?: number;
-      createdItems?: components["schemas"]["CreatedNotificationItem"][];
+      createdAt: string;
+      updatedAt: string;
+      deletedAt?: string | null;
+      revision: number;
     };
     AppSummaryResponse: {
       packageName: string;
@@ -243,15 +191,46 @@ export interface components {
       totalElements?: number;
       totalPages?: number;
     };
-    DeleteNotificationsResponse: {
-      deleted?: number;
+    SyncPushItem: {
+      id: string;
+      deviceId: string;
+      packageName: string;
+      appName: string;
+      title: string;
+      text: string;
+      timestamp: number;
+      updatedAt: number;
+      deletedAt?: number | null;
     };
-    NotificationPageResponse: {
-      content?: components["schemas"]["NotificationResponse"][];
-      page?: number;
-      size?: number;
-      totalElements?: number;
-      totalPages?: number;
+    SyncPushRequest: {
+      items: components["schemas"]["SyncPushItem"][];
+    };
+    SyncPushResultItem: {
+      id: string;
+      accepted: boolean;
+      revision: number;
+    };
+    SyncPushResponse: {
+      results: components["schemas"]["SyncPushResultItem"][];
+    };
+    SyncRecord: {
+      id: string;
+      deviceId: string;
+      packageName: string;
+      appName: string;
+      title: string;
+      text: string;
+      timestamp: number;
+      updatedAt: number;
+      deletedAt?: number | null;
+      revision: number;
+    };
+    SyncPullResponse: {
+      items: components["schemas"]["SyncRecord"][];
+      nextSince?: number | null;
+      nextBefore?: number | null;
+      hasMore: boolean;
+      serverRevision: number;
     };
     AppSettingItem: {
       packageName: string;
@@ -359,78 +338,6 @@ export interface operations {
       };
     };
   };
-  listNotifications: {
-    parameters: {
-      query?: {
-        packageName?: string;
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["NotificationPageResponse"];
-        };
-      };
-    };
-  };
-  createNotification: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateNotificationRequest"];
-      };
-    };
-    responses: {
-      /** @description Created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["NotificationResponse"];
-        };
-      };
-    };
-  };
-  batchCreateNotifications: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BatchCreateNotificationRequest"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["BatchCreateNotificationResponse"];
-        };
-      };
-    };
-  };
   listApps: {
     parameters: {
       query?: {
@@ -454,52 +361,12 @@ export interface operations {
       };
     };
   };
-  getNotification: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["NotificationResponse"];
-        };
-      };
-    };
-  };
-  deleteNotification: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  deleteNotifications: {
+  syncPullNotifications: {
     parameters: {
       query?: {
-        packageName?: string;
+        since?: number;
+        before?: number;
+        limit?: number;
       };
       header?: never;
       path?: never;
@@ -513,7 +380,31 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "*/*": components["schemas"]["DeleteNotificationsResponse"];
+          "*/*": components["schemas"]["SyncPullResponse"];
+        };
+      };
+    };
+  };
+  syncPushNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SyncPushRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["SyncPushResponse"];
         };
       };
     };

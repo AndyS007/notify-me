@@ -10,11 +10,7 @@ import { useAppList } from "../hooks/use-app-list";
 import { useAppSettings } from "../hooks/use-app-settings";
 import { usePermission } from "../hooks/use-permission";
 import { useSmsPermission } from "../hooks/use-sms-permission";
-import {
-  pullAppSummaries,
-  pullRemoteNotifications,
-  syncUnsynced,
-} from "../services/sync-service";
+import { pullSync, pushSync } from "../services/sync-service";
 import { startSmsListener } from "../services/sms-listener";
 import { AppSummaryRow } from "../components/AppSummaryRow";
 import { EmptyState } from "../components/EmptyState";
@@ -69,21 +65,14 @@ export default function NotificationsScreen() {
   const triggerPushSync = useCallback(() => {
     if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
     pushTimerRef.current = setTimeout(() => {
-      syncUnsynced().catch(() => {});
+      pushSync().catch(() => {});
     }, 1000);
   }, []);
 
-  // First the apps endpoint for fast first paint, then a full pull to keep
-  // the local mirror complete. Both write into the same `notifications` table
-  // which the SQLite change listener picks up.
   const triggerPullSync = useCallback(() => {
     if (pullTimerRef.current) clearTimeout(pullTimerRef.current);
     pullTimerRef.current = setTimeout(() => {
-      pullAppSummaries({ page: 0, size: 30 })
-        .catch(() => {})
-        .finally(() => {
-          pullRemoteNotifications().catch(() => {});
-        });
+      pullSync().catch(() => {});
     }, 1000);
   }, []);
 
@@ -132,8 +121,7 @@ export default function NotificationsScreen() {
 
   const onRefresh = useCallback(async () => {
     try {
-      await pullAppSummaries({ page: 0, size: 30 });
-      await pullRemoteNotifications();
+      await pullSync();
     } catch {
       // network failure — fall back to whatever's cached locally
     }

@@ -1,4 +1,4 @@
-import { and, desc, eq, lt } from "drizzle-orm";
+import { and, desc, eq, isNull, lt } from "drizzle-orm";
 import { useCallback, useEffect, useState } from "react";
 import { db } from "../db";
 import { notifications } from "../db/schema";
@@ -25,13 +25,14 @@ export function useAppNotifications(
   const fetchPage = useCallback(
     async (cursor: number | null) => {
       if (!packageName) return [];
+      const baseFilter = and(
+        eq(notifications.packageName, packageName),
+        isNull(notifications.deletedAt),
+      );
       const condition =
         cursor != null
-          ? and(
-              eq(notifications.packageName, packageName),
-              lt(notifications.timestamp, cursor),
-            )
-          : eq(notifications.packageName, packageName);
+          ? and(baseFilter, lt(notifications.timestamp, cursor))
+          : baseFilter;
 
       return db
         .select()
