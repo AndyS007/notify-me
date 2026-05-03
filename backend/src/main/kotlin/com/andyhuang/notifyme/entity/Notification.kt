@@ -64,11 +64,17 @@ class Notification(
     var deletedAt: Instant? = null,
 
     /**
-     * Stamped by [com.andyhuang.notifyme.service.NotificationSyncService] from
-     * a Postgres sequence on every save. Not nullable in the DB, but declared
-     * mutable here so the service can update it before save.
+     * Stamped by [com.andyhuang.notifyme.service.NotificationRevisionService]
+     * from a Postgres sequence on every save. The `columnDefinition` lets
+     * Hibernate `ddl-auto=update` add the column to an existing populated
+     * table — without a default, Postgres rejects ALTER TABLE ADD COLUMN
+     * NOT NULL on a non-empty table.
      */
-    @Column(name = "revision", nullable = false)
+    @Column(
+        name = "revision",
+        nullable = false,
+        columnDefinition = "BIGINT NOT NULL DEFAULT 0",
+    )
     var revision: Long = 0,
 
     @Column(name = "created_at", nullable = false, updatable = false)
