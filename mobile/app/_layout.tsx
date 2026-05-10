@@ -1,4 +1,3 @@
-import "../src/theme/unistyles";
 import { config } from "@/src/config";
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
