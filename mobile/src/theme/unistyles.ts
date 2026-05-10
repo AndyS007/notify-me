@@ -58,16 +58,12 @@ declare module "react-native-unistyles" {
   export interface UnistylesThemes extends AppThemes {}
 }
 
-// Read MMKV synchronously — runs at module evaluation time before first render.
-// On web SSR (static export), MMKV's localStorage backend throws because there
-// is no `window`. Swallow that and fall back to adaptive themes; the browser
-// will pick up the stored preference once setThemePreference runs client-side.
-let storedPref: "light" | "dark" | "system" | undefined;
-try {
-  storedPref = storage.getString("theme_preference") as typeof storedPref;
-} catch {
-  storedPref = undefined;
-}
+// Read MMKV synchronously — runs at module evaluation time before first render
+const storedPref = storage.getString("theme_preference") as
+  | "light"
+  | "dark"
+  | "system"
+  | undefined;
 const initialTheme: "light" | "dark" | undefined =
   storedPref === "light" || storedPref === "dark" ? storedPref : undefined;
 
@@ -81,11 +77,7 @@ StyleSheet.configure({
 export type ThemePreference = "light" | "dark" | "system";
 
 export function setThemePreference(pref: ThemePreference) {
-  try {
-    storage.set("theme_preference", pref);
-  } catch {
-    // SSR: localStorage unavailable
-  }
+  storage.set("theme_preference", pref);
   if (pref === "system") {
     UnistylesRuntime.setAdaptiveThemes(true);
   } else {
