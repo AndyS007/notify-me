@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
 import { storage } from "../storage";
 
@@ -58,12 +59,18 @@ declare module "react-native-unistyles" {
   export interface UnistylesThemes extends AppThemes {}
 }
 
-// Read MMKV synchronously — runs at module evaluation time before first render
-const storedPref = storage.getString("theme_preference") as
-  | "light"
-  | "dark"
-  | "system"
-  | undefined;
+// Read MMKV synchronously — runs at module evaluation time before first render.
+// MMKV (Nitro) has no web binding, so skip the read on web and fall back to
+// adaptive themes; otherwise the throw would prevent StyleSheet.configure
+// from ever running.
+const storedPref =
+  Platform.OS === "web"
+    ? undefined
+    : (storage.getString("theme_preference") as
+        | "light"
+        | "dark"
+        | "system"
+        | undefined);
 const hasManualPref = storedPref === "light" || storedPref === "dark";
 
 StyleSheet.configure({
@@ -76,7 +83,9 @@ StyleSheet.configure({
 export type ThemePreference = "light" | "dark" | "system";
 
 export function setThemePreference(pref: ThemePreference) {
-  storage.set("theme_preference", pref);
+  if (Platform.OS !== "web") {
+    storage.set("theme_preference", pref);
+  }
   if (pref === "system") {
     UnistylesRuntime.setAdaptiveThemes(true);
   } else {
