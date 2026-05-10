@@ -68,12 +68,13 @@ try {
 } catch {
   storedPref = undefined;
 }
-const hasManualPref = storedPref === "light" || storedPref === "dark";
+const initialTheme: "light" | "dark" | undefined =
+  storedPref === "light" || storedPref === "dark" ? storedPref : undefined;
 
 StyleSheet.configure({
   themes: { dark, light },
-  settings: hasManualPref
-    ? { initialTheme: storedPref } // use stored manual preference, no flash
+  settings: initialTheme
+    ? { initialTheme } // use stored manual preference, no flash
     : { adaptiveThemes: true }, // follow system color scheme (default)
 });
 
