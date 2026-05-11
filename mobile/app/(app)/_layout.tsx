@@ -75,6 +75,7 @@ export default function HomeLayout() {
         headerShown: false,
         sceneStyle: {
           backgroundColor: theme.colors.background,
+          overflow: "scroll",
         },
         drawerStyle: {
           backgroundColor: theme.colors.background,
