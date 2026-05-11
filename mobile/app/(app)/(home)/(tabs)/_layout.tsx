@@ -12,7 +12,6 @@ export default function TabsLayout() {
         headerShown: false,
         sceneStyle: {
           backgroundColor: theme.colors.background,
-          overflow: "scroll",
         },
         tabBarStyle: {
           backgroundColor: theme.colors.surface,

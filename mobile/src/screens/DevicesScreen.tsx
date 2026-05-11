@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityIndicator, FlatList, Switch, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "../components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
   useDevices,

@@ -2,7 +2,7 @@ import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "../components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Avatar } from "../components/Avatar";
 import { ScreenHeader } from "../components/ScreenHeader";

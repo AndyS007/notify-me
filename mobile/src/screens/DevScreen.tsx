@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Alert, Pressable, ScrollView, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "../components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { db } from "../db";

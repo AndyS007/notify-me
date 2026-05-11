@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "../../../../src/components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { AppIcon } from "../../../../src/components/AppIcon";
 import { NotificationItem } from "../../../../src/components/NotificationItem";
