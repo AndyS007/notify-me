@@ -1,6 +1,10 @@
 import React from "react";
-import { Platform, View, type StyleProp, type ViewStyle } from "react-native";
-import { SafeAreaView, type Edge } from "react-native-safe-area-context";
+import { type StyleProp, type ViewStyle } from "react-native";
+import {
+  SafeAreaView as RawSafeAreaView,
+  type Edge,
+} from "react-native-safe-area-context";
+import { withUnistyles } from "react-native-unistyles";
 
 type Props = {
   children?: React.ReactNode;
@@ -14,11 +18,9 @@ type Props = {
    */
   edges?: readonly Edge[];
 };
+const SafeAreaView = withUnistyles(RawSafeAreaView);
 
 export function Screen({ children, style, edges = ["top"] }: Props) {
-  if (Platform.OS === "web") {
-    return <View style={style}>{children}</View>;
-  }
   return (
     <SafeAreaView style={style} edges={edges}>
       {children}
