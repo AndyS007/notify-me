@@ -19,6 +19,7 @@ import { useAppIcon } from "../../../../src/hooks/use-app-icon";
 import { useAppList } from "../../../../src/hooks/use-app-list";
 import { useAppNotifications } from "../../../../src/hooks/use-app-notifications";
 import { pullSync } from "../../../../src/services/sync-service";
+import { debounce } from "../../../../src/utils/debounce";
 
 const PAGE_SIZE = 50;
 
@@ -48,17 +49,12 @@ export default function AppNotificationsScreen() {
   // inserts) would otherwise stampede `refresh()` and hammer the DB; collapse
   // the burst into a single refresh on the trailing edge.
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedRefresh = debounce(refresh, 150);
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
-      if (tableName !== "notifications") return;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        timer = null;
-        refresh();
-      }, 150);
+      if (tableName === "notifications") debouncedRefresh();
     });
     return () => {
-      if (timer) clearTimeout(timer);
+      debouncedRefresh.cancel();
       sub.remove();
     };
   }, [refresh]);
