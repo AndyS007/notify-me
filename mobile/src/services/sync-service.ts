@@ -137,13 +137,24 @@ export async function pullSync(): Promise<{ ingested: number }> {
   });
 }
 
+// Sentinel "before" value for the very first bootstrap call: revisions are
+// positive longs, so any number above the server's head walks history newest
+// first. The server distinguishes bootstrap vs incremental by whether `before`
+// is present, so we must always send one during bootstrap — otherwise the
+// server falls through to the ASC branch and `nextBefore` comes back null,
+// which would leave our cursor pinned and repeat the same page until we hit
+// PULL_MAX_PAGES.
+const BOOTSTRAP_INITIAL_BEFORE = Number.MAX_SAFE_INTEGER;
+
 async function runBootstrapPull(): Promise<number> {
   let ingested = 0;
-  let before = await getSyncStateNumber(SYNC_KEYS.bootstrapBeforeCursor);
+  let before =
+    (await getSyncStateNumber(SYNC_KEYS.bootstrapBeforeCursor)) ??
+    BOOTSTRAP_INITIAL_BEFORE;
 
   for (let page = 0; page < PULL_MAX_PAGES; page++) {
     const resp = await syncPullApi({
-      before: before ?? undefined,
+      before,
       limit: PULL_PAGE_SIZE,
     });
 
@@ -158,10 +169,18 @@ async function runBootstrapPull(): Promise<number> {
 
     ingested += await ingestRecords(resp.items);
 
-    if (resp.nextBefore != null) {
-      before = resp.nextBefore;
-      await setSyncStateNumber(SYNC_KEYS.bootstrapBeforeCursor, before);
+    // Bail out if the server can't give us a cursor to advance with. Without
+    // this we'd burn the remaining PULL_MAX_PAGES iterations re-pulling the
+    // same page.
+    if (resp.nextBefore == null) {
+      await setSyncStateNumber(SYNC_KEYS.lastSyncRevision, resp.serverRevision);
+      await setSyncStateValue(SYNC_KEYS.bootstrapBeforeCursor, null);
+      await setSyncStateValue(SYNC_KEYS.bootstrapComplete, "1");
+      return ingested;
     }
+
+    before = resp.nextBefore;
+    await setSyncStateNumber(SYNC_KEYS.bootstrapBeforeCursor, before);
 
     if (!resp.hasMore) {
       await setSyncStateNumber(SYNC_KEYS.lastSyncRevision, resp.serverRevision);
@@ -191,10 +210,15 @@ async function runIncrementalPull(): Promise<number> {
 
     ingested += await ingestRecords(resp.items);
 
-    if (resp.nextSince != null) {
-      since = resp.nextSince;
-      await setSyncStateNumber(SYNC_KEYS.lastSyncRevision, since);
+    // If the server can't hand us a cursor to advance with, stop rather than
+    // looping on the same page until PULL_MAX_PAGES is exhausted.
+    if (resp.nextSince == null) {
+      await setSyncStateNumber(SYNC_KEYS.lastSyncRevision, resp.serverRevision);
+      return ingested;
     }
+
+    since = resp.nextSince;
+    await setSyncStateNumber(SYNC_KEYS.lastSyncRevision, since);
 
     if (!resp.hasMore) {
       await setSyncStateNumber(SYNC_KEYS.lastSyncRevision, resp.serverRevision);

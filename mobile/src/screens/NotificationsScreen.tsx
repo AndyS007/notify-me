@@ -76,17 +76,34 @@ export default function NotificationsScreen() {
     }, 1000);
   }, []);
 
+  // `addDatabaseChangeListener` fires per row, so a bulk pull would otherwise
+  // call `refresh()` hundreds of times back-to-back. Collapse each table's
+  // burst into a single trailing-edge call.
   useEffect(() => {
+    let notifTimer: ReturnType<typeof setTimeout> | null = null;
+    let settingsTimer: ReturnType<typeof setTimeout> | null = null;
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
       if (tableName === "notifications") {
-        refresh();
-        triggerPushSync();
+        if (notifTimer) clearTimeout(notifTimer);
+        notifTimer = setTimeout(() => {
+          notifTimer = null;
+          refresh();
+          triggerPushSync();
+        }, 150);
       }
       if (tableName === "app_settings") {
-        refreshSettings();
+        if (settingsTimer) clearTimeout(settingsTimer);
+        settingsTimer = setTimeout(() => {
+          settingsTimer = null;
+          refreshSettings();
+        }, 150);
       }
     });
-    return () => sub.remove();
+    return () => {
+      if (notifTimer) clearTimeout(notifTimer);
+      if (settingsTimer) clearTimeout(settingsTimer);
+      sub.remove();
+    };
   }, [refresh, refreshSettings, triggerPushSync]);
 
   useFocusEffect(

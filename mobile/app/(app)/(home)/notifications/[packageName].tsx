@@ -44,13 +44,23 @@ export default function AppNotificationsScreen() {
   const icon = asyncIcon ?? null;
 
   // Keep the local list fresh when the headless task or sync writes new rows.
+  // `addDatabaseChangeListener` fires once per row, so a bulk pull (hundreds of
+  // inserts) would otherwise stampede `refresh()` and hammer the DB; collapse
+  // the burst into a single refresh on the trailing edge.
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
-      if (tableName === "notifications") {
+      if (tableName !== "notifications") return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
         refresh();
-      }
+      }, 150);
     });
-    return () => sub.remove();
+    return () => {
+      if (timer) clearTimeout(timer);
+      sub.remove();
+    };
   }, [refresh]);
 
   useFocusEffect(
