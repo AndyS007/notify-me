@@ -109,6 +109,7 @@ export default function DevicesScreen() {
               <Text style={styles.emptyText}>No devices registered</Text>
             </View>
           }
+          style={styles.list}
           contentContainerStyle={
             (devices?.length ?? 0) === 0
               ? styles.emptyContent
@@ -143,6 +144,9 @@ const styles = StyleSheet.create((theme) => ({
   listContent: {
     padding: 16,
     gap: 12,
+  },
+  list: {
+    flex: 1,
   },
   emptyContent: {
     flex: 1,
