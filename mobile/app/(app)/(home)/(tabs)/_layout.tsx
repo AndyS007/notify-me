@@ -11,6 +11,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         sceneStyle: {
+          flex: 1,
           backgroundColor: theme.colors.background,
         },
         tabBarStyle: {

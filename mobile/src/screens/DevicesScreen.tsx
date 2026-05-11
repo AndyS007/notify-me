@@ -1,5 +1,12 @@
 import React from "react";
-import { ActivityIndicator, FlatList, Switch, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
@@ -100,24 +107,30 @@ export default function DevicesScreen() {
           <ActivityIndicator color={theme.colors.textSecondary} />
         </View>
       ) : (
-        <FlatList
-          data={devices ?? []}
-          keyExtractor={(d) => d.id ?? d.deviceId ?? Math.random().toString()}
-          renderItem={({ item }) => <DeviceCard device={item} />}
-          ListEmptyComponent={
-            <View style={styles.centered}>
-              <Text style={styles.emptyText}>No devices registered</Text>
-            </View>
-          }
+        <ScrollView
           style={styles.list}
           contentContainerStyle={
             (devices?.length ?? 0) === 0
               ? styles.emptyContent
               : styles.listContent
           }
-          onRefresh={refetch}
-          refreshing={isRefetching}
-        />
+          refreshControl={
+            <RefreshControl onRefresh={refetch} refreshing={isRefetching} />
+          }
+        >
+          {(devices?.length ?? 0) === 0 ? (
+            <View style={styles.centered}>
+              <Text style={styles.emptyText}>No devices registered</Text>
+            </View>
+          ) : (
+            devices?.map((item) => (
+              <DeviceCard
+                key={item.id ?? item.deviceId ?? Math.random().toString()}
+                device={item}
+              />
+            ))
+          )}
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -126,6 +139,7 @@ export default function DevicesScreen() {
 const styles = StyleSheet.create((theme) => ({
   root: {
     flex: 1,
+    minHeight: 0,
     backgroundColor: theme.colors.background,
   },
   subtitle: {
@@ -147,6 +161,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   list: {
     flex: 1,
+    minHeight: 0,
   },
   emptyContent: {
     flex: 1,
