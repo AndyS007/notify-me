@@ -6,7 +6,7 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useUnistyles } from "react-native-unistyles";
 import migrations from "../drizzle/migrations";
@@ -91,13 +91,17 @@ function ClerkLoadingFallback() {
 }
 
 export default Sentry.wrap(function RootLayout() {
+  // Local SQLite is native-only; the db proxy (src/db/index.ts) throws on
+  // any access on web, which the migrator catches and surfaces as `error`.
+  // On web we just ignore migration state and render the app.
+  const isWeb = Platform.OS === "web";
   const { success, error } = useMigrations(db, migrations);
 
-  if (error) {
+  if (!isWeb && error) {
     return <MigrationError message={error.message} />;
   }
 
-  if (!success) {
+  if (!isWeb && !success) {
     return null;
   }
 

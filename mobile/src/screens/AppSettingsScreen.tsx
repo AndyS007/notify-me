@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, Switch, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "../components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useAppList } from "../hooks/use-app-list";
 import { useAppSettings } from "../hooks/use-app-settings";

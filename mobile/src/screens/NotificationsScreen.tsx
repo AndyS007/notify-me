@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "../components/Screen";
 import * as SQLite from "expo-sqlite";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
