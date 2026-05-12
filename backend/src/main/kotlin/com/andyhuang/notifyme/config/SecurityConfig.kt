@@ -41,7 +41,8 @@ class SecurityConfig(
                 "http://localhost:*",
                 "http://127.0.0.1:*",
                 "https://localhost:*",
-                "https://127.0.0.1:*"
+                "https://127.0.0.1:*",
+                "https://*.expo.app"
             )
             allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD")
             allowedHeaders = listOf("*")
