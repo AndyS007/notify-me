@@ -1,14 +1,41 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Alert, Pressable, ScrollView, Text } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import Constants from "expo-constants";
+import * as Updates from "expo-updates";
+import React, { useCallback, useState } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "../components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { db } from "../db";
-import { appSettings, notifications } from "../db/schema";
+import { appSettings, notifications, syncState } from "../db/schema";
+
+type SyncStateRow = { key: string; value: string | null };
+
+const APP_INFO_ROWS: SyncStateRow[] = [
+  { key: "env", value: __DEV__ ? "development" : "production" },
+  { key: "channel", value: Updates.channel ?? "(none)" },
+  { key: "version", value: Constants.expoConfig?.version ?? "(unknown)" },
+  { key: "runtime version", value: Updates.runtimeVersion ?? "(none)" },
+  { key: "update id", value: Updates.updateId ?? "(embedded)" },
+];
 
 export default function DevScreen() {
   const { theme } = useUnistyles();
+  const [syncRows, setSyncRows] = useState<SyncStateRow[]>([]);
+
+  const loadSyncState = useCallback(async () => {
+    const rows = await db
+      .select({ key: syncState.key, value: syncState.value })
+      .from(syncState);
+    setSyncRows(rows);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSyncState();
+    }, [loadSyncState]),
+  );
 
   const onClearDb = () => {
     Alert.alert(
@@ -46,6 +73,45 @@ export default function DevScreen() {
           />
           <Text style={styles.actionText}>Clear local SQLite DB</Text>
         </Pressable>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>App info</Text>
+          </View>
+          {APP_INFO_ROWS.map((row) => (
+            <View key={row.key} style={styles.kvRow}>
+              <Text style={styles.kvKey}>{row.key}</Text>
+              <Text style={styles.kvValue} selectable>
+                {row.value}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Sync state</Text>
+            <Pressable onPress={loadSyncState} hitSlop={8}>
+              <Ionicons
+                name="refresh"
+                size={18}
+                color={theme.colors.textSecondary}
+              />
+            </Pressable>
+          </View>
+          {syncRows.length === 0 ? (
+            <Text style={styles.empty}>(no rows)</Text>
+          ) : (
+            syncRows.map((row) => (
+              <View key={row.key} style={styles.kvRow}>
+                <Text style={styles.kvKey}>{row.key}</Text>
+                <Text style={styles.kvValue} selectable>
+                  {row.value ?? "(null)"}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -74,5 +140,48 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.badgeText,
     fontWeight: "600",
     fontSize: 15,
+  },
+  section: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+  },
+  sectionTitle: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  empty: {
+    color: theme.colors.textSecondary,
+    fontSize: 13,
+    fontStyle: "italic",
+    paddingVertical: 6,
+  },
+  kvRow: {
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.colors.divider,
+  },
+  kvKey: {
+    color: theme.colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  kvValue: {
+    color: theme.colors.text,
+    fontSize: 13,
+    fontFamily: "monospace",
   },
 }));
