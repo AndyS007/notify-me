@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SQLite from "expo-sqlite";
@@ -16,6 +16,7 @@ import { AppSummaryRow } from "../components/AppSummaryRow";
 import { EmptyState } from "../components/EmptyState";
 import { PermissionBanner } from "../components/PermissionBanner";
 import { ScreenHeader } from "../components/ScreenHeader";
+import { debounce } from "../utils/debounce";
 
 export default function NotificationsScreen() {
   const { items, loading, hasMore, refresh, loadMore } = useAppSummaries();
@@ -59,34 +60,40 @@ export default function NotificationsScreen() {
     [router],
   );
 
-  const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pullTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerPushSync = useMemo(
+    () => debounce(() => pushSync().catch(() => {}), 1000),
+    [],
+  );
+  const triggerPullSync = useMemo(
+    () => debounce(() => pullSync().catch(() => {}), 1000),
+    [],
+  );
+  useEffect(
+    () => () => {
+      triggerPushSync.cancel();
+      triggerPullSync.cancel();
+    },
+    [triggerPushSync, triggerPullSync],
+  );
 
-  const triggerPushSync = useCallback(() => {
-    if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
-    pushTimerRef.current = setTimeout(() => {
-      pushSync().catch(() => {});
-    }, 1000);
-  }, []);
-
-  const triggerPullSync = useCallback(() => {
-    if (pullTimerRef.current) clearTimeout(pullTimerRef.current);
-    pullTimerRef.current = setTimeout(() => {
-      pullSync().catch(() => {});
-    }, 1000);
-  }, []);
-
+  // `addDatabaseChangeListener` fires per row, so a bulk pull would otherwise
+  // call `refresh()` hundreds of times back-to-back. Collapse each table's
+  // burst into a single trailing-edge call.
   useEffect(() => {
+    const debouncedNotif = debounce(() => {
+      refresh();
+      triggerPushSync();
+    }, 150);
+    const debouncedSettings = debounce(refreshSettings, 150);
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
-      if (tableName === "notifications") {
-        refresh();
-        triggerPushSync();
-      }
-      if (tableName === "app_settings") {
-        refreshSettings();
-      }
+      if (tableName === "notifications") debouncedNotif();
+      else if (tableName === "app_settings") debouncedSettings();
     });
-    return () => sub.remove();
+    return () => {
+      debouncedNotif.cancel();
+      debouncedSettings.cancel();
+      sub.remove();
+    };
   }, [refresh, refreshSettings, triggerPushSync]);
 
   useFocusEffect(

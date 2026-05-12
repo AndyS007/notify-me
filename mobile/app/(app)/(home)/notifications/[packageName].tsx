@@ -19,6 +19,7 @@ import { useAppIcon } from "../../../../src/hooks/use-app-icon";
 import { useAppList } from "../../../../src/hooks/use-app-list";
 import { useAppNotifications } from "../../../../src/hooks/use-app-notifications";
 import { pullSync } from "../../../../src/services/sync-service";
+import { debounce } from "../../../../src/utils/debounce";
 
 const PAGE_SIZE = 50;
 
@@ -44,13 +45,18 @@ export default function AppNotificationsScreen() {
   const icon = asyncIcon ?? null;
 
   // Keep the local list fresh when the headless task or sync writes new rows.
+  // `addDatabaseChangeListener` fires once per row, so a bulk pull (hundreds of
+  // inserts) would otherwise stampede `refresh()` and hammer the DB; collapse
+  // the burst into a single refresh on the trailing edge.
   useEffect(() => {
+    const debouncedRefresh = debounce(refresh, 150);
     const sub = SQLite.addDatabaseChangeListener(({ tableName }) => {
-      if (tableName === "notifications") {
-        refresh();
-      }
+      if (tableName === "notifications") debouncedRefresh();
     });
-    return () => sub.remove();
+    return () => {
+      debouncedRefresh.cancel();
+      sub.remove();
+    };
   }, [refresh]);
 
   useFocusEffect(
