@@ -4,10 +4,10 @@ import * as Haptics from "expo-haptics";
 import { StyleSheet } from "react-native-unistyles";
 import { AppIcon } from "./AppIcon";
 import { ContextMenu, type ContextMenuAction } from "./ContextMenu";
-import { useAppIcon } from "../hooks/use-app-icon";
-import { AppInfo } from "../services/app-list-service";
-import { AppSummary } from "../hooks/use-app-summaries";
-import { formatRelativeTime } from "../utils/format-time";
+import { useAppIcon } from "@hooks/use-app-icon";
+import { AppInfo } from "@services/app-list-service";
+import { AppSummary } from "@hooks/use-app-summaries";
+import { formatRelativeTime } from "@utils/format-time";
 
 type Props = {
   summary: AppSummary;

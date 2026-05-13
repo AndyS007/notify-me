@@ -9,9 +9,9 @@ import {
   startReadSMS,
   stopReadSMS,
 } from "@maniac-tech/react-native-expo-read-sms";
-import { db } from "../db";
-import { notifications } from "../db/schema";
-import { getLocalDeviceId } from "../api/devices";
+import { db } from "@db";
+import { notifications } from "@db/schema";
+import { getLocalDeviceId } from "@api/devices";
 
 /**
  * Synthetic package identifier stored on every SMS row so that inbound SMS

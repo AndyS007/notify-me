@@ -1,5 +1,5 @@
 import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
-import { storage } from "../storage";
+import { storage } from "@/src/storage";
 
 const dark = {
   colors: {

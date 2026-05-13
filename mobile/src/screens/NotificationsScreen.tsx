@@ -1,22 +1,22 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
-import { SafeAreaView } from "../components/Screen";
+import { SafeAreaView } from "@components/Screen";
 import * as SQLite from "expo-sqlite";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useAppSummaries, AppSummary } from "../hooks/use-app-summaries";
-import { useAppList } from "../hooks/use-app-list";
-import { useAppSettings } from "../hooks/use-app-settings";
-import { usePermission } from "../hooks/use-permission";
-import { useSmsPermission } from "../hooks/use-sms-permission";
-import { pullSync, pushSync } from "../services/sync-service";
-import { startSmsListener } from "../services/sms-listener";
-import { AppSummaryRow } from "../components/AppSummaryRow";
-import { EmptyState } from "../components/EmptyState";
-import { PermissionBanner } from "../components/PermissionBanner";
-import { ScreenHeader } from "../components/ScreenHeader";
-import { debounce } from "../utils/debounce";
+import { useAppSummaries, AppSummary } from "@hooks/use-app-summaries";
+import { useAppList } from "@hooks/use-app-list";
+import { useAppSettings } from "@hooks/use-app-settings";
+import { usePermission } from "@hooks/use-permission";
+import { useSmsPermission } from "@hooks/use-sms-permission";
+import { pullSync, pushSync } from "@services/sync-service";
+import { startSmsListener } from "@services/sms-listener";
+import { AppSummaryRow } from "@components/AppSummaryRow";
+import { EmptyState } from "@components/EmptyState";
+import { PermissionBanner } from "@components/PermissionBanner";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { debounce } from "@utils/debounce";
 
 export default function NotificationsScreen() {
   const { items, loading, hasMore, refresh, loadMore } = useAppSummaries();

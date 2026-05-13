@@ -2,12 +2,12 @@ import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "../components/Screen";
+import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Avatar } from "../components/Avatar";
-import { ScreenHeader } from "../components/ScreenHeader";
-import { useSignOutConfirm } from "../hooks/use-sign-out-confirm";
-import { getDisplayName, getInitials } from "../utils/user";
+import { Avatar } from "@components/Avatar";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { useSignOutConfirm } from "@hooks/use-sign-out-confirm";
+import { getDisplayName, getInitials } from "@utils/user";
 
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (

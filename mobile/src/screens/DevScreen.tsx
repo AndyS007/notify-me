@@ -4,11 +4,11 @@ import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import React, { useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "../components/Screen";
+import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { ScreenHeader } from "../components/ScreenHeader";
-import { db } from "../db";
-import { appSettings, notifications, syncState } from "../db/schema";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { db } from "@db";
+import { appSettings, notifications, syncState } from "@db/schema";
 
 type SyncStateRow = { key: string; value: string | null };
 

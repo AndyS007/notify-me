@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Pressable } from "react-native";
 import { UnistylesRuntime, useUnistyles } from "react-native-unistyles";
-import { setThemePreference } from "../theme/unistyles";
+import { setThemePreference } from "@theme/unistyles";
 
 export function ThemeToggle() {
   const { theme } = useUnistyles();

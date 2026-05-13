@@ -1,6 +1,6 @@
 import { getClerkInstance } from "@clerk/expo";
 import createClient, { type Client } from "openapi-fetch";
-import { config } from "../config";
+import { config } from "@/src/config";
 import type { paths } from "./schema";
 
 export class ApiError extends Error {

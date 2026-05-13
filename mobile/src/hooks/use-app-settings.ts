@@ -3,7 +3,7 @@ import {
   getAllAppSettings,
   setAppEnabled,
   type AppSettingRecord,
-} from "../services/app-settings-service";
+} from "@services/app-settings-service";
 
 export function useAppSettings() {
   const [settings, setSettings] = useState<Map<string, AppSettingRecord>>(

@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { appSettings } from "../db/schema";
+import { db } from "@db";
+import { appSettings } from "@db/schema";
 import {
   pushAppSettingsApi,
   pullAppSettingsApi,
   type AppSettingItem,
-} from "../api/app-settings";
+} from "@api/app-settings";
 
 export async function pushAppSettings(): Promise<{
   created: number;
