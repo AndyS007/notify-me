@@ -1,13 +1,13 @@
 import React from "react";
 import { ActivityIndicator, FlatList, Switch, Text, View } from "react-native";
-import { SafeAreaView } from "../components/Screen";
+import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
   useDevices,
   useUpdateDevicePushEnabled,
   type DeviceResponse,
-} from "../api/devices";
-import { ScreenHeader } from "../components/ScreenHeader";
+} from "@api/devices";
+import { ScreenHeader } from "@components/ScreenHeader";
 
 function DeviceCard({ device }: { device: DeviceResponse }) {
   const { theme } = useUnistyles();

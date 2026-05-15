@@ -1,9 +1,9 @@
 import { Platform } from "react-native";
 import * as Crypto from "expo-crypto";
 import RNAndroidNotificationListener from "react-native-android-notification-listener";
-import { getLocalDeviceId } from "../api/devices";
-import { db } from "../db";
-import { notifications } from "../db/schema";
+import { getLocalDeviceId } from "@api/devices";
+import { db } from "@db";
+import { notifications } from "@db/schema";
 import { getAppInfo } from "./app-list-service";
 import { isAppEnabled } from "./app-settings-service";
 

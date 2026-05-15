@@ -10,8 +10,8 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useSignOutConfirm } from "../hooks/use-sign-out-confirm";
-import { getDisplayName, getInitials } from "../utils/user";
+import { useSignOutConfirm } from "@hooks/use-sign-out-confirm";
+import { getDisplayName, getInitials } from "@utils/user";
 import { Avatar } from "./Avatar";
 import { ThemeToggle } from "./ThemeToggle";
 

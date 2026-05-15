@@ -1,8 +1,8 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { NotificationRecord } from "../db/schema";
-import { formatRelativeTime } from "../utils/format-time";
+import { NotificationRecord } from "@db/schema";
+import { formatRelativeTime } from "@utils/format-time";
 
 type Props = {
   item: NotificationRecord;

@@ -1,8 +1,8 @@
 import { useAuth } from "@clerk/expo";
 import { useCallback } from "react";
 import { Alert } from "react-native";
-import { db } from "../db";
-import { appSettings, notifications } from "../db/schema";
+import { db } from "@db";
+import { appSettings, notifications } from "@db/schema";
 
 export function useSignOutConfirm() {
   const { signOut } = useAuth();

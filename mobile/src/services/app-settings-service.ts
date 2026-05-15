@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { appSettings } from "../db/schema";
+import { db } from "@db";
+import { appSettings } from "@db/schema";
 
 export type AppSettingRecord = typeof appSettings.$inferSelect;
 

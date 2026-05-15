@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
 import { ExpoAndroidAppList } from "expo-android-app-list";
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { appSettings } from "../db/schema";
+import { db } from "@db";
+import { appSettings } from "@db/schema";
 
 export type AppInfo = {
   packageName: string;

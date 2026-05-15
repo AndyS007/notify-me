@@ -1,7 +1,7 @@
 import { and, desc, eq, isNull, lt } from "drizzle-orm";
 import { useCallback, useEffect, useState } from "react";
-import { db } from "../db";
-import { notifications } from "../db/schema";
+import { db } from "@db";
+import { notifications } from "@db/schema";
 
 export type NotificationRecord = typeof notifications.$inferSelect;
 

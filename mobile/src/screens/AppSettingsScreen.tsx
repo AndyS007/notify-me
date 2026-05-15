@@ -1,13 +1,13 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, Switch, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "../components/Screen";
+import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useAppList } from "../hooks/use-app-list";
-import { useAppSettings } from "../hooks/use-app-settings";
-import { useAppIcon } from "../hooks/use-app-icon";
-import { AppIcon } from "../components/AppIcon";
-import { ScreenHeader } from "../components/ScreenHeader";
-import type { AppInfo } from "../services/app-list-service";
+import { useAppList } from "@hooks/use-app-list";
+import { useAppSettings } from "@hooks/use-app-settings";
+import { useAppIcon } from "@hooks/use-app-icon";
+import { AppIcon } from "@components/AppIcon";
+import { ScreenHeader } from "@components/ScreenHeader";
+import type { AppInfo } from "@services/app-list-service";
 
 type AppRow = AppInfo & { enabled: boolean };
 

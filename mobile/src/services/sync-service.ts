@@ -4,18 +4,18 @@ import {
   getLocalDeviceId,
   isDeviceRegistered,
   waitForDeviceRegistration,
-} from "../api/devices";
-import { syncPullApi, syncPushApi } from "../api/notifications";
-import type { SyncRecord } from "../api/backend";
-import { db } from "../db";
-import { notifications } from "../db/schema";
+} from "@api/devices";
+import { syncPullApi, syncPushApi } from "@api/notifications";
+import type { SyncRecord } from "@api/backend";
+import { db } from "@db";
+import { notifications } from "@db/schema";
 import {
   SYNC_KEYS,
   getSyncStateNumber,
   getSyncStateValue,
   setSyncStateNumber,
   setSyncStateValue,
-} from "../db/sync-state";
+} from "@db/sync-state";
 
 const PUSH_BATCH_SIZE = 100;
 const PULL_PAGE_SIZE = 200;

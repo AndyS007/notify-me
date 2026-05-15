@@ -8,7 +8,7 @@ import {
   type RegisterDeviceResponse,
   type UpdateDeviceRequest,
 } from "./backend";
-import { registerForPushTokenAsync } from "../services/push-service";
+import { registerForPushTokenAsync } from "@services/push-service";
 
 export type {
   RegisterDeviceRequest,
