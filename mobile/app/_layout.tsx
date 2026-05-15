@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useUnistyles } from "react-native-unistyles";
 import migrations from "../drizzle/migrations";
 import { queryClient } from "../src/api/query-client";
+import { AlertHost } from "../src/components/Alert";
 import { db } from "../src/db";
 import { useAppUpdate } from "../src/hooks/use-app-update";
 import { initPushNotifications } from "../src/services/push-service";
@@ -118,6 +119,7 @@ export default Sentry.wrap(function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <AppContent />
           </QueryClientProvider>
+          <AlertHost />
         </ClerkLoaded>
       </ClerkProvider>
     </GestureHandlerRootView>
