@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { Alert } from "@components/Alert";
 import * as Updates from "expo-updates";
 import { useEffect, useRef } from "react";
 
