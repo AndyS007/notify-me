@@ -1,7 +1,7 @@
 import React from "react";
-import { Modal, Pressable, Text, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
-import type { AlertButton, AlertOptions, AlertStatic } from "react-native";
+import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { AlertButton, AlertOptions } from "react-native";
 
 type AlertPayload = {
   id: number;
@@ -29,17 +29,27 @@ function pump() {
 function finish() {
   current = null;
   listener?.(null);
-  // Defer so React commits the close before opening the next one.
+  // Defer so React commits the close before opening the next queued alert.
   setTimeout(pump, 0);
 }
 
-export const Alert: Pick<AlertStatic, "alert"> = {
-  alert(
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  return (
+    !!value &&
+    (typeof value === "object" || typeof value === "function") &&
+    typeof (value as { then?: unknown }).then === "function"
+  );
+}
+
+export const Alert: {
+  alert: (
     title: string,
     message?: string,
     buttons?: AlertButton[],
     options?: AlertOptions,
-  ) {
+  ) => void;
+} = {
+  alert(title, message, buttons, options) {
     queue.push({
       id: nextId++,
       title,
@@ -52,10 +62,15 @@ export const Alert: Pick<AlertStatic, "alert"> = {
 };
 
 export function AlertHost() {
+  const { theme } = useUnistyles();
   const [payload, setPayload] = React.useState<AlertPayload | null>(null);
+  const [loadingIndex, setLoadingIndex] = React.useState<number | null>(null);
 
   React.useEffect(() => {
-    listener = setPayload;
+    listener = (next) => {
+      setPayload(next);
+      setLoadingIndex(null);
+    };
     pump();
     return () => {
       listener = null;
@@ -64,18 +79,34 @@ export function AlertHost() {
 
   if (!payload) return null;
 
-  const cancelable = payload.options?.cancelable !== false;
+  const isLoading = loadingIndex !== null;
+  const cancelable = payload.options?.cancelable !== false && !isLoading;
 
   const handleDismiss = () => {
+    if (isLoading) return;
     const cancelBtn = payload.buttons.find((b) => b.style === "cancel");
     cancelBtn?.onPress?.();
     payload.options?.onDismiss?.();
     finish();
   };
 
-  const handlePress = (btn: AlertButton) => {
-    btn.onPress?.();
-    finish();
+  const handlePress = (btn: AlertButton, index: number) => {
+    if (isLoading) return;
+    const result = btn.onPress?.();
+    if (isThenable(result)) {
+      setLoadingIndex(index);
+      Promise.resolve(result).then(
+        () => finish(),
+        (err) => {
+          finish();
+          // Surface the rejection so the caller's error handling / dev tools
+          // still see it instead of being swallowed by the wrapper.
+          throw err;
+        },
+      );
+    } else {
+      finish();
+    }
   };
 
   const stacked = payload.buttons.length > 2;
@@ -89,11 +120,12 @@ export function AlertHost() {
         if (cancelable) handleDismiss();
       }}
     >
-      <Pressable
-        style={styles.backdrop}
-        onPress={cancelable ? handleDismiss : undefined}
-      >
-        <Pressable style={styles.dialog} onPress={(e) => e.stopPropagation()}>
+      <View style={styles.backdrop}>
+        <Pressable
+          style={styles.backdropTouchable}
+          onPress={cancelable ? handleDismiss : undefined}
+        />
+        <View style={styles.dialog}>
           <View style={styles.body}>
             <Text style={styles.title}>{payload.title}</Text>
             {payload.message ? (
@@ -102,34 +134,46 @@ export function AlertHost() {
           </View>
           <View style={stacked ? styles.buttonColumn : styles.buttonRow}>
             {payload.buttons.map((btn, i) => {
-              const separatorStyle =
+              const separator =
                 i > 0 && (stacked ? styles.separatorTop : styles.separatorLeft);
+              const isBtnLoading = loadingIndex === i;
+              const dimmed = isLoading && !isBtnLoading;
+              const spinnerColor =
+                btn.style === "destructive"
+                  ? theme.colors.badge
+                  : theme.colors.accent;
               return (
                 <Pressable
                   key={i}
+                  disabled={isLoading}
                   style={[
                     styles.button,
-                    separatorStyle,
+                    separator,
                     !stacked && styles.buttonRowItem,
+                    dimmed && styles.dimmed,
                   ]}
-                  onPress={() => handlePress(btn)}
+                  onPress={() => handlePress(btn, i)}
                 >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      btn.style === "destructive" && styles.destructive,
-                      btn.style === "cancel" && styles.cancel,
-                      btn.isPreferred && styles.preferred,
-                    ]}
-                  >
-                    {btn.text ?? "OK"}
-                  </Text>
+                  {isBtnLoading ? (
+                    <ActivityIndicator size="small" color={spinnerColor} />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.buttonText,
+                        btn.style === "destructive" && styles.destructive,
+                        btn.style === "cancel" && styles.cancel,
+                        btn.isPreferred && styles.preferred,
+                      ]}
+                    >
+                      {btn.text ?? "OK"}
+                    </Text>
+                  )}
                 </Pressable>
               );
             })}
           </View>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -141,6 +185,13 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
+  },
+  backdropTouchable: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   dialog: {
     width: "100%",
@@ -209,5 +260,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   destructive: {
     color: theme.colors.badge,
+  },
+  dimmed: {
+    opacity: 0.4,
   },
 }));
