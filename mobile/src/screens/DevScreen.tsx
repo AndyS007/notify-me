@@ -8,10 +8,16 @@ import { Alert } from "@components/Alert";
 import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { config } from "@/src/config";
 import { db } from "@db";
 import { appSettings, notifications, syncState } from "@db/schema";
 
 type SyncStateRow = { key: string; value: string | null };
+
+const ENV_ROWS: SyncStateRow[] = [
+  { key: "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY", value: config.publishableKey },
+  { key: "EXPO_PUBLIC_API_BASE_URL", value: config.apiBaseUrl },
+];
 
 const APP_INFO_ROWS: SyncStateRow[] = [
   { key: "env", value: __DEV__ ? "development" : "production" },
@@ -74,6 +80,20 @@ export default function DevScreen() {
           />
           <Text style={styles.actionText}>Clear local SQLite DB</Text>
         </Pressable>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Environment</Text>
+          </View>
+          {ENV_ROWS.map((row) => (
+            <View key={row.key} style={styles.kvRow}>
+              <Text style={styles.kvKey}>{row.key}</Text>
+              <Text style={styles.kvValue} selectable>
+                {row.value}
+              </Text>
+            </View>
+          ))}
+        </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
