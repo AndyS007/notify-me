@@ -13,10 +13,10 @@ import { appSettings, notifications, syncState } from "@db/schema";
 
 type SyncStateRow = { key: string; value: string | null };
 
-const ENV_ROWS: SyncStateRow[] = [
-  { key: "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY", value: config.publishableKey },
-  { key: "EXPO_PUBLIC_API_BASE_URL", value: config.apiBaseUrl },
-];
+const ENV_ROWS: SyncStateRow[] = Object.entries(config).map(([key, value]) => ({
+  key,
+  value: String(value),
+}));
 
 const APP_INFO_ROWS: SyncStateRow[] = [
   { key: "env", value: __DEV__ ? "development" : "production" },
