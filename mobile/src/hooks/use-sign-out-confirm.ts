@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/expo";
 import { useCallback } from "react";
-import { Alert } from "react-native";
+import { Alert } from "@components/Alert";
 import { db } from "@db";
 import { appSettings, notifications } from "@db/schema";
 

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   Text,
@@ -12,6 +11,7 @@ import { useSignUp } from "@clerk/expo";
 import { useSignInWithApple } from "@clerk/expo/apple";
 import { useSignInWithGoogle } from "@clerk/expo/google";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { Alert } from "@components/Alert";
 
 export default function SignUpScreen() {
   const { signUp } = useSignUp();

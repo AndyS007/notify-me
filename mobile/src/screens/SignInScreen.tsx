@@ -4,7 +4,6 @@ import { useSignInWithGoogle } from "@clerk/expo/google";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   Text,
@@ -12,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { Alert } from "@components/Alert";
 
 export default function SignInScreen() {
   const { signIn } = useSignIn();
