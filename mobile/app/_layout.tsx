@@ -1,12 +1,13 @@
 import { config } from "@/src/config";
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
+import * as Sentry from "@sentry/react-native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { ActivityIndicator, Platform, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useUnistyles } from "react-native-unistyles";
 import migrations from "../drizzle/migrations";
@@ -16,7 +17,6 @@ import { db } from "../src/db";
 import { useAppUpdate } from "../src/hooks/use-app-update";
 import { initPushNotifications } from "../src/services/push-service";
 import { reportError } from "../src/utils/error-reporter";
-import * as Sentry from "@sentry/react-native";
 
 Sentry.init({
   dsn: "https://7054d28acc84ba0d73c4b7a0c917fe1f@o4511240273461248.ingest.us.sentry.io/4511240331264000",
@@ -94,14 +94,13 @@ export default Sentry.wrap(function RootLayout() {
   // Local SQLite is native-only; the db proxy (src/db/index.ts) throws on
   // any access on web, which the migrator catches and surfaces as `error`.
   // On web we just ignore migration state and render the app.
-  const isWeb = Platform.OS === "web";
   const { success, error } = useMigrations(db, migrations);
 
-  if (!isWeb && error) {
+  if (error) {
     return <MigrationError message={error.message} />;
   }
 
-  if (!isWeb && !success) {
+  if (!success) {
     return null;
   }
 
