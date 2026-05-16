@@ -2,51 +2,47 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { NotificationRecord } from "@db/schema";
-import { formatRelativeTime } from "@utils/format-time";
+import { formatExactTime } from "@utils/format-time";
 
 type Props = {
   item: NotificationRecord;
-  isLast: boolean;
   onLongPress?: () => void;
 };
 
-export function NotificationItem({ item, isLast, onLongPress }: Props) {
+export function NotificationItem({ item, onLongPress }: Props) {
   return (
-    <Pressable
-      style={[styles.container, !isLast && styles.divider]}
-      onLongPress={onLongPress}
-    >
-      <View style={styles.content}>
-        {!!item.title && (
-          <Text style={styles.title} numberOfLines={1}>
-            {item.title}
-          </Text>
-        )}
-        {!!item.text && (
-          <Text style={styles.text} numberOfLines={2}>
-            {item.text}
-          </Text>
-        )}
-        {!item.title && !item.text && (
-          <Text style={styles.empty}>(no content)</Text>
-        )}
+    <Pressable style={styles.container} onLongPress={onLongPress}>
+      <View style={styles.bubble}>
+        <View style={styles.content}>
+          {!!item.title && (
+            <Text style={styles.title} numberOfLines={1}>
+              {item.title}
+            </Text>
+          )}
+          {!!item.text && <Text style={styles.text}>{item.text}</Text>}
+          {!item.title && !item.text && (
+            <Text style={styles.empty}>(no content)</Text>
+          )}
+        </View>
+        <Text style={styles.time}>{formatExactTime(item.timestamp)}</Text>
       </View>
-      <Text style={styles.time}>{formatRelativeTime(item.timestamp)}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
   },
-  divider: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: theme.colors.divider,
+  bubble: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 10,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
   content: {
     flex: 1,
@@ -54,7 +50,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   title: {
     color: theme.colors.text,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
   },
   text: {
@@ -70,7 +66,6 @@ const styles = StyleSheet.create((theme) => ({
   time: {
     color: theme.colors.textTertiary,
     fontSize: 11,
-    marginTop: 2,
     flexShrink: 0,
   },
 }));
