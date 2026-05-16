@@ -2,12 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
   RefreshControl,
   SectionList,
   Text,
@@ -33,8 +30,6 @@ import {
 } from "../../../../src/utils/format-time";
 
 const PAGE_SIZE = 50;
-const LOAD_MORE_DISTANCE_FROM_TOP = 80;
-const AUTO_SCROLL_BOTTOM_THRESHOLD = 120;
 
 type DateSection = {
   key: string;
@@ -99,16 +94,20 @@ export default function AppNotificationsScreen() {
     await refresh();
   }, [refresh]);
 
-  // Group items into per-day sections in ASCENDING order so the newest day
-  // (and the newest message inside it) lands at the bottom of the list,
-  // matching a chat thread layout.
+  const onEndReached = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadMore();
+  }, [hasMore, loading, loadMore]);
+
+  // Group the DESC-sorted items into per-day sections. Both the sections
+  // and the items inside them remain in DESC order; the SectionList is
+  // rendered `inverted`, so visually we get oldest at the top and newest
+  // at the bottom — the chat-style layout.
   const sections = useMemo<DateSection[]>(() => {
     if (items.length === 0) return [];
     const groups: DateSection[] = [];
     let current: DateSection | null = null;
-    // `items` is DESC by timestamp; walk it backwards to build ASC sections.
-    for (let i = items.length - 1; i >= 0; i--) {
-      const item = items[i];
+    for (const item of items) {
       const key = getLocalDayKey(item.timestamp);
       if (!current || current.key !== key) {
         current = {
@@ -123,135 +122,6 @@ export default function AppNotificationsScreen() {
     }
     return groups;
   }, [items]);
-
-  const listRef = useRef<SectionList<NotificationRecord, DateSection>>(null);
-  const newestTimestampRef = useRef<number | null>(null);
-  const didInitialScrollRef = useRef(false);
-  const isAtBottomRef = useRef(true);
-  const loadMoreInFlightRef = useRef(false);
-
-  const scrollToBottom = useCallback(
-    (animated: boolean) => {
-      const list = listRef.current;
-      if (!list) return;
-      // On web, drive the underlying scrollable element directly. RNW's
-      // `scrollToLocation` routes through `scrollToIndex`, which silently
-      // no-ops when the bottom rows haven't been measured yet — that's
-      // what left the screen sitting at the natural top (oldest first)
-      // and feeling upside-down compared to a chat layout.
-      if (Platform.OS === "web") {
-        const node = list.getScrollableNode?.() as
-          | (HTMLElement & { scrollTop: number; scrollHeight: number })
-          | null
-          | undefined;
-        if (node) {
-          if (animated && typeof node.scrollTo === "function") {
-            node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
-          } else {
-            node.scrollTop = node.scrollHeight;
-          }
-          return;
-        }
-      }
-      // Native: jump to the bottom of the underlying ScrollView. Asking
-      // for a very large Y is clamped to the content bounds, so we don't
-      // need a precise row index up front.
-      const responder = list.getScrollResponder?.() as
-        | { scrollTo?: (opts: { y: number; animated: boolean }) => void }
-        | undefined;
-      if (responder?.scrollTo) {
-        responder.scrollTo({ y: Number.MAX_SAFE_INTEGER, animated });
-        return;
-      }
-      if (sections.length === 0) return;
-      const sectionIndex = sections.length - 1;
-      const itemIndex = sections[sectionIndex].data.length - 1;
-      if (itemIndex < 0) return;
-      list.scrollToLocation({
-        sectionIndex,
-        itemIndex,
-        animated,
-        viewPosition: 1,
-      });
-    },
-    [sections],
-  );
-
-  // Auto-scroll to the bottom when a brand-new notification arrives, but
-  // only if the user is already pinned to the bottom — same rule chat apps
-  // use so reading older messages isn't yanked away by a new arrival.
-  useEffect(() => {
-    if (items.length === 0) {
-      newestTimestampRef.current = null;
-      didInitialScrollRef.current = false;
-      isAtBottomRef.current = true;
-      return;
-    }
-    const newest = items[0].timestamp;
-    const previous = newestTimestampRef.current;
-    newestTimestampRef.current = newest;
-    if (previous != null && newest > previous && isAtBottomRef.current) {
-      requestAnimationFrame(() => scrollToBottom(true));
-    }
-  }, [items, scrollToBottom]);
-
-  const handleContentSizeChange = useCallback(() => {
-    if (!didInitialScrollRef.current && sections.length > 0) {
-      scrollToBottom(false);
-      didInitialScrollRef.current = true;
-    }
-  }, [sections.length, scrollToBottom]);
-
-  // Backup initial-scroll trigger. `onContentSizeChange` is the primary
-  // hook, but on web the SectionList sometimes settles into its final
-  // size after layout passes have already fired — without this nudge the
-  // screen can stay parked at the natural top (oldest first), which is
-  // what made the chat layout feel reversed.
-  useEffect(() => {
-    if (didInitialScrollRef.current || sections.length === 0) return;
-    const id = setTimeout(() => {
-      if (!didInitialScrollRef.current) {
-        scrollToBottom(false);
-        didInitialScrollRef.current = true;
-      }
-    }, 50);
-    return () => clearTimeout(id);
-  }, [sections.length, scrollToBottom]);
-
-  const onScroll = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-      const distanceFromBottom =
-        contentSize.height - contentOffset.y - layoutMeasurement.height;
-      isAtBottomRef.current =
-        distanceFromBottom < AUTO_SCROLL_BOTTOM_THRESHOLD;
-
-      if (
-        contentOffset.y < LOAD_MORE_DISTANCE_FROM_TOP &&
-        hasMore &&
-        !loading &&
-        !loadMoreInFlightRef.current
-      ) {
-        loadMoreInFlightRef.current = true;
-        loadMore().finally(() => {
-          loadMoreInFlightRef.current = false;
-        });
-      }
-    },
-    [hasMore, loading, loadMore],
-  );
-
-  const onScrollToIndexFailed = useCallback(
-    (info: { index: number; highestMeasuredFrameIndex: number }) => {
-      // Target row isn't measured yet — wait one frame and try once more.
-      // Without this, the initial scroll-to-bottom can silently no-op on
-      // very tall lists where the bottom rows aren't laid out yet.
-      setTimeout(() => {
-        if (info.index >= 0) scrollToBottom(false);
-      }, 50);
-    },
-    [scrollToBottom],
-  );
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
@@ -284,20 +154,22 @@ export default function AppNotificationsScreen() {
         </View>
       ) : (
         <SectionList<NotificationRecord, DateSection>
-          ref={listRef}
+          inverted
           sections={sections}
           keyExtractor={(item) => item.clientId}
           renderItem={({ item }) => <NotificationItem item={item} />}
-          renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeaderRow}>
-              <View style={styles.sectionHeaderPill}>
-                <Text style={styles.sectionHeaderText}>{section.title}</Text>
+          // `inverted` flips everything vertically, so footers render
+          // visually ABOVE their section's items — which is exactly what
+          // we want for date labels.
+          renderSectionFooter={({ section }) => (
+            <View style={styles.sectionLabelRow}>
+              <View style={styles.sectionLabelPill}>
+                <Text style={styles.sectionLabelText}>{section.title}</Text>
               </View>
             </View>
           )}
-          stickySectionHeadersEnabled
           contentContainerStyle={styles.list}
-          ListHeaderComponent={
+          ListFooterComponent={
             loading && items.length > 0 ? (
               <ActivityIndicator
                 style={styles.loadingMore}
@@ -305,18 +177,8 @@ export default function AppNotificationsScreen() {
               />
             ) : null
           }
-          onContentSizeChange={handleContentSizeChange}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-          onScrollToIndexFailed={onScrollToIndexFailed}
-          // Native only — keeps the visible rows steady when older pages
-          // prepend at the top. RNW doesn't implement this prop, so skip
-          // it on web rather than have it silently dropped.
-          maintainVisibleContentPosition={
-            Platform.OS === "web"
-              ? undefined
-              : { minIndexForVisible: 1 }
-          }
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.5}
           refreshControl={
             <RefreshControl
               refreshing={loading && items.length === 0}
@@ -362,14 +224,13 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
   },
   list: {
-    paddingBottom: 12,
+    paddingVertical: 12,
   },
-  sectionHeaderRow: {
+  sectionLabelRow: {
     alignItems: "center",
-    paddingVertical: 8,
-    backgroundColor: theme.colors.background,
+    paddingVertical: 10,
   },
-  sectionHeaderPill: {
+  sectionLabelPill: {
     backgroundColor: theme.colors.surface,
     borderRadius: 999,
     paddingHorizontal: 12,
@@ -377,7 +238,7 @@ const styles = StyleSheet.create((theme) => ({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: theme.colors.divider,
   },
-  sectionHeaderText: {
+  sectionLabelText: {
     color: theme.colors.textSecondary,
     fontSize: 12,
     fontWeight: "600",
