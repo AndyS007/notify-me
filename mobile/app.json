@@ -15,7 +15,7 @@
       }
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "fingerprint"
     },
     "ios": {
       "supportsTablet": true,
