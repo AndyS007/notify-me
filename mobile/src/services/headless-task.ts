@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react-native";
+import { reportError } from "@utils/error-reporter";
 import { RawNotification, saveNotification } from "./notification-service";
 import { pushSync } from "./sync-service";
 
@@ -10,8 +10,8 @@ const headlessTask = async ({ notification }: { notification: string }) => {
     await pushSync();
   } catch (err) {
     // Headless JS task — re-throwing won't propagate to any UI boundary, so
-    // capture explicitly to make sure Sentry sees background-task failures.
-    Sentry.captureException(err);
+    // report explicitly to make sure background-task failures are tracked.
+    reportError(err);
     throw err;
   }
 };

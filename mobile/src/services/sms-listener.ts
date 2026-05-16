@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import * as Crypto from "expo-crypto";
-import * as Sentry from "@sentry/react-native";
+import { reportError } from "@utils/error-reporter";
 // The library ships no TypeScript declarations; per project convention we do
 // not fabricate one — everything below is typed as `any`.
 // @ts-ignore — untyped third-party module
@@ -101,9 +101,9 @@ export async function startSmsListener(
       const { address, body } = parseNativeSmsPayload(sms);
       persistSms(address, body)
         .then(() => onMessage?.())
-        .catch((err) => Sentry.captureException(err));
+        .catch((err) => reportError(err));
     } catch (err) {
-      Sentry.captureException(err);
+      reportError(err);
     }
   });
 

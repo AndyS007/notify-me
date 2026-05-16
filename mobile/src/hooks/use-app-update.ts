@@ -1,7 +1,7 @@
 import { Alert } from "@components/Alert";
 import * as Updates from "expo-updates";
 import { useEffect, useRef } from "react";
-import * as Sentry from "@sentry/react-native";
+import { reportError } from "@utils/error-reporter";
 
 export function useAppUpdate() {
   const { isUpdateAvailable, isUpdatePending, isDownloading } =
@@ -12,7 +12,7 @@ export function useAppUpdate() {
   useEffect(() => {
     if (!Updates.isEnabled) return;
     Updates.checkForUpdateAsync().catch((err) =>
-      Sentry.captureException(err),
+      reportError(err),
     );
   }, []);
 
@@ -43,7 +43,7 @@ export function useAppUpdate() {
           text: "Install Now",
           onPress: () => {
             Updates.fetchUpdateAsync().catch((err) => {
-              Sentry.captureException(err);
+              reportError(err);
               Alert.alert(
                 "Update Failed",
                 "Could not download the update. Please try again later.",

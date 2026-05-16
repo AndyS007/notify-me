@@ -15,6 +15,7 @@ import { AlertHost } from "../src/components/Alert";
 import { db } from "../src/db";
 import { useAppUpdate } from "../src/hooks/use-app-update";
 import { initPushNotifications } from "../src/services/push-service";
+import { reportError } from "../src/utils/error-reporter";
 import * as Sentry from "@sentry/react-native";
 
 Sentry.init({
@@ -31,13 +32,11 @@ Sentry.init({
   // spotlight: __DEV__,
 });
 
-SplashScreen.preventAutoHideAsync().catch((err) =>
-  Sentry.captureException(err),
-);
+SplashScreen.preventAutoHideAsync().catch(reportError);
 
 function useHideSplashOnMount() {
   useEffect(() => {
-    SplashScreen.hideAsync().catch((err) => Sentry.captureException(err));
+    SplashScreen.hideAsync().catch((err) => reportError(err));
   }, []);
 }
 
@@ -46,7 +45,7 @@ function AppContent() {
   useHideSplashOnMount();
 
   useEffect(() => {
-    initPushNotifications().catch((err) => Sentry.captureException(err));
+    initPushNotifications().catch((err) => reportError(err));
   }, []);
 
   return <Slot />;

@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import * as Sentry from "@sentry/react-native";
+import { reportError } from "@utils/error-reporter";
 import { Alert } from "@components/Alert";
 
 export default function SignInScreen() {
@@ -38,7 +38,7 @@ export default function SignInScreen() {
         router.replace("/(app)");
       }
     } catch (err: any) {
-      Sentry.captureException(err);
+      reportError(err);
       Alert.alert("Sign in failed", err.message);
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
-      Sentry.captureException(err);
+      reportError(err);
       Alert.alert("Apple sign-in failed", err.message);
     }
   };
@@ -70,7 +70,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
-      Sentry.captureException(err);
+      reportError(err);
       Alert.alert("Google sign-in failed", err.message);
     }
   };

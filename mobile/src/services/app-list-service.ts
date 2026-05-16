@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import { ExpoAndroidAppList } from "expo-android-app-list";
 import { eq } from "drizzle-orm";
-import * as Sentry from "@sentry/react-native";
+import { reportError } from "@utils/error-reporter";
 import { db } from "@db";
 import { appSettings } from "@db/schema";
 
@@ -114,7 +114,7 @@ export async function loadAppIcon(
       return base64;
     }
   } catch (err) {
-    Sentry.captureException(err);
+    reportError(err);
   }
   return null;
 }

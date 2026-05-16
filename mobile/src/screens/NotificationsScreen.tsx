@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "@components/Screen";
 import * as SQLite from "expo-sqlite";
-import * as Sentry from "@sentry/react-native";
+import { reportError } from "@utils/error-reporter";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -64,7 +64,7 @@ export default function NotificationsScreen() {
   const triggerPushSync = useMemo(
     () =>
       debounce(
-        () => pushSync().catch((err) => Sentry.captureException(err)),
+        () => pushSync().catch((err) => reportError(err)),
         1000,
       ),
     [],
@@ -72,7 +72,7 @@ export default function NotificationsScreen() {
   const triggerPullSync = useMemo(
     () =>
       debounce(
-        () => pullSync().catch((err) => Sentry.captureException(err)),
+        () => pullSync().catch((err) => reportError(err)),
         1000,
       ),
     [],
@@ -122,7 +122,7 @@ export default function NotificationsScreen() {
   useEffect(() => {
     if (hasSmsPermission) {
       startSmsListener(triggerPushSync).catch((err) =>
-        Sentry.captureException(err),
+        reportError(err),
       );
       return;
     }
@@ -134,7 +134,7 @@ export default function NotificationsScreen() {
     const granted = await requestSms();
     if (granted) {
       startSmsListener(triggerPushSync).catch((err) =>
-        Sentry.captureException(err),
+        reportError(err),
       );
     }
   }, [requestSms, triggerPushSync]);
@@ -145,7 +145,7 @@ export default function NotificationsScreen() {
     } catch (err) {
       // Pull failed (commonly: offline). Report it but still fall back to
       // whatever's cached locally so the UI stays usable.
-      Sentry.captureException(err);
+      reportError(err);
     }
     await refresh();
     triggerPushSync();
