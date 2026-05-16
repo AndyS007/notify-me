@@ -1,15 +1,9 @@
-import { useSignIn } from "@clerk/expo";
+import { useSSO, useSignIn } from "@clerk/expo";
 import { useSignInWithApple } from "@clerk/expo/apple";
 import { useSignInWithGoogle } from "@clerk/expo/google";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Alert } from "@components/Alert";
 
@@ -17,6 +11,7 @@ export default function SignInScreen() {
   const { signIn } = useSignIn();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
+  const { startSSOFlow } = useSSO();
   const router = useRouter();
   const { theme } = useUnistyles();
 
@@ -60,7 +55,9 @@ export default function SignInScreen() {
   const onGooglePress = async () => {
     try {
       const { createdSessionId, setActive: activate } =
-        await startGoogleAuthenticationFlow();
+        Platform.OS === "web"
+          ? await startSSOFlow({ strategy: "oauth_google" })
+          : await startGoogleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
         router.replace("/(app)");

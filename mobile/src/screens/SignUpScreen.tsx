@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import {
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { useSignUp } from "@clerk/expo";
+import { useSSO, useSignUp } from "@clerk/expo";
 import { useSignInWithApple } from "@clerk/expo/apple";
 import { useSignInWithGoogle } from "@clerk/expo/google";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -17,6 +11,7 @@ export default function SignUpScreen() {
   const { signUp } = useSignUp();
   const { startAppleAuthenticationFlow } = useSignInWithApple();
   const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
+  const { startSSOFlow } = useSSO();
   const router = useRouter();
   const { theme } = useUnistyles();
 
@@ -91,7 +86,9 @@ export default function SignUpScreen() {
   const onGooglePress = async () => {
     try {
       const { createdSessionId, setActive: activate } =
-        await startGoogleAuthenticationFlow();
+        Platform.OS === "web"
+          ? await startSSOFlow({ strategy: "oauth_google" })
+          : await startGoogleAuthenticationFlow();
       if (createdSessionId && activate) {
         await activate({ session: createdSessionId });
         router.replace("/(app)");
