@@ -2,11 +2,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
+  SectionList,
   Text,
   TouchableOpacity,
   View,
@@ -18,11 +18,24 @@ import { AppIcon } from "../../../../src/components/AppIcon";
 import { NotificationItem } from "../../../../src/components/NotificationItem";
 import { useAppIcon } from "../../../../src/hooks/use-app-icon";
 import { useAppList } from "../../../../src/hooks/use-app-list";
-import { useAppNotifications } from "../../../../src/hooks/use-app-notifications";
+import {
+  NotificationRecord,
+  useAppNotifications,
+} from "../../../../src/hooks/use-app-notifications";
 import { pullSync } from "../../../../src/services/sync-service";
 import { debounce } from "../../../../src/utils/debounce";
+import {
+  formatDateSection,
+  getLocalDayKey,
+} from "../../../../src/utils/format-time";
 
 const PAGE_SIZE = 50;
+
+type DateSection = {
+  key: string;
+  title: string;
+  data: NotificationRecord[];
+};
 
 export default function AppNotificationsScreen() {
   const params = useLocalSearchParams<{
@@ -86,6 +99,30 @@ export default function AppNotificationsScreen() {
     loadMore();
   }, [hasMore, loading, loadMore]);
 
+  // Group the DESC-sorted items into per-day sections. Both the sections
+  // and the items inside them remain in DESC order; the SectionList is
+  // rendered `inverted`, so visually we get oldest at the top and newest
+  // at the bottom — the chat-style layout.
+  const sections = useMemo<DateSection[]>(() => {
+    if (items.length === 0) return [];
+    const groups: DateSection[] = [];
+    let current: DateSection | null = null;
+    for (const item of items) {
+      const key = getLocalDayKey(item.timestamp);
+      if (!current || current.key !== key) {
+        current = {
+          key,
+          title: formatDateSection(item.timestamp),
+          data: [item],
+        };
+        groups.push(current);
+      } else {
+        current.data.push(item);
+      }
+    }
+    return groups;
+  }, [items]);
+
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
@@ -111,41 +148,46 @@ export default function AppNotificationsScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.clientId}
-        renderItem={({ item, index }) => (
-          <NotificationItem
-            item={item}
-            isLast={index === items.length - 1}
-          />
-        )}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          !loading ? (
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>No notifications yet</Text>
+      {!loading && items.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>No notifications yet</Text>
+        </View>
+      ) : (
+        <SectionList<NotificationRecord, DateSection>
+          inverted
+          sections={sections}
+          keyExtractor={(item) => item.clientId}
+          renderItem={({ item }) => <NotificationItem item={item} />}
+          // `inverted` flips everything vertically, so footers render
+          // visually ABOVE their section's items — which is exactly what
+          // we want for date labels.
+          renderSectionFooter={({ section }) => (
+            <View style={styles.sectionLabelRow}>
+              <View style={styles.sectionLabelPill}>
+                <Text style={styles.sectionLabelText}>{section.title}</Text>
+              </View>
             </View>
-          ) : null
-        }
-        ListFooterComponent={
-          loading && items.length > 0 ? (
-            <ActivityIndicator
-              style={styles.footer}
-              color={theme.colors.accent}
+          )}
+          contentContainerStyle={styles.list}
+          ListFooterComponent={
+            loading && items.length > 0 ? (
+              <ActivityIndicator
+                style={styles.loadingMore}
+                color={theme.colors.accent}
+              />
+            ) : null
+          }
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading && items.length === 0}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.refreshIndicator}
             />
-          ) : null
-        }
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading && items.length === 0}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.refreshIndicator}
-          />
-        }
-      />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -182,18 +224,35 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
   },
   list: {
-    paddingVertical: 8,
-    paddingBottom: 40,
+    paddingVertical: 12,
+  },
+  sectionLabelRow: {
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  sectionLabelPill: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.colors.divider,
+  },
+  sectionLabelText: {
+    color: theme.colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "600",
   },
   empty: {
+    flex: 1,
     alignItems: "center",
-    paddingVertical: 60,
+    justifyContent: "center",
   },
   emptyText: {
     color: theme.colors.textTertiary,
     fontSize: 14,
   },
-  footer: {
+  loadingMore: {
     paddingVertical: 16,
   },
 }));
