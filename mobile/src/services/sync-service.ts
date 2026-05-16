@@ -45,11 +45,7 @@ export async function pushSync(): Promise<{
     if (!isDeviceRegistered()) {
       const pending = waitForDeviceRegistration();
       if (!pending) return { pushed: 0, rejected: 0 };
-      try {
-        await pending;
-      } catch {
-        return { pushed: 0, rejected: 0 };
-      }
+      await pending;
     }
 
     const localDeviceId = await getLocalDeviceId();

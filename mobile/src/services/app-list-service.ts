@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import { ExpoAndroidAppList } from "expo-android-app-list";
 import { eq } from "drizzle-orm";
+import { reportError } from "@utils/error-reporter";
 import { db } from "@db";
 import { appSettings } from "@db/schema";
 
@@ -18,41 +19,36 @@ export type AppInfo = {
  */
 export async function syncAppsFromDevice(): Promise<AppInfo[]> {
   if (Platform.OS !== "android") return [];
-  try {
-    const devices = await ExpoAndroidAppList.getAll();
-    if (devices.length === 0) return [];
-    const now = Date.now();
-    for (const a of devices) {
-      const isSystem = a.isSystemApp ? 1 : 0;
-      await db
-        .insert(appSettings)
-        .values({
-          packageName: a.packageName,
+  const devices = await ExpoAndroidAppList.getAll();
+  if (devices.length === 0) return [];
+  const now = Date.now();
+  for (const a of devices) {
+    const isSystem = a.isSystemApp ? 1 : 0;
+    await db
+      .insert(appSettings)
+      .values({
+        packageName: a.packageName,
+        appName: a.appName,
+        enabled: a.isSystemApp ? 0 : 1,
+        isSystemApp: isSystem,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: appSettings.packageName,
+        // Do NOT overwrite `enabled` — preserve the user's toggle.
+        set: {
           appName: a.appName,
-          enabled: a.isSystemApp ? 0 : 1,
           isSystemApp: isSystem,
           updatedAt: now,
-        })
-        .onConflictDoUpdate({
-          target: appSettings.packageName,
-          // Do NOT overwrite `enabled` — preserve the user's toggle.
-          set: {
-            appName: a.appName,
-            isSystemApp: isSystem,
-            updatedAt: now,
-          },
-        });
-    }
-    deviceSyncedThisSession = true;
-    return devices.map((a) => ({
-      packageName: a.packageName,
-      appName: a.appName,
-      isSystemApp: a.isSystemApp,
-    }));
-  } catch (e) {
-    console.warn("Failed to sync app list from device:", e);
-    return [];
+        },
+      });
   }
+  deviceSyncedThisSession = true;
+  return devices.map((a) => ({
+    packageName: a.packageName,
+    appName: a.appName,
+    isSystemApp: a.isSystemApp,
+  }));
 }
 
 /**
@@ -117,8 +113,8 @@ export async function loadAppIcon(
       iconCache.set(packageName, base64);
       return base64;
     }
-  } catch {
-    // icon not available
+  } catch (err) {
+    reportError(err);
   }
   return null;
 }

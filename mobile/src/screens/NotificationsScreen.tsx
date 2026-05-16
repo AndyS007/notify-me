@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "@components/Screen";
 import * as SQLite from "expo-sqlite";
+import { reportError } from "@utils/error-reporter";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -61,11 +62,19 @@ export default function NotificationsScreen() {
   );
 
   const triggerPushSync = useMemo(
-    () => debounce(() => pushSync().catch(() => {}), 1000),
+    () =>
+      debounce(
+        () => pushSync().catch((err) => reportError(err)),
+        1000,
+      ),
     [],
   );
   const triggerPullSync = useMemo(
-    () => debounce(() => pullSync().catch(() => {}), 1000),
+    () =>
+      debounce(
+        () => pullSync().catch((err) => reportError(err)),
+        1000,
+      ),
     [],
   );
   useEffect(
@@ -112,7 +121,9 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     if (hasSmsPermission) {
-      startSmsListener(triggerPushSync).catch(() => {});
+      startSmsListener(triggerPushSync).catch((err) =>
+        reportError(err),
+      );
       return;
     }
     const id = setInterval(recheckSms, 3000);
@@ -122,15 +133,19 @@ export default function NotificationsScreen() {
   const handleRequestSms = useCallback(async () => {
     const granted = await requestSms();
     if (granted) {
-      startSmsListener(triggerPushSync).catch(() => {});
+      startSmsListener(triggerPushSync).catch((err) =>
+        reportError(err),
+      );
     }
   }, [requestSms, triggerPushSync]);
 
   const onRefresh = useCallback(async () => {
     try {
       await pullSync();
-    } catch {
-      // network failure — fall back to whatever's cached locally
+    } catch (err) {
+      // Pull failed (commonly: offline). Report it but still fall back to
+      // whatever's cached locally so the UI stays usable.
+      reportError(err);
     }
     await refresh();
     triggerPushSync();

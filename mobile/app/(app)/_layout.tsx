@@ -4,6 +4,7 @@ import { Redirect } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { useEffect, useRef } from "react";
 import { useUnistyles } from "react-native-unistyles";
+import { reportError } from "../../src/utils/error-reporter";
 import { syncPushTokenAsync, useRegisterDevice } from "../../src/api/devices";
 import { DrawerContent } from "../../src/components/DrawerContent";
 import {
@@ -27,12 +28,10 @@ export default function HomeLayout() {
         // Fire-and-forget the notification permission prompt + push token
         // upload. This runs AFTER the device row exists so it only ever
         // updates the expoPushToken column.
-        syncPushTokenAsync().catch((err) =>
-          console.warn("Push token sync failed:", err),
-        );
+        syncPushTokenAsync().catch((err) => reportError(err));
       },
       onError: (err) => {
-        console.warn("Device registration failed:", err);
+        reportError(err);
         // Allow the next run of this effect to retry (e.g. on re-sign-in).
         registered.current = false;
       },
@@ -43,9 +42,7 @@ export default function HomeLayout() {
     if (!isSignedIn) return;
 
     const syncOnPush = () => {
-      pullSync().catch((err) =>
-        console.warn("[push] pull sync failed:", err),
-      );
+      pullSync().catch((err) => reportError(err));
     };
 
     const receivedSub = addPushReceivedListener(syncOnPush);
@@ -60,8 +57,8 @@ export default function HomeLayout() {
   useEffect(() => {
     if (!isSignedIn) return;
     startSmsListener(() => {
-      pushSync().catch(() => {});
-    }).catch(() => {});
+      pushSync().catch((err) => reportError(err));
+    }).catch((err) => reportError(err));
   }, [isSignedIn]);
 
   if (!isSignedIn) {

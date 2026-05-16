@@ -5,6 +5,7 @@ import { useSSO, useSignUp } from "@clerk/expo";
 import { useSignInWithApple } from "@clerk/expo/apple";
 import { useSignInWithGoogle } from "@clerk/expo/google";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { reportError } from "@utils/error-reporter";
 import { Alert } from "@components/Alert";
 
 export default function SignUpScreen() {
@@ -44,6 +45,7 @@ export default function SignUpScreen() {
         router.replace("/(app)");
       }
     } catch (err: any) {
+      reportError(err);
       Alert.alert("Sign up failed", err.message);
     } finally {
       setLoading(false);
@@ -63,6 +65,7 @@ export default function SignUpScreen() {
         router.replace("/(app)");
       }
     } catch (err: any) {
+      reportError(err);
       Alert.alert("Verification failed", err.message);
     } finally {
       setLoading(false);
@@ -79,6 +82,7 @@ export default function SignUpScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
+      reportError(err);
       Alert.alert("Apple sign-in failed", err.message);
     }
   };
@@ -95,6 +99,7 @@ export default function SignUpScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
+      reportError(err);
       Alert.alert("Google sign-in failed", err.message);
     }
   };

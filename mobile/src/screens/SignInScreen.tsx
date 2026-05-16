@@ -5,6 +5,7 @@ import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { reportError } from "@utils/error-reporter";
 import { Alert } from "@components/Alert";
 
 export default function SignInScreen() {
@@ -32,6 +33,7 @@ export default function SignInScreen() {
         router.replace("/(app)");
       }
     } catch (err: any) {
+      reportError(err);
       Alert.alert("Sign in failed", err.message);
     } finally {
       setLoading(false);
@@ -48,6 +50,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
+      reportError(err);
       Alert.alert("Apple sign-in failed", err.message);
     }
   };
@@ -64,6 +67,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") return;
+      reportError(err);
       Alert.alert("Google sign-in failed", err.message);
     }
   };
