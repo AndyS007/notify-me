@@ -42,20 +42,16 @@ class ExpoPushService(
         if (valid.isEmpty()) return
 
         for (chunk in valid.chunked(batchSize)) {
-            try {
-                val headers = HttpHeaders().apply {
-                    contentType = MediaType.APPLICATION_JSON
-                    accept = listOf(MediaType.APPLICATION_JSON)
-                    if (accessToken.isNotBlank()) {
-                        set("Authorization", "Bearer $accessToken")
-                    }
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                accept = listOf(MediaType.APPLICATION_JSON)
+                if (accessToken.isNotBlank()) {
+                    set("Authorization", "Bearer $accessToken")
                 }
-                val entity = HttpEntity(chunk, headers)
-                val response = rest.postForEntity(pushUrl, entity, Map::class.java)
-                log.debug("Expo push sent ({} msgs): status={}", chunk.size, response.statusCode)
-            } catch (e: Exception) {
-                log.warn("Expo push send failed ({} msgs): {}", chunk.size, e.message)
             }
+            val entity = HttpEntity(chunk, headers)
+            val response = rest.postForEntity(pushUrl, entity, Map::class.java)
+            log.debug("Expo push sent ({} msgs): status={}", chunk.size, response.statusCode)
         }
     }
 

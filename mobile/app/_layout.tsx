@@ -31,11 +31,13 @@ Sentry.init({
   // spotlight: __DEV__,
 });
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.preventAutoHideAsync().catch((err) =>
+  Sentry.captureException(err),
+);
 
 function useHideSplashOnMount() {
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => {});
+    SplashScreen.hideAsync().catch((err) => Sentry.captureException(err));
   }, []);
 }
 
@@ -44,9 +46,7 @@ function AppContent() {
   useHideSplashOnMount();
 
   useEffect(() => {
-    initPushNotifications().catch((err) =>
-      console.warn("[push] init failed:", err),
-    );
+    initPushNotifications().catch((err) => Sentry.captureException(err));
   }, []);
 
   return <Slot />;

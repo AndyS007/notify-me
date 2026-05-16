@@ -1,6 +1,7 @@
 import { Alert } from "@components/Alert";
 import * as Updates from "expo-updates";
 import { useEffect, useRef } from "react";
+import * as Sentry from "@sentry/react-native";
 
 export function useAppUpdate() {
   const { isUpdateAvailable, isUpdatePending, isDownloading } =
@@ -10,9 +11,9 @@ export function useAppUpdate() {
   // Check for updates on mount (only in non-dev builds where updates are enabled)
   useEffect(() => {
     if (!Updates.isEnabled) return;
-    Updates.checkForUpdateAsync().catch(() => {
-      // Silently ignore network errors during update check
-    });
+    Updates.checkForUpdateAsync().catch((err) =>
+      Sentry.captureException(err),
+    );
   }, []);
 
   // When an update is downloaded and ready, reload automatically
@@ -41,7 +42,8 @@ export function useAppUpdate() {
         {
           text: "Install Now",
           onPress: () => {
-            Updates.fetchUpdateAsync().catch(() => {
+            Updates.fetchUpdateAsync().catch((err) => {
+              Sentry.captureException(err);
               Alert.alert(
                 "Update Failed",
                 "Could not download the update. Please try again later.",

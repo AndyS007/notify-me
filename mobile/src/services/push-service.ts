@@ -55,13 +55,8 @@ export async function registerForPushTokenAsync(): Promise<string | null> {
     return null;
   }
 
-  try {
-    const result = await Notifications.getExpoPushTokenAsync({ projectId });
-    return result.data;
-  } catch (err) {
-    console.warn("[push] failed to get Expo push token:", err);
-    return null;
-  }
+  const result = await Notifications.getExpoPushTokenAsync({ projectId });
+  return result.data;
 }
 
 export function addPushReceivedListener(

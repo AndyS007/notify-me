@@ -75,11 +75,7 @@ export async function registerDeviceApi(): Promise<RegisterDeviceResponse> {
 
 export async function syncPushTokenAsync(): Promise<void> {
   if (registrationPromise) {
-    try {
-      await registrationPromise;
-    } catch {
-      return;
-    }
+    await registrationPromise;
   } else if (!deviceRegistered) {
     return;
   }

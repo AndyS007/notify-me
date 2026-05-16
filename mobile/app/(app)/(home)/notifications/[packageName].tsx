@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "../../../../src/components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import * as Sentry from "@sentry/react-native";
 import { AppIcon } from "../../../../src/components/AppIcon";
 import { NotificationItem } from "../../../../src/components/NotificationItem";
 import { useAppIcon } from "../../../../src/hooks/use-app-icon";
@@ -64,7 +65,7 @@ export default function AppNotificationsScreen() {
       // Pull-sync runs at the global level (chat-list focus + push events),
       // but kicking it off again on focus here keeps a stale detail view
       // from lingering if the user navigated straight here.
-      pullSync().catch(() => {});
+      pullSync().catch((err) => Sentry.captureException(err));
       refresh();
     }, [refresh]),
   );
@@ -72,8 +73,10 @@ export default function AppNotificationsScreen() {
   const onRefresh = useCallback(async () => {
     try {
       await pullSync();
-    } catch {
-      // network failure — fall back to whatever's cached locally
+    } catch (err) {
+      // Pull failed (commonly: offline). Report it but still fall back to
+      // whatever's cached locally so the UI stays usable.
+      Sentry.captureException(err);
     }
     await refresh();
   }, [refresh]);
