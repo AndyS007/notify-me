@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   RefreshControl,
   SectionList,
   Text,
@@ -132,7 +133,37 @@ export default function AppNotificationsScreen() {
   const scrollToBottom = useCallback(
     (animated: boolean) => {
       const list = listRef.current;
-      if (!list || sections.length === 0) return;
+      if (!list) return;
+      // On web, drive the underlying scrollable element directly. RNW's
+      // `scrollToLocation` routes through `scrollToIndex`, which silently
+      // no-ops when the bottom rows haven't been measured yet — that's
+      // what left the screen sitting at the natural top (oldest first)
+      // and feeling upside-down compared to a chat layout.
+      if (Platform.OS === "web") {
+        const node = list.getScrollableNode?.() as
+          | (HTMLElement & { scrollTop: number; scrollHeight: number })
+          | null
+          | undefined;
+        if (node) {
+          if (animated && typeof node.scrollTo === "function") {
+            node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
+          } else {
+            node.scrollTop = node.scrollHeight;
+          }
+          return;
+        }
+      }
+      // Native: jump to the bottom of the underlying ScrollView. Asking
+      // for a very large Y is clamped to the content bounds, so we don't
+      // need a precise row index up front.
+      const responder = list.getScrollResponder?.() as
+        | { scrollTo?: (opts: { y: number; animated: boolean }) => void }
+        | undefined;
+      if (responder?.scrollTo) {
+        responder.scrollTo({ y: Number.MAX_SAFE_INTEGER, animated });
+        return;
+      }
+      if (sections.length === 0) return;
       const sectionIndex = sections.length - 1;
       const itemIndex = sections[sectionIndex].data.length - 1;
       if (itemIndex < 0) return;
@@ -169,6 +200,22 @@ export default function AppNotificationsScreen() {
       scrollToBottom(false);
       didInitialScrollRef.current = true;
     }
+  }, [sections.length, scrollToBottom]);
+
+  // Backup initial-scroll trigger. `onContentSizeChange` is the primary
+  // hook, but on web the SectionList sometimes settles into its final
+  // size after layout passes have already fired — without this nudge the
+  // screen can stay parked at the natural top (oldest first), which is
+  // what made the chat layout feel reversed.
+  useEffect(() => {
+    if (didInitialScrollRef.current || sections.length === 0) return;
+    const id = setTimeout(() => {
+      if (!didInitialScrollRef.current) {
+        scrollToBottom(false);
+        didInitialScrollRef.current = true;
+      }
+    }, 50);
+    return () => clearTimeout(id);
   }, [sections.length, scrollToBottom]);
 
   const onScroll = useCallback(
@@ -262,10 +309,14 @@ export default function AppNotificationsScreen() {
           onScroll={onScroll}
           scrollEventThrottle={16}
           onScrollToIndexFailed={onScrollToIndexFailed}
-          // Prepending older pages would otherwise jump the visible content
-          // downward; this option keeps the rows the user is reading in
-          // place when the list grows at the top.
-          maintainVisibleContentPosition={{ minIndexForVisible: 1 }}
+          // Native only — keeps the visible rows steady when older pages
+          // prepend at the top. RNW doesn't implement this prop, so skip
+          // it on web rather than have it silently dropped.
+          maintainVisibleContentPosition={
+            Platform.OS === "web"
+              ? undefined
+              : { minIndexForVisible: 1 }
+          }
           refreshControl={
             <RefreshControl
               refreshing={loading && items.length === 0}
