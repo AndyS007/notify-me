@@ -2,46 +2,36 @@ import { Alert } from "@components/Alert";
 import { reportError } from "@utils/error-reporter";
 import { useFocusEffect } from "expo-router";
 import * as Updates from "expo-updates";
-import { useCallback, useEffect, useRef } from "react";
-
-function showUpdateAvailablePrompt(alertShown: React.RefObject<boolean>) {
-  if (alertShown.current) return;
-  alertShown.current = true;
-
-  Alert.alert(
-    "Update Available",
-    "A new version is ready. Install now for the latest improvements.",
-    [
-      {
-        text: "Later",
-        style: "cancel",
-        onPress: () => {
-          alertShown.current = false;
-        },
-      },
-      {
-        text: "Install Now",
-        onPress: async () => {
-          try {
-            await Updates.fetchUpdateAsync();
-          } catch (err) {
-            reportError(err);
-            Alert.alert(
-              "Update Failed",
-              "Could not download the update. Please try again later.",
-            );
-            alertShown.current = false;
-          }
-        },
-      },
-    ],
-  );
-}
+import { useCallback, useRef } from "react";
 
 export function useAppUpdate() {
-  const { isUpdateAvailable, isUpdatePending, isDownloading } =
-    Updates.useUpdates();
+  const { isUpdatePending, isDownloading } = Updates.useUpdates();
   const alertShown = useRef(false);
+
+  const showUpdateReadyPrompt = useCallback(() => {
+    if (alertShown.current) return;
+    alertShown.current = true;
+
+    Alert.alert(
+      "Update Ready",
+      "A new version has been downloaded. Restart now to apply.",
+      [
+        {
+          text: "Later",
+          style: "cancel",
+          onPress: () => {
+            alertShown.current = false;
+          },
+        },
+        {
+          text: "Restart Now",
+          onPress: () => {
+            void Updates.reloadAsync();
+          },
+        },
+      ],
+    );
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -50,10 +40,15 @@ export function useAppUpdate() {
 
       void (async () => {
         try {
+          if (isUpdatePending) {
+            showUpdateReadyPrompt();
+            return;
+          }
           const result = await Updates.checkForUpdateAsync();
+          if (cancelled || !result.isAvailable) return;
+          await Updates.fetchUpdateAsync();
           if (cancelled) return;
-          if (!result.isAvailable) return;
-          showUpdateAvailablePrompt(alertShown);
+          showUpdateReadyPrompt();
         } catch (err) {
           if (!cancelled) reportError(err);
         }
@@ -62,19 +57,8 @@ export function useAppUpdate() {
       return () => {
         cancelled = true;
       };
-    }, []),
+    }, [isUpdatePending, showUpdateReadyPrompt]),
   );
-
-  useEffect(() => {
-    if (isUpdatePending) {
-      Updates.reloadAsync();
-    }
-  }, [isUpdatePending]);
-
-  useEffect(() => {
-    if (!isUpdateAvailable) return;
-    showUpdateAvailablePrompt(alertShown);
-  }, [isUpdateAvailable]);
 
   return { isDownloading };
 }
