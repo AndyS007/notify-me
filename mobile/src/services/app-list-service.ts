@@ -13,9 +13,10 @@ export type AppInfo = {
 
 /**
  * Fetch the installed app list from the device and upsert it into the
- * `app_settings` table. On insert we seed `enabled` from `isSystemApp`
- * (system apps default off, user apps default on). On conflict we refresh
- * the metadata but preserve whatever `enabled` the user has chosen.
+ * `app_settings` table. Tracking is strictly opt-in: every newly-discovered
+ * app is inserted disabled and the user has to flip the toggle to start
+ * capturing its notifications. On conflict we refresh the metadata but
+ * preserve whatever `enabled` the user has chosen.
  */
 export async function syncAppsFromDevice(): Promise<AppInfo[]> {
   if (Platform.OS !== "android") return [];
@@ -29,7 +30,7 @@ export async function syncAppsFromDevice(): Promise<AppInfo[]> {
       .values({
         packageName: a.packageName,
         appName: a.appName,
-        enabled: a.isSystemApp ? 0 : 1,
+        enabled: 0,
         isSystemApp: isSystem,
         updatedAt: now,
       })

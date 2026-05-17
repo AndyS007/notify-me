@@ -29,10 +29,13 @@ class AppSetting(
     val appName: String = "",
 
     @Column(name = "enabled", nullable = false)
-    var enabled: Boolean = true,
+    var enabled: Boolean = false,
 
     @Column(name = "is_system_app", nullable = false)
     var isSystemApp: Boolean = false,
+
+    @Column(name = "app_icon_url")
+    var appIconUrl: String? = null,
 
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant = Instant.now()

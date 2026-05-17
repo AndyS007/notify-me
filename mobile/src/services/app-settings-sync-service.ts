@@ -19,6 +19,7 @@ export async function pushAppSettings(): Promise<{
     appName: r.appName,
     enabled: r.enabled === 1,
     isSystemApp: r.isSystemApp === 1,
+    appIconUrl: r.appIconUrl ?? null,
     updatedAt: r.updatedAt,
   }));
 
@@ -45,6 +46,7 @@ export async function pullAppSettings(): Promise<{ merged: number }> {
         appName: item.appName,
         enabled: item.enabled ? 1 : 0,
         isSystemApp: item.isSystemApp ? 1 : 0,
+        appIconUrl: item.appIconUrl ?? null,
         updatedAt: item.updatedAt,
       });
       merged++;
@@ -57,6 +59,8 @@ export async function pullAppSettings(): Promise<{ merged: number }> {
             appName: item.appName,
             enabled: item.enabled ? 1 : 0,
             isSystemApp: item.isSystemApp ? 1 : 0,
+            // Don't blow away a locally-uploaded URL with null.
+            appIconUrl: item.appIconUrl ?? local.appIconUrl,
             updatedAt: item.updatedAt,
           })
           .where(eq(appSettings.packageName, item.packageName));

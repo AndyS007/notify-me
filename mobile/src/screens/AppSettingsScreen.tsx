@@ -11,10 +11,11 @@ import type { AppInfo } from "@services/app-list-service";
 
 type AppRow = AppInfo & { enabled: boolean };
 
-function resolveEnabled(info: AppInfo, setting?: { enabled: number }): boolean {
+function resolveEnabled(_info: AppInfo, setting?: { enabled: number }): boolean {
+  // Tracking is strictly opt-in: nothing is captured unless the user has
+  // explicitly enabled the app via the toggle on this screen.
   if (setting) return setting.enabled === 1;
-  // No explicit setting — system apps default to disabled, user apps to enabled.
-  return !info.isSystemApp;
+  return false;
 }
 
 function AppSettingsRow({

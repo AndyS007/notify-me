@@ -56,8 +56,9 @@ export const appSettings = sqliteTable(
     id: int("id").primaryKey({ autoIncrement: true }),
     packageName: text("package_name").notNull(),
     appName: text("app_name").notNull().default(""),
-    enabled: int("enabled").notNull().default(1),
+    enabled: int("enabled").notNull().default(0),
     isSystemApp: int("is_system_app").notNull().default(0),
+    appIconUrl: text("app_icon_url"),
     updatedAt: int("updated_at").notNull().default(0),
   },
   (table) => [

@@ -116,6 +116,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/app-settings/upload-icon": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["uploadAppIcon"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/hello": {
     parameters: {
       query?: never;
@@ -237,6 +253,7 @@ export interface components {
       appName: string;
       enabled: boolean;
       isSystemApp: boolean;
+      appIconUrl?: string | null;
       updatedAt: number;
     };
     SyncAppSettingsRequest: {
@@ -245,6 +262,15 @@ export interface components {
     SyncAppSettingsResponse: {
       created?: number;
       updated?: number;
+    };
+    UploadAppIconRequest: {
+      packageName: string;
+      appName: string;
+      iconBase64: string;
+    };
+    UploadAppIconResponse: {
+      packageName: string;
+      appIconUrl?: string | null;
     };
     RegisterDeviceResponse: {
       id?: string;
@@ -449,6 +475,30 @@ export interface operations {
         };
         content: {
           "*/*": components["schemas"]["SyncAppSettingsResponse"];
+        };
+      };
+    };
+  };
+  uploadAppIcon: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UploadAppIconRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["UploadAppIconResponse"];
         };
       };
     };

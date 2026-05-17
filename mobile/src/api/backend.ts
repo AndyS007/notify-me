@@ -25,6 +25,10 @@ export type SyncPullResponse = components["schemas"]["SyncPullResponse"];
 export type AppSettingItem = components["schemas"]["AppSettingItem"];
 export type SyncAppSettingsResponse =
   components["schemas"]["SyncAppSettingsResponse"];
+export type UploadAppIconRequest =
+  components["schemas"]["UploadAppIconRequest"];
+export type UploadAppIconResponse =
+  components["schemas"]["UploadAppIconResponse"];
 
 export const api = {
   async registerDevice(
@@ -86,5 +90,12 @@ export const api = {
   async pullAppSettings(): Promise<AppSettingItem[]> {
     const { data } = await client.GET("/app-settings");
     return data ?? [];
+  },
+
+  async uploadAppIcon(
+    body: UploadAppIconRequest,
+  ): Promise<UploadAppIconResponse> {
+    const { data } = await client.POST("/app-settings/upload-icon", { body });
+    return data!;
   },
 };
