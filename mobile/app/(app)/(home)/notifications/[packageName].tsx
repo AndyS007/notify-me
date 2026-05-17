@@ -2,9 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
   RefreshControl,
@@ -32,8 +33,7 @@ import {
 } from "../../../../src/utils/format-time";
 
 const PAGE_SIZE = 50;
-const LOAD_MORE_DISTANCE_FROM_TOP = 80;
-const AUTO_SCROLL_BOTTOM_THRESHOLD = 120;
+const SCROLL_TO_TOP_THRESHOLD = Dimensions.get("window").height;
 
 type DateSection = {
   key: string;
@@ -98,16 +98,14 @@ export default function AppNotificationsScreen() {
     await refresh();
   }, [refresh]);
 
-  // Group items into per-day sections in ASCENDING order so the newest day
-  // (and the newest message inside it) lands at the bottom of the list,
-  // matching a chat thread layout.
+  // `items` arrives DESC by timestamp — newest first. Group consecutive
+  // items by their local day, keeping sections in the same DESC order so
+  // the newest day (and newest item inside it) sits at the top of the list.
   const sections = useMemo<DateSection[]>(() => {
     if (items.length === 0) return [];
     const groups: DateSection[] = [];
     let current: DateSection | null = null;
-    // `items` is DESC by timestamp; walk it backwards to build ASC sections.
-    for (let i = items.length - 1; i >= 0; i--) {
-      const item = items[i];
+    for (const item of items) {
       const key = getLocalDayKey(item.timestamp);
       if (!current || current.key !== key) {
         current = {
@@ -124,87 +122,35 @@ export default function AppNotificationsScreen() {
   }, [items]);
 
   const listRef = useRef<SectionList<NotificationRecord, DateSection>>(null);
-  const newestTimestampRef = useRef<number | null>(null);
-  const didInitialScrollRef = useRef(false);
-  const isAtBottomRef = useRef(true);
-  const loadMoreInFlightRef = useRef(false);
+  const showScrollToTopRef = useRef(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
-  const scrollToBottom = useCallback(
-    (animated: boolean) => {
-      const list = listRef.current;
-      if (!list || sections.length === 0) return;
-      const sectionIndex = sections.length - 1;
-      const itemIndex = sections[sectionIndex].data.length - 1;
-      if (itemIndex < 0) return;
-      list.scrollToLocation({
-        sectionIndex,
-        itemIndex,
-        animated,
-        viewPosition: 1,
-      });
-    },
-    [sections],
-  );
-
-  // Auto-scroll to the bottom when a brand-new notification arrives, but
-  // only if the user is already pinned to the bottom — same rule chat apps
-  // use so reading older messages isn't yanked away by a new arrival.
-  useEffect(() => {
-    if (items.length === 0) {
-      newestTimestampRef.current = null;
-      didInitialScrollRef.current = false;
-      isAtBottomRef.current = true;
-      return;
-    }
-    const newest = items[0].timestamp;
-    const previous = newestTimestampRef.current;
-    newestTimestampRef.current = newest;
-    if (previous != null && newest > previous && isAtBottomRef.current) {
-      requestAnimationFrame(() => scrollToBottom(true));
-    }
-  }, [items, scrollToBottom]);
-
-  const handleContentSizeChange = useCallback(() => {
-    if (!didInitialScrollRef.current && sections.length > 0) {
-      scrollToBottom(false);
-      didInitialScrollRef.current = true;
-    }
-  }, [sections.length, scrollToBottom]);
+  const onEndReached = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadMore();
+  }, [hasMore, loading, loadMore]);
 
   const onScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-      const distanceFromBottom =
-        contentSize.height - contentOffset.y - layoutMeasurement.height;
-      isAtBottomRef.current =
-        distanceFromBottom < AUTO_SCROLL_BOTTOM_THRESHOLD;
-
-      if (
-        contentOffset.y < LOAD_MORE_DISTANCE_FROM_TOP &&
-        hasMore &&
-        !loading &&
-        !loadMoreInFlightRef.current
-      ) {
-        loadMoreInFlightRef.current = true;
-        loadMore().finally(() => {
-          loadMoreInFlightRef.current = false;
-        });
+      const shouldShow =
+        e.nativeEvent.contentOffset.y > SCROLL_TO_TOP_THRESHOLD;
+      if (shouldShow !== showScrollToTopRef.current) {
+        showScrollToTopRef.current = shouldShow;
+        setShowScrollToTop(shouldShow);
       }
     },
-    [hasMore, loading, loadMore],
+    [],
   );
 
-  const onScrollToIndexFailed = useCallback(
-    (info: { index: number; highestMeasuredFrameIndex: number }) => {
-      // Target row isn't measured yet — wait one frame and try once more.
-      // Without this, the initial scroll-to-bottom can silently no-op on
-      // very tall lists where the bottom rows aren't laid out yet.
-      setTimeout(() => {
-        if (info.index >= 0) scrollToBottom(false);
-      }, 50);
-    },
-    [scrollToBottom],
-  );
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToLocation({
+      sectionIndex: 0,
+      itemIndex: 0,
+      animated: true,
+      viewPosition: 0,
+      viewOffset: 0,
+    });
+  }, []);
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
@@ -236,44 +182,57 @@ export default function AppNotificationsScreen() {
           <Text style={styles.emptyText}>No notifications yet</Text>
         </View>
       ) : (
-        <SectionList<NotificationRecord, DateSection>
-          ref={listRef}
-          sections={sections}
-          keyExtractor={(item) => item.clientId}
-          renderItem={({ item }) => <NotificationItem item={item} />}
-          renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeaderRow}>
-              <View style={styles.sectionHeaderPill}>
-                <Text style={styles.sectionHeaderText}>{section.title}</Text>
+        <View style={styles.listWrap}>
+          <SectionList<NotificationRecord, DateSection>
+            ref={listRef}
+            sections={sections}
+            keyExtractor={(item) => item.clientId}
+            renderItem={({ item }) => <NotificationItem item={item} />}
+            renderSectionHeader={({ section }) => (
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionHeaderPill}>
+                  <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                </View>
               </View>
-            </View>
-          )}
-          stickySectionHeadersEnabled
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            loading && items.length > 0 ? (
-              <ActivityIndicator
-                style={styles.loadingMore}
-                color={theme.colors.accent}
+            )}
+            stickySectionHeadersEnabled
+            contentContainerStyle={styles.list}
+            ListFooterComponent={
+              loading && items.length > 0 ? (
+                <ActivityIndicator
+                  style={styles.loadingMore}
+                  color={theme.colors.accent}
+                />
+              ) : null
+            }
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.5}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading && items.length === 0}
+                onRefresh={onRefresh}
+                tintColor={theme.colors.refreshIndicator}
               />
-            ) : null
-          }
-          onContentSizeChange={handleContentSizeChange}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-          onScrollToIndexFailed={onScrollToIndexFailed}
-          // Prepending older pages would otherwise jump the visible content
-          // downward; this option keeps the rows the user is reading in
-          // place when the list grows at the top.
-          maintainVisibleContentPosition={{ minIndexForVisible: 1 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading && items.length === 0}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.refreshIndicator}
-            />
-          }
-        />
+            }
+          />
+          {showScrollToTop && (
+            <TouchableOpacity
+              style={styles.fab}
+              onPress={scrollToTop}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Scroll to top"
+            >
+              <Ionicons
+                name="arrow-up"
+                size={22}
+                color={theme.colors.accentText}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       )}
     </SafeAreaView>
   );
@@ -310,8 +269,11 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textTertiary,
     fontSize: 12,
   },
+  listWrap: {
+    flex: 1,
+  },
   list: {
-    paddingBottom: 12,
+    paddingBottom: 24,
   },
   sectionHeaderRow: {
     alignItems: "center",
@@ -342,5 +304,21 @@ const styles = StyleSheet.create((theme) => ({
   },
   loadingMore: {
     paddingVertical: 16,
+  },
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
   },
 }));
