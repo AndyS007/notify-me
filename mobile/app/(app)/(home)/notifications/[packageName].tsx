@@ -1,8 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import * as SQLite from "expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as SQLite from "expo-sqlite";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -14,11 +20,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "../../../../src/components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { reportError } from "../../../../src/utils/error-reporter";
 import { AppIcon } from "../../../../src/components/AppIcon";
 import { NotificationItem } from "../../../../src/components/NotificationItem";
+import { SafeAreaView } from "../../../../src/components/Screen";
 import { useAppIcon } from "../../../../src/hooks/use-app-icon";
 import { useAppList } from "../../../../src/hooks/use-app-list";
 import {
@@ -27,6 +32,7 @@ import {
 } from "../../../../src/hooks/use-app-notifications";
 import { pullSync } from "../../../../src/services/sync-service";
 import { debounce } from "../../../../src/utils/debounce";
+import { reportError } from "../../../../src/utils/error-reporter";
 import {
   formatDateSection,
   getLocalDayKey,
@@ -130,17 +136,13 @@ export default function AppNotificationsScreen() {
     loadMore();
   }, [hasMore, loading, loadMore]);
 
-  const onScroll = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const shouldShow =
-        e.nativeEvent.contentOffset.y > SCROLL_TO_TOP_THRESHOLD;
-      if (shouldShow !== showScrollToTopRef.current) {
-        showScrollToTopRef.current = shouldShow;
-        setShowScrollToTop(shouldShow);
-      }
-    },
-    [],
-  );
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const shouldShow = e.nativeEvent.contentOffset.y > SCROLL_TO_TOP_THRESHOLD;
+    if (shouldShow !== showScrollToTopRef.current) {
+      showScrollToTopRef.current = shouldShow;
+      setShowScrollToTop(shouldShow);
+    }
+  }, []);
 
   const scrollToTop = useCallback(() => {
     listRef.current?.scrollToLocation({
@@ -160,11 +162,7 @@ export default function AppNotificationsScreen() {
           style={styles.backButton}
           hitSlop={12}
         >
-          <Ionicons
-            name="chevron-back"
-            size={26}
-            color={theme.colors.accent}
-          />
+          <Ionicons name="chevron-back" size={26} color={theme.colors.accent} />
         </TouchableOpacity>
         <AppIcon iconBase64={icon} appName={displayName} size={36} />
         <View style={styles.headerText}>
@@ -278,7 +276,6 @@ const styles = StyleSheet.create((theme) => ({
   sectionHeaderRow: {
     alignItems: "center",
     paddingVertical: 8,
-    backgroundColor: theme.colors.background,
   },
   sectionHeaderPill: {
     backgroundColor: theme.colors.surface,
