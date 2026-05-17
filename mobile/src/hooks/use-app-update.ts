@@ -1,28 +1,27 @@
 import { Alert } from "@components/Alert";
 import { reportError } from "@utils/error-reporter";
-import { useFocusEffect } from "expo-router";
 import * as Updates from "expo-updates";
-import { useCallback, useRef } from "react";
+import { useEffect } from "react";
 
 export function useAppUpdate() {
-  const { isUpdatePending, isDownloading } = Updates.useUpdates();
-  const alertShown = useRef(false);
+  const { isUpdateAvailable, isUpdatePending, isDownloading } =
+    Updates.useUpdates();
 
-  const showUpdateReadyPrompt = useCallback(() => {
-    if (alertShown.current) return;
-    alertShown.current = true;
+  useEffect(() => {
+    if (!Updates.isEnabled) return;
+    if (!isUpdateAvailable || isUpdatePending || isDownloading) return;
+
+    Updates.fetchUpdateAsync().catch(reportError);
+  }, [isUpdateAvailable, isUpdatePending, isDownloading]);
+
+  useEffect(() => {
+    if (!isUpdatePending) return;
 
     Alert.alert(
       "Update Ready",
       "A new version has been downloaded. Restart now to apply.",
       [
-        {
-          text: "Later",
-          style: "cancel",
-          onPress: () => {
-            alertShown.current = false;
-          },
-        },
+        { text: "Later", style: "cancel" },
         {
           text: "Restart Now",
           onPress: () => {
@@ -31,34 +30,7 @@ export function useAppUpdate() {
         },
       ],
     );
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!Updates.isEnabled) return;
-      let cancelled = false;
-
-      void (async () => {
-        try {
-          if (isUpdatePending) {
-            showUpdateReadyPrompt();
-            return;
-          }
-          const result = await Updates.checkForUpdateAsync();
-          if (cancelled || !result.isAvailable) return;
-          await Updates.fetchUpdateAsync();
-          if (cancelled) return;
-          showUpdateReadyPrompt();
-        } catch (err) {
-          if (!cancelled) reportError(err);
-        }
-      })();
-
-      return () => {
-        cancelled = true;
-      };
-    }, [isUpdatePending, showUpdateReadyPrompt]),
-  );
+  }, [isUpdatePending]);
 
   return { isDownloading };
 }
