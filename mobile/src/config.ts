@@ -1,3 +1,8 @@
+import Constants from "expo-constants";
+
+export const APP_PACKAGE_NAME =
+  Constants.expoConfig?.android?.package ?? "com.andys007.notifyme";
+
 export const config = {
   publishableKey:
     process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ||

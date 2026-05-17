@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@db";
 import { appSettings } from "@db/schema";
+import { APP_PACKAGE_NAME } from "../config";
 
 export type AppSettingRecord = typeof appSettings.$inferSelect;
 
@@ -21,7 +22,7 @@ export async function getAllAppSettings(): Promise<
  * `true` so we don't silently drop a real user notification.
  */
 export async function isAppEnabled(packageName: string): Promise<boolean> {
-  if (packageName === "com.andys007.notifyme") return false;
+  if (packageName === APP_PACKAGE_NAME) return false;
   const rows = await db
     .select({ enabled: appSettings.enabled })
     .from(appSettings)
