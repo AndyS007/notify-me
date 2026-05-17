@@ -3,14 +3,23 @@ import { useFocusEffect } from "@react-navigation/native";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import React, { useCallback, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { Alert } from "@components/Alert";
 import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { config } from "@/src/config";
 import { db } from "@db";
-import { appSettings, notifications, syncState } from "@db/schema";
+import {
+  appSettings,
+  notifications,
+  syncState,
+  type DebugLogRecord,
+} from "@db/schema";
+import {
+  clearDebugLogs,
+  listDebugLogs,
+} from "@/src/services/debug-log-service";
 
 type SyncStateRow = { key: string; value: string | null };
 
@@ -30,6 +39,7 @@ const APP_INFO_ROWS: SyncStateRow[] = [
 export default function DevScreen() {
   const { theme } = useUnistyles();
   const [syncRows, setSyncRows] = useState<SyncStateRow[]>([]);
+  const [logs, setLogs] = useState<DebugLogRecord[]>([]);
 
   const loadSyncState = useCallback(async () => {
     const rows = await db
@@ -38,10 +48,15 @@ export default function DevScreen() {
     setSyncRows(rows);
   }, []);
 
+  const loadLogs = useCallback(async () => {
+    setLogs(await listDebugLogs(100));
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       loadSyncState();
-    }, [loadSyncState]),
+      loadLogs();
+    }, [loadSyncState, loadLogs]),
   );
 
   const onClearDb = () => {
@@ -63,6 +78,11 @@ export default function DevScreen() {
         },
       ],
     );
+  };
+
+  const onClearLogs = async () => {
+    await clearDebugLogs();
+    await loadLogs();
   };
 
   return (
@@ -133,9 +153,58 @@ export default function DevScreen() {
             ))
           )}
         </View>
+
+        {Platform.OS === "android" && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Log history</Text>
+              <View style={styles.sectionActions}>
+                <Pressable onPress={onClearLogs} hitSlop={8}>
+                  <Ionicons
+                    name="trash-outline"
+                    size={18}
+                    color={theme.colors.textSecondary}
+                  />
+                </Pressable>
+                <Pressable onPress={loadLogs} hitSlop={8}>
+                  <Ionicons
+                    name="refresh"
+                    size={18}
+                    color={theme.colors.textSecondary}
+                  />
+                </Pressable>
+              </View>
+            </View>
+            {logs.length === 0 ? (
+              <Text style={styles.empty}>(no logs)</Text>
+            ) : (
+              logs.map((row) => (
+                <View key={row.id} style={styles.kvRow}>
+                  <Text style={styles.kvKey}>
+                    {formatTimestamp(row.createdAt)} · {row.level} · {row.source}
+                  </Text>
+                  <Text style={styles.kvValue} selectable>
+                    {row.message}
+                  </Text>
+                  {row.data ? (
+                    <Text style={styles.logData} selectable>
+                      {row.data}
+                    </Text>
+                  ) : null}
+                </View>
+              ))
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function formatTimestamp(ms: number): string {
+  const d = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 const styles = StyleSheet.create((theme) => ({
@@ -176,6 +245,11 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "space-between",
     paddingVertical: 6,
   },
+  sectionActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   sectionTitle: {
     color: theme.colors.text,
     fontSize: 14,
@@ -204,5 +278,11 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.text,
     fontSize: 13,
     fontFamily: "monospace",
+  },
+  logData: {
+    color: theme.colors.textSecondary,
+    fontSize: 11,
+    fontFamily: "monospace",
+    marginTop: 4,
   },
 }));

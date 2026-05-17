@@ -76,3 +76,23 @@ export const syncState = sqliteTable("sync_state", {
   key: text("key").primaryKey(),
   value: text("value"),
 });
+
+/**
+ * Debug log entries surfaced on the Dev screen. The headless notification
+ * task can't easily print to the Metro/JS console once the app is backgrounded,
+ * so we persist a row per captured notification (plus any errors) here.
+ */
+export const debugLogs = sqliteTable(
+  "debug_logs",
+  {
+    id: int("id").primaryKey({ autoIncrement: true }),
+    createdAt: int("created_at").notNull(),
+    level: text("level").notNull().default("info"),
+    source: text("source").notNull().default(""),
+    message: text("message").notNull().default(""),
+    data: text("data"),
+  },
+  (table) => [index("idx_debug_logs_created_at").on(table.createdAt)],
+);
+
+export type DebugLogRecord = typeof debugLogs.$inferSelect;
