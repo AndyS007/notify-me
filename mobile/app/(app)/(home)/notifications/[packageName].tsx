@@ -1,21 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import * as SQLite from "expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo } from "react";
+import * as SQLite from "expo-sqlite";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   RefreshControl,
   SectionList,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "../../../../src/components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { reportError } from "../../../../src/utils/error-reporter";
 import { AppIcon } from "../../../../src/components/AppIcon";
 import { NotificationItem } from "../../../../src/components/NotificationItem";
+import { SafeAreaView } from "../../../../src/components/Screen";
 import { useAppIcon } from "../../../../src/hooks/use-app-icon";
 import { useAppList } from "../../../../src/hooks/use-app-list";
 import {
@@ -24,12 +32,14 @@ import {
 } from "../../../../src/hooks/use-app-notifications";
 import { pullSync } from "../../../../src/services/sync-service";
 import { debounce } from "../../../../src/utils/debounce";
+import { reportError } from "../../../../src/utils/error-reporter";
 import {
   formatDateSection,
   getLocalDayKey,
 } from "../../../../src/utils/format-time";
 
 const PAGE_SIZE = 50;
+const SCROLL_TO_TOP_THRESHOLD = Dimensions.get("window").height;
 
 type DateSection = {
   key: string;
@@ -94,15 +104,9 @@ export default function AppNotificationsScreen() {
     await refresh();
   }, [refresh]);
 
-  const onEndReached = useCallback(() => {
-    if (!hasMore || loading) return;
-    loadMore();
-  }, [hasMore, loading, loadMore]);
-
-  // Group the DESC-sorted items into per-day sections. Both the sections
-  // and the items inside them remain in DESC order; the SectionList is
-  // rendered `inverted`, so visually we get oldest at the top and newest
-  // at the bottom — the chat-style layout.
+  // `items` arrives DESC by timestamp — newest first. Group consecutive
+  // items by their local day, keeping sections in the same DESC order so
+  // the newest day (and newest item inside it) sits at the top of the list.
   const sections = useMemo<DateSection[]>(() => {
     if (items.length === 0) return [];
     const groups: DateSection[] = [];
@@ -123,6 +127,33 @@ export default function AppNotificationsScreen() {
     return groups;
   }, [items]);
 
+  const listRef = useRef<SectionList<NotificationRecord, DateSection>>(null);
+  const showScrollToTopRef = useRef(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  const onEndReached = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadMore();
+  }, [hasMore, loading, loadMore]);
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const shouldShow = e.nativeEvent.contentOffset.y > SCROLL_TO_TOP_THRESHOLD;
+    if (shouldShow !== showScrollToTopRef.current) {
+      showScrollToTopRef.current = shouldShow;
+      setShowScrollToTop(shouldShow);
+    }
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToLocation({
+      sectionIndex: 0,
+      itemIndex: 0,
+      animated: true,
+      viewPosition: 0,
+      viewOffset: 0,
+    });
+  }, []);
+
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
@@ -131,11 +162,7 @@ export default function AppNotificationsScreen() {
           style={styles.backButton}
           hitSlop={12}
         >
-          <Ionicons
-            name="chevron-back"
-            size={26}
-            color={theme.colors.accent}
-          />
+          <Ionicons name="chevron-back" size={26} color={theme.colors.accent} />
         </TouchableOpacity>
         <AppIcon iconBase64={icon} appName={displayName} size={36} />
         <View style={styles.headerText}>
@@ -153,40 +180,57 @@ export default function AppNotificationsScreen() {
           <Text style={styles.emptyText}>No notifications yet</Text>
         </View>
       ) : (
-        <SectionList<NotificationRecord, DateSection>
-          inverted
-          sections={sections}
-          keyExtractor={(item) => item.clientId}
-          renderItem={({ item }) => <NotificationItem item={item} />}
-          // `inverted` flips everything vertically, so footers render
-          // visually ABOVE their section's items — which is exactly what
-          // we want for date labels.
-          renderSectionFooter={({ section }) => (
-            <View style={styles.sectionLabelRow}>
-              <View style={styles.sectionLabelPill}>
-                <Text style={styles.sectionLabelText}>{section.title}</Text>
+        <View style={styles.listWrap}>
+          <SectionList<NotificationRecord, DateSection>
+            ref={listRef}
+            sections={sections}
+            keyExtractor={(item) => item.clientId}
+            renderItem={({ item }) => <NotificationItem item={item} />}
+            renderSectionHeader={({ section }) => (
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionHeaderPill}>
+                  <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                </View>
               </View>
-            </View>
-          )}
-          contentContainerStyle={styles.list}
-          ListFooterComponent={
-            loading && items.length > 0 ? (
-              <ActivityIndicator
-                style={styles.loadingMore}
-                color={theme.colors.accent}
+            )}
+            stickySectionHeadersEnabled
+            contentContainerStyle={styles.list}
+            ListFooterComponent={
+              loading && items.length > 0 ? (
+                <ActivityIndicator
+                  style={styles.loadingMore}
+                  color={theme.colors.accent}
+                />
+              ) : null
+            }
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.5}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading && items.length === 0}
+                onRefresh={onRefresh}
+                tintColor={theme.colors.refreshIndicator}
               />
-            ) : null
-          }
-          onEndReached={onEndReached}
-          onEndReachedThreshold={0.5}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading && items.length === 0}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.refreshIndicator}
-            />
-          }
-        />
+            }
+          />
+          {showScrollToTop && (
+            <TouchableOpacity
+              style={styles.fab}
+              onPress={scrollToTop}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Scroll to top"
+            >
+              <Ionicons
+                name="arrow-up"
+                size={22}
+                color={theme.colors.accentText}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       )}
     </SafeAreaView>
   );
@@ -223,14 +267,17 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textTertiary,
     fontSize: 12,
   },
+  listWrap: {
+    flex: 1,
+  },
   list: {
-    paddingVertical: 12,
+    paddingBottom: 24,
   },
-  sectionLabelRow: {
+  sectionHeaderRow: {
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
-  sectionLabelPill: {
+  sectionHeaderPill: {
     backgroundColor: theme.colors.surface,
     borderRadius: 999,
     paddingHorizontal: 12,
@@ -238,7 +285,7 @@ const styles = StyleSheet.create((theme) => ({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: theme.colors.divider,
   },
-  sectionLabelText: {
+  sectionHeaderText: {
     color: theme.colors.textSecondary,
     fontSize: 12,
     fontWeight: "600",
@@ -254,5 +301,21 @@ const styles = StyleSheet.create((theme) => ({
   },
   loadingMore: {
     paddingVertical: 16,
+  },
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
   },
 }));

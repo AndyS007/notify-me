@@ -42,7 +42,6 @@ export function formatDateSection(timestamp: number): string {
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
-  if (diffDays > 1 && diffDays < 7) return `${diffDays} days ago`;
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
