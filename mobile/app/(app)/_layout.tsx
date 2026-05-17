@@ -116,6 +116,14 @@ export default function HomeLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="logs"
+        options={{
+          title: "Logs",
+          drawerItemStyle: { display: "none" },
+          swipeEnabled: false,
+        }}
+      />
     </Drawer>
   );
 }

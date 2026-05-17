@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 import * as Updates from "expo-updates";
 import React, { useCallback, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { Alert } from "@components/Alert";
 import { SafeAreaView } from "@components/Screen";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -29,6 +30,7 @@ const APP_INFO_ROWS: SyncStateRow[] = [
 
 export default function DevScreen() {
   const { theme } = useUnistyles();
+  const router = useRouter();
   const [syncRows, setSyncRows] = useState<SyncStateRow[]>([]);
 
   const loadSyncState = useCallback(async () => {
@@ -133,6 +135,27 @@ export default function DevScreen() {
             ))
           )}
         </View>
+
+        {Platform.OS === "android" && (
+          <Pressable
+            style={styles.navRow}
+            onPress={() => router.push("/logs")}
+          >
+            <View style={styles.navRowLeft}>
+              <Ionicons
+                name="document-text-outline"
+                size={20}
+                color={theme.colors.text}
+              />
+              <Text style={styles.navRowLabel}>Logs</Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -175,6 +198,27 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 6,
+  },
+  navRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: theme.colors.surface,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  navRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  navRowLabel: {
+    color: theme.colors.text,
+    fontSize: 15,
+    fontWeight: "500",
   },
   sectionTitle: {
     color: theme.colors.text,
