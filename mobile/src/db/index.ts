@@ -21,7 +21,9 @@ export type Db = ExpoSQLiteDatabase<typeof schema>;
 
 let webSqlite: Promise<SQLiteDatabase> | null = null;
 function getWebSqlite() {
-  webSqlite ??= openDatabaseAsync("notifications.db").then(async (sqlite) => {
+  webSqlite ??= openDatabaseAsync("notifications.db", {
+    enableChangeListener: true,
+  }).then(async (sqlite) => {
     await runWebMigrations(sqlite);
     return sqlite;
   });
@@ -97,4 +99,7 @@ function makeWebDb(): Db {
 export const db: Db =
   Platform.OS === "web"
     ? makeWebDb()
-    : drizzleSync(openDatabaseSync("notifications.db"), { schema });
+    : drizzleSync(
+        openDatabaseSync("notifications.db", { enableChangeListener: true }),
+        { schema },
+      );
