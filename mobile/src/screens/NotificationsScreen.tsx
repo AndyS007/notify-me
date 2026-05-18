@@ -1,32 +1,34 @@
-import React, { useCallback, useEffect, useMemo } from "react";
-import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
-import { SafeAreaView } from "@components/Screen";
-import * as SQLite from "expo-sqlite";
-import { reportError } from "@utils/error-reporter";
-import { useFocusEffect } from "@react-navigation/native";
-import { useRouter } from "expo-router";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useAppSummaries, AppSummary } from "@hooks/use-app-summaries";
-import { useAppList } from "@hooks/use-app-list";
-import { useAppSettings } from "@hooks/use-app-settings";
-import { usePermission } from "@hooks/use-permission";
-import { useSmsPermission } from "@hooks/use-sms-permission";
-import { pullSync, pushSync } from "@services/sync-service";
-import { startSmsListener } from "@services/sms-listener";
 import { AppSummaryRow } from "@components/AppSummaryRow";
 import { EmptyState } from "@components/EmptyState";
 import { PermissionBanner } from "@components/PermissionBanner";
+import { SafeAreaView } from "@components/Screen";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { useAppList } from "@hooks/use-app-list";
+import { useAppSettings } from "@hooks/use-app-settings";
+import { AppSummary, useAppSummaries } from "@hooks/use-app-summaries";
+import { usePermission } from "@hooks/use-permission";
+import { useSmsPermission } from "@hooks/use-sms-permission";
+import { useFocusEffect } from "@react-navigation/native";
+import { startSmsListener } from "@services/sms-listener";
+import { pullSync, pushSync } from "@services/sync-service";
 import { debounce } from "@utils/debounce";
+import { reportError } from "@utils/error-reporter";
+import { useRouter } from "expo-router";
+import * as SQLite from "expo-sqlite";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 export default function NotificationsScreen() {
-  const { items, loading, hasMore, refresh, loadMore } = useAppSummaries();
-  const { appMap } = useAppList(true);
   const {
-    settings: appSettings,
-    toggle: toggleApp,
-    refresh: refreshSettings,
-  } = useAppSettings();
+    items: visibleItems,
+    loading,
+    hasMore,
+    refresh,
+    loadMore,
+  } = useAppSummaries();
+  const { appMap } = useAppList(true);
+  const { toggle: toggleApp, refresh: refreshSettings } = useAppSettings();
   const { hasPermission, request, recheck } = usePermission();
   const {
     hasPermission: hasSmsPermission,
@@ -35,11 +37,6 @@ export default function NotificationsScreen() {
   } = useSmsPermission();
   const { theme } = useUnistyles();
   const router = useRouter();
-
-  const visibleItems = items.filter((s) => {
-    const setting = appSettings.get(s.packageName);
-    return setting ? setting.enabled === 1 : true;
-  });
 
   const handleDisableApp = useCallback(
     (packageName: string, appName: string) => {
@@ -62,19 +59,11 @@ export default function NotificationsScreen() {
   );
 
   const triggerPushSync = useMemo(
-    () =>
-      debounce(
-        () => pushSync().catch((err) => reportError(err)),
-        1000,
-      ),
+    () => debounce(() => pushSync().catch((err) => reportError(err)), 1000),
     [],
   );
   const triggerPullSync = useMemo(
-    () =>
-      debounce(
-        () => pullSync().catch((err) => reportError(err)),
-        1000,
-      ),
+    () => debounce(() => pullSync().catch((err) => reportError(err)), 1000),
     [],
   );
   useEffect(
@@ -121,9 +110,7 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     if (hasSmsPermission) {
-      startSmsListener(triggerPushSync).catch((err) =>
-        reportError(err),
-      );
+      startSmsListener(triggerPushSync).catch((err) => reportError(err));
       return;
     }
     const id = setInterval(recheckSms, 3000);
@@ -133,9 +120,7 @@ export default function NotificationsScreen() {
   const handleRequestSms = useCallback(async () => {
     const granted = await requestSms();
     if (granted) {
-      startSmsListener(triggerPushSync).catch((err) =>
-        reportError(err),
-      );
+      startSmsListener(triggerPushSync).catch((err) => reportError(err));
     }
   }, [requestSms, triggerPushSync]);
 

@@ -1,7 +1,7 @@
-import { desc, isNull } from "drizzle-orm";
-import { useCallback, useEffect, useState } from "react";
 import { db } from "@db";
-import { notifications } from "@db/schema";
+import { appSettings, notifications } from "@db/schema";
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { useCallback, useEffect, useState } from "react";
 
 export type AppSummary = {
   packageName: string;
@@ -45,12 +45,19 @@ export function useAppSummaries(pageSize: number = DEFAULT_PAGE_SIZE) {
         text: notifications.text,
       })
       .from(notifications)
+      .innerJoin(
+        appSettings,
+        and(
+          eq(notifications.packageName, appSettings.packageName),
+          eq(appSettings.enabled, 1),
+        ),
+      )
       .where(isNull(notifications.deletedAt))
       .orderBy(desc(notifications.timestamp));
 
     const byPkg = new Map<
       string,
-      { latest: typeof rows[number]; count: number }
+      { latest: (typeof rows)[number]; count: number }
     >();
     for (const r of rows) {
       const existing = byPkg.get(r.packageName);
